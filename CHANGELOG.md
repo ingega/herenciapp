@@ -20,6 +20,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [0.0.1] - 2026-05-01
+
+### Added
+- Basic FastAPI application with Jinja2 templating support
+- HTML template (index.html) with Bootstrap 5 styling
+- Static files structure for CSS and other assets
+- Enhanced dependencies: `uvicorn[standard]` and `jinja2`
+- Poetry lock file generated
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ### Removed
 - N/A
 
