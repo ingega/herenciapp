@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Poetry dependency management
 - FastAPI framework integration
 - Uvicorn development server configuration
+- Dockerfile for containerizing the application
+- GitHub Actions workflow for automated deployment to EC2
 
 ### Changed
 - Updated project description for clarity
