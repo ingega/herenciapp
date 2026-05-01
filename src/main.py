@@ -15,9 +15,7 @@ templates = Jinja2Templates(directory="src/templates")
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse(
-        "index.html", 
-        {
-            "request": request, 
-            "current_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
+        request=request,  # Pass request as a named argument
+        name="index.html", 
+        context={"current_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
     )
