@@ -1,0 +1,33 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Initial project setup and configuration
+- Basic project structure with `src/` and `tests/` directories
+- Poetry dependency management
+- FastAPI framework integration
+- Uvicorn development server configuration
+
+### Changed
+- Updated project description for clarity
+
+### Fixed
+- N/A
+
+### Removed
+- N/A
+
+## [0.1.0] - 2026-04-30
+
+### Added
+- Project initialized with Poetry
+- FastAPI dependency added
+- Uvicorn added to development dependencies
+- Basic README and CHANGELOG files created
+- Project structure established
