@@ -8,24 +8,31 @@
 </head>
 <body class="bg-light">
     <div class="container mt-5">
-        <div class="card shadow">
-            <div class="card-body text-center">
-                <h1>Bienvenid@s a {{ config.RESTAURANT_NAME }}</h1>
-                <p>Domicilio: {{ config.RESTAURANT_ADDRESS }}</p>
-                <p>Teléfono: {{ config.RESTAURANT_PHONE }}</p>
-                <p class="text-muted">Hora Actual del Servidor: {{ current_time }}</p>
-                <p class="lead">Estado del Sistema: <span class="badge bg-success">En Línea</span></p>
+    <div class="card shadow border-0"> <div class="card-body text-center p-5"> {% if config.SHOW_LOGO %}
+                <div class="mb-4">
+                    <img src="{{ url_for('static', path='images/' + config.RESTAURANT_LOGO_NAME) }}" 
+                         alt="{{ config.RESTAURANT_NAME }} Logo" 
+                         class="img-fluid rounded" 
+                         style="max-height: 120px; object-fit: contain;">
+                </div>
+            {% endif %}
+
+            <h1 class="display-5 fw-bold mb-3">Bienvenid@s a {{ config.RESTAURANT_NAME }}</h1>
+            
+            <div class="mb-4">
+                <p class="mb-1"><strong>Domicilio:</strong> {{ config.RESTAURANT_ADDRESS }}</p>
+                <p><strong>Teléfono:</strong> {{ config.RESTAURANT_PHONE }}</p>
             </div>
+
+            <hr class="my-4"> <div class="d-flex justify-content-center align-items-center gap-3">
+                <p class="text-muted mb-0 small">Hora del Servidor: {{ current_time }}</p>
+                <div class="vr"></div> <p class="mb-0">
+                    <span class="badge rounded-pill bg-success">Sistema En Línea</span>
+                </p>
+            </div>
+            
         </div>
     </div>
-    // Optional: Show restaurant logo if configured
-    {% if config.SHOW_LOGO %}
-        <div class="mb-4">
-            <img src="{{ url_for('static', path='images/' + config.RESTAURANT_LOGO_NAME) }}" 
-            alt="{{ config.RESTAURANT_NAME }} Logo" 
-            class="img-fluid" 
-            style="max-height: 150px;">
-        </div>
-    {% endif %}
+</div>
 </body>
 </html>

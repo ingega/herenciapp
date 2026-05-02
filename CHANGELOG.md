@@ -22,6 +22,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [0.1.5] - 2026-05-02
+
+### Added
+- Production-ready Docker multi-stage build with a separate builder stage for dependency installation
+- Non-root runtime configuration and Uvicorn set to run with 4 workers for improved performance
+
+### Changed
+- Updated `README.md` with Python 3.12 / Poetry 1.8 requirements, clearer project description, and enhanced onboarding instructions
+- Refined the main template layout in `src/templates/index.html` with improved card styling, logo presentation, and localized restaurant metadata display
+
+### Fixed
+- N/A
+
 ## [0.1.4] - 2026-05-02
 
 ### Added

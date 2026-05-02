@@ -1,26 +1,33 @@
-FROM python:3.11-slim
-
-# System dependencies for Poetry and Python
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Stage 1: Builder
+FROM python:3.11-slim as builder
 
 ENV POETRY_VERSION=1.8.2 \
     POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_CREATE=false \
-    PATH="/opt/poetry/bin:$PATH"
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN apt-get update && apt-get install -y curl && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
+    ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry
 
 WORKDIR /app
+COPY pyproject.toml poetry.lock* ./
+RUN poetry install --only main --no-root
 
-# Copy dependency files
-COPY pyproject.toml poetry.lock* /app/
+# Stage 2: Final Production Image
+FROM python:3.11-slim
 
-# Install dependencies (no dev tools for production-grade)
-RUN poetry install --no-interaction --no-ansi --no-root --only main
+WORKDIR /app
+# Copy only the installed packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+COPY . .
 
-# Copy the source code (assuming your app is in /src)
-COPY . /app/
+# Security: Don't run as root
+RUN useradd -m herenciauser
+USER herenciauser
 
+ENV PYTHONPATH=/app
 EXPOSE 8000
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
