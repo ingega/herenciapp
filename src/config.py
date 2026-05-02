@@ -4,8 +4,8 @@ class Settings(BaseSettings):
     # Restaurant Metadata
     APP_NAME: str = "Herenciapp"
     RESTAURANT_NAME: str = "Herencia del Abuelo"
-    RESTAURANT_ADDRESS: str = "Calle Principal #123, Ciudad"
-    RESTAURANT_PHONE: str = "+123456789"
+    RESTAURANT_ADDRESS: str = "Plaza San Isidro, local D17, Zapopan, Jalisco"
+    RESTAURANT_PHONE: str = "+523334816129"
     RESTAURANT_LOGO_NAME: str = "main_logo.png"
     SHOW_LOGO: bool = True
     
