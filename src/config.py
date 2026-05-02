@@ -1,20 +1,21 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # Restaurant Metadata
     APP_NAME: str = "Herenciapp"
     RESTAURANT_NAME: str = "Herencia del Abuelo"
-    RESTAURANT_ADDRESS: str = "Plaza San Isidro, local D17"
-    RESTAURANT_PHONE: str = "+52-33-34-81-61-29"
-
-    # media configuration
-    RESTAURANT_LOGO_NAME: str = "main_logo.png"  # Default name
+    RESTAURANT_ADDRESS: str = "Calle Principal #123, Ciudad"
+    RESTAURANT_PHONE: str = "+123456789"
+    RESTAURANT_LOGO_NAME: str = "main_logo.png"
     SHOW_LOGO: bool = True
     
     # Environment config
     DEBUG: bool = True
 
-    class Config:
-        env_file = ".env" # This allows to override these via a .env file
+    # Pydantic V2+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8"
+    )
 
 settings = Settings()
