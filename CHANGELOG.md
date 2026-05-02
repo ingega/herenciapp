@@ -22,6 +22,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [0.1.4] - 2026-05-02
+
+### Added
+- Expanded root endpoint tests in `tests/test_main.py` with full response validation and logo rendering checks
+- Added a dedicated test for static file serving configuration and image path generation
+
+### Changed
+- Removed `.gitignore` exclusion for `src/static/images/` to allow media file tracking
+- Refined home page validation logic and test coverage for restaurant config values
+
+### Fixed
+- N/A
+
 ## [0.1.3] - 2026-05-02
 
 ### Added
