@@ -22,7 +22,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
-## [0.0.1] - 2026-05-01
+## [0.1.2] - 2026-05-02
+
+### Added
+- Environment settings support with `pydantic-settings` and `.env` support
+- New `src/config.py` module for restaurant metadata and app configuration
+- Test coverage for the root route using FastAPI `TestClient`
+
+### Changed
+- Added `pytest` and `httpx` to dev dependencies
+- Updated `pyproject.toml` and `poetry.lock` for new dependencies
+
+### Fixed
+- N/A
+
+## [0.1.1] - 2026-05-01
 
 ### Added
 - Basic FastAPI application with Jinja2 templating support
