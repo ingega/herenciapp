@@ -1,33 +1,18 @@
 # Stage 1: Builder
-FROM python:3.11-slim as builder
-
-ENV POETRY_VERSION=1.8.2 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=false
-
-RUN apt-get update && apt-get install -y curl && \
-    curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry
-
+FROM python:3.12-slim as builder
 WORKDIR /app
-COPY pyproject.toml poetry.lock* ./
-RUN poetry install --only main --no-root
+RUN pip install poetry
+COPY pyproject.toml poetry.lock ./
+# Generate requirements.txt to avoid installing poetry in final image
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 # Stage 2: Final Production Image
-FROM python:3.11-slim
-
+FROM python:3.12-slim
 WORKDIR /app
-# Copy only the installed packages from builder
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /app/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-
-# Security: Don't run as root
-RUN useradd -m herenciauser
-USER herenciauser
-
+# Set PYTHONPATH so FastAPI can find your src module [cite: 48]
 ENV PYTHONPATH=/app
 EXPOSE 8000
-
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["gvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -22,6 +22,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [0.1.6] - 2026-05-02
+
+### Added
+- Automated test execution step in GitHub Actions workflow to validate code before deployment
+
+### Changed
+- Simplified Dockerfile to use `poetry export` for generating `requirements.txt` instead of installing poetry in the final image
+- Updated Python base image to version 3.12 in both builder and final stages
+- Refactored GitHub Actions workflow to use `docker-compose up` for streamlined container orchestration
+- Updated EC2 deployment paths and automation script (`cd ~/herenciapp`)
+- Renamed workflow to "Deploy Herenciapp to EC2" for clarity
+
+### Fixed
+- N/A
+
 ## [0.1.5] - 2026-05-02
 
 ### Added

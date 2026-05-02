@@ -1,4 +1,4 @@
-name: Deploy Herenciapp
+name: Deploy Herenciapp to EC2
 
 on:
   push:
@@ -8,8 +8,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Run Tests
+        run: |
+          # Add your pytest command here to ensure no broken code goes live
+          # poetry run pytest [cite: 139]
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
@@ -18,9 +23,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/projects/herenciapp
+            cd ~/herenciapp
             git pull origin main
-            docker build -t herenciapp .
-            docker stop herenciapp-container || true
-            docker rm herenciapp-container || true
-            docker run -d --name herenciapp-container -p 8000:8000 herenciapp
+            docker-compose up -d --build
+            docker image prune -f
