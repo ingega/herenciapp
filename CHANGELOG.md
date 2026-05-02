@@ -22,6 +22,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [0.1.3] - 2026-05-02
+
+### Added
+- Restaurant logo configuration with `RESTAURANT_LOGO_NAME` and `SHOW_LOGO` settings in `config.py`
+- Optional logo display in the main template with conditional rendering
+- Spanish language updates to the index page for restaurant details
+- Media files ignore pattern in `.gitignore` for `src/static/images/*`
+
+### Changed
+- Updated app title to use dynamic `APP_NAME` from settings
+- Enhanced template context with global config access
+- Localized UI text to Spanish for restaurant information display
+
+### Fixed
+- N/A
+
 ## [0.1.2] - 2026-05-02
 
 ### Added
