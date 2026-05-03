@@ -22,6 +22,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [0.1.7] - 2026-05-02
+
+### Added
+- N/A
+
+### Changed
+- Updated project.toml for use as project, instead a package
+- Updated Python base image to use 3.13
+- Refactored `deploy.yml` file to save space in EC2 instance
+
+### Fixed
+- N/A
+
 ## [0.1.6] - 2026-05-02
 
 ### Added
