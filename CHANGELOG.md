@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.7] - 2026-05-02
 
 ### Added
-- N/A
+- removed security files in `.gitignore`
 
 ### Changed
 - Updated project.toml for use as project, instead a package
@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored `deploy.yml` file to save space in EC2 instance
 
 ### Fixed
-- Moved *package-mode* var in `project.toml` file to tool.poetry section
+- Moved *package-mode* var in `pyproject.toml` file to tool.poetry section
 
 ## [0.1.6] - 2026-05-02
 
