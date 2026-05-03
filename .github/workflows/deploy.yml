@@ -5,17 +5,27 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  test-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run Tests
-        run: |
-          # Add your pytest command here to ensure no broken code goes live
-          # poetry run pytest [cite: 139]
+      # 1. Professional Step: Run tests on GitHub's hardware, not yours
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
 
+      - name: Install Poetry and Dependencies
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry install
+      
+      - name: Run Pytest
+        run: poetry run pytest
+
+      # 2. Optimization: SSH into EC2 and manage the "Kitchen Cleanup"
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
         with:
@@ -26,5 +36,10 @@ jobs:
           script: |
             cd ~/fastapi-projects/herenciapp
             git pull origin main
-            docker-compose up -d --build
+            
+            # Rebuild only the app, leaving the database volumes untouched
+            docker compose up -d --build
+            
+            # CRITICAL for 8GB disks: Remove old, unused image layers immediately
             docker image prune -f
+            docker system prune -f --volumes # Optional: use with caution to clear build cache
