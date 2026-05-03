@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored `deploy.yml` file to save space in EC2 instance
 
 ### Fixed
-- N/A
+- Moved *package-mode* var in `project.toml` file to tool.poetry section
 
 ## [0.1.6] - 2026-05-02
 
