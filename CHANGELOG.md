@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated project.toml for use as project, instead a package
 - Updated Python base image to use 3.13
 - Refactored `deploy.yml` file to save space in EC2 instance
+- Added `python -m` commands to `Dockerfile`
 
 ### Fixed
 - Moved *package-mode* var in `pyproject.toml` file to tool.poetry section
