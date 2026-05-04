@@ -34,12 +34,21 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           debug: true
           script: |
+            set -e # Exit immediately if a command fails
             cd ~/fastapi-projects/herenciapp
+            
+            echo "--- Current Directory Content ---"
+            ls -la
+            
+            echo "--- Pulling latest code ---"
             git pull origin main
             
-            # Rebuild only the app, leaving the database volumes untouched
-            docker compose up -d --build
+            echo "--- Building Docker Image ---"
+            # We add --progress=plain to see the build logs in GitHub Actions
+            docker compose build --no-cache --progress=plain
             
-            # CRITICAL for 8GB disks: Remove old, unused image layers immediately
+            echo "--- Starting Container ---"
+            docker compose up -d
+            
+            echo "--- Cleanup ---"
             docker image prune -f
-            docker system prune -f --volumes # Optional: use with caution to clear build cache
