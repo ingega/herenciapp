@@ -4,8 +4,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles  # <--- New Import
 from datetime import datetime
 from src.config import settings
+from src.__init__ import __version__
 
-app = FastAPI(title=settings.APP_NAME)
+app = FastAPI(title=settings.APP_NAME, version=__version__)
 
 # Mount Static Files
 # This tells FastAPI: "Any request starting with /static should look in src/static"
@@ -19,5 +20,8 @@ async def read_root(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"current_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+        context={
+            "current_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "version": __version__
+        }
     )
