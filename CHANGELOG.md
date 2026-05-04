@@ -26,7 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - version metadata
-- installation of poetry-export plugin to use with poetry >= 2.4
+- installated of poetry-export plugin to use with poetry >= 2.4
+- created courutine in `deploy.yml` file to create an .env file
 
 ### Changed
 - Updated `Dockerfile` and `docker-compose` files port from 8000 to 8001
