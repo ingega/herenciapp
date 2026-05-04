@@ -2,6 +2,7 @@
 FROM python:3.12-slim as builder
 WORKDIR /app
 RUN pip install poetry
+RUN poetry self add poetry-plugin-export
 COPY pyproject.toml poetry.lock ./
 # Generate requirements.txt to avoid installing poetry in final image
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
