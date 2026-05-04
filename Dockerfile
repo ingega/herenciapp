@@ -15,7 +15,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt [cite: 2]
+RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 ENV PYTHONPATH=/app
 EXPOSE 8001

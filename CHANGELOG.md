@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `Dockerfile` and `docker-compose` files port from 8000 to 8001
 
 ### Fixed
-- `Dockerfile` structure, separating COPY from RUN line.
+- `Dockerfile` structure, separating COPY from RUN line. and removing a wrong comment
 
 
 ## [0.1.7] - 2026-05-02
