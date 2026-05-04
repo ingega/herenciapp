@@ -42,10 +42,6 @@ jobs:
             
             echo "--- Pulling latest code ---"
             git pull origin main
-            
-            # Create the .env file on the fly using GitHub Secrets
-            echo "EC2_HOST=${{ secrets.EC2_HOST }}" > .env
-            echo "EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}" >> .env
 
             echo "--- Building Docker Image ---"
             # We add --progress=plain to see the build logs in GitHub Actions
