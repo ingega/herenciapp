@@ -13,11 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.1.0] - 2026-05-05
+
+### Added
+- database connection in `docker-compose.yml` file
+
+### Changed
+
+### Fixed
+
 ## [1.0.1] - 2026-05-05
 
 ### Added
 - health endpoint
 - test for health endpoint
+- folder structure for applications
 
 ### Changed
 - Adding cleanup commands for EC2 instance in `deploy.yml` file
