@@ -13,7 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-## [1.0.0] - 2024-05-04
+## [1.0.1] - 2026-05-05
+
+### Added
+
+### Changed
+- Adding cleanup commands for EC2 instance in `deploy.yml` file
+
+### Fixed
+
+## [1.0.0] - 2026-05-04
 ### Added
 - Initial production-grade MVP for Herencia del Abuelo.
 - FastAPI backend with Jinja2 frontend integration.

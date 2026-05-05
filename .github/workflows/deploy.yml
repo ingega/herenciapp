@@ -52,3 +52,21 @@ jobs:
             
             echo "--- Cleanup ---"
             docker image prune -f
+
+            # Clean up the specialized buildx cache (very important for small disks)
+            echo "--- Pruning Docker Builder Cache ---"
+            docker builder prune -a -f
+
+            # Vacuum logs older than 1 day to prevent log bloat
+            echo "--- Vacuuming Logs ---"
+            sudo journalctl --vacuum-time=1d
+
+            # deleting cache installation of pip
+            echo "--- Cleaning pip cache ---"
+            rm -rf ~/.cache/pip
+
+            # deleting cache installation of poetry
+            echo "--- Cleaning Poetry cache ---"
+            rm -rf ~/.cache/poetry
+
+            echo "--- Deployment Finished Successfully ---"
