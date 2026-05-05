@@ -8,19 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project setup and configuration
-- Basic project structure with `src/` and `tests/` directories
-- Poetry dependency management
-- FastAPI framework integration
-- Uvicorn development server configuration
-- Dockerfile for containerizing the application
-- GitHub Actions workflow for automated deployment to EC2
 
 ### Changed
-- Updated project description for clarity
 
 ### Fixed
-- N/A
+
+## [1.0.0] - 2024-05-04
+### Added
+- Initial production-grade MVP for Herencia del Abuelo.
+- FastAPI backend with Jinja2 frontend integration.
+- Mobile-first responsive UI using Bootstrap.
+- Multi-stage Dockerfile for slim production images.
+- Automated CI/CD pipeline via GitHub Actions to AWS EC2.
+- Professional README.md and project documentation.
 
 ## [0.1.9] - 2026-05-04
 
