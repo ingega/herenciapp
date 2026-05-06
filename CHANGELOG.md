@@ -18,10 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Database authentication dependencies: bcrypt, sqlalchemy, alembic
 - Initial models structure: src/models/auth.py
+- Settings loader with cached `get_settings()` factory for application configuration
 
 ### Changed
 - Updated poetry.lock with new packages
 - Poetry version updated to 2.4.0
+- `src/main.py` now initializes FastAPI with `get_settings()` and imports `StaticFiles`
+- Added production/mock database configuration support and dynamic `DATABASE_URL` construction in `src/config.py`
 
 ### Fixed
 

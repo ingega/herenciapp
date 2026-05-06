@@ -3,10 +3,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles  # <--- New Import
 from datetime import datetime
-from src.config import settings
+from src.config import get_settings
 from src.router import api_router
 from src.__init__ import __version__ as version
 
+settings = get_settings()
 app = FastAPI(title=settings.APP_NAME, __version__ = version)
 app.include_router(api_router)
 
