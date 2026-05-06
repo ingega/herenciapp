@@ -3,12 +3,26 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime
+from contextlib import asynccontextmanager
 from src.config import settings
 from src.router import api_router
 from src.__init__ import __version__ as version
+from database import init_db
 
-app = FastAPI(title=settings.APP_NAME, __version__ = version)
-app.include_router(api_router)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db() 
+    yield
+    pass
+
+app = FastAPI(
+    title="Herenciapp",
+        version=version,
+    lifespan=lifespan
+)
+
+# routers
+app.include_router(api_router)  # main or system router
 
 # Static Files
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
