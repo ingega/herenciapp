@@ -1,18 +1,16 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles  # <--- New Import
+from fastapi.staticfiles import StaticFiles
 from datetime import datetime
-from src.config import get_settings
+from src.config import settings
 from src.router import api_router
 from src.__init__ import __version__ as version
 
-settings = get_settings()
 app = FastAPI(title=settings.APP_NAME, __version__ = version)
 app.include_router(api_router)
 
-# Mount Static Files
-# This tells FastAPI: "Any request starting with /static should look in src/static"
+# Static Files
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 templates = Jinja2Templates(directory="src/templates")

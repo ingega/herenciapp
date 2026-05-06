@@ -20,16 +20,16 @@ class Settings(BaseSettings):
     APP_MODE: str = "mock"
 
     # Real Database Vars
-    DB_HOST: str
-    DB_NAME: str
-    DB_USER: str
-    DB_PASS: str
+    DB_HOST: str | None = None
+    DB_NAME: str | None = None
+    DB_USER: str | None = None
+    DB_PASS: str | None = None
 
     # Mock Database Vars
-    MOCK_DB_HOST: str
-    MOCK_DB_NAME: str
-    MOCK_DB_USER: str
-    MOCK_DB_PASS: str
+    MOCK_DB_HOST: str | None = None
+    MOCK_DB_NAME: str | None = None
+    MOCK_DB_USER: str | None = None
+    MOCK_DB_PASS: str | None = None
 
     ## Pydantic V2+
     model_config = SettingsConfigDict(
@@ -48,3 +48,6 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings():
     return Settings()
+
+# For convenience, we can also create a global instance of settings
+settings = get_settings()
