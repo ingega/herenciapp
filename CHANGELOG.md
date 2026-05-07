@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.1] - 2026-05-05
 
 ### Added
-- Database authentication dependencies: bcrypt, sqlalchemy, alembic, sqlmodel
+- Database authentication dependencies: bcrypt, sqlalchemy, alembic, sqlmodel, psycopg2
 - Initial models structure: src/models/auth.py
 - Settings loader with cached `get_settings()` factory for application configuration
 
