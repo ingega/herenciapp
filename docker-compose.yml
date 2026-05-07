@@ -19,9 +19,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${MOCK_DB_USER}
+      - POSTGRES_PASSWORD=${MOCK_DB_PASSWORD}
+      - POSTGRES_DB=${MOCK_DB_NAME}
     ports:
       - "5432:5432"
 
