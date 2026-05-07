@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     MOCK_DB_HOST: str | None = None
     MOCK_DB_NAME: str | None = None
     MOCK_DB_USER: str | None = None
-    MOCK_DB_PASS: str | None = None
+    MOCK_DB_PASSWORD: str | None = None
 
     ## Pydantic V2+
     model_config = SettingsConfigDict(
