@@ -94,12 +94,11 @@ def create_pending_user(session: Session, user_data: UserCreate) -> User | None:
             return None
 
         # 3. Prepare the database object
-        verification_code = generate_verification_token()
         db_user = User(
             email=email_clean,
             hashed_password=hash_password(user_data.password),
             is_active=False,  # Locked until verified
-            verification_code=verification_code
+            verification_code=generate_verification_token(),
             # Set expiration for 15 minutes from now
             code_expires_at=datetime.now(timezone.utc) + timedelta(minutes=15)
         )
