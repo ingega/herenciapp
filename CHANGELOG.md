@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.7]
 
 ### Added
-- test for configuration for database connection testin in `test/conftest.py`
+- functions session_fixture and client_fixture for database connection testing in `test/conftest.py`
+
 ### Changed
 
 ### Fixed
