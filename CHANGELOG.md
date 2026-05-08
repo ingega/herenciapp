@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.3.1]
+
+### Added
+- file `src/api/v1/apps/users/schemas.py` for users pydantic schemas
+- UserCreate schema in `src/api/v1/apps/users/schemas.py`
+
+### Changed
+
+### Fixed
+
 ## [1.3.0] - 2026-05-08
 
 ### Added
