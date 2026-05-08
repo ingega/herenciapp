@@ -13,18 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-## [1.2.8]
+## [1.3.0] - 2026-05-08
 
 ### Added
-- test for services
+- `get_user_by_id`, `get_all_users`, and `delete_user` service functions in `src/api/v1/apps/users/services.py`
+- New service test coverage for CRUD behavior and edge cases in `tests/unit/test_auth_services.py`
 
 ### Changed
-- N/A
+- `update_user` in `src/api/v1/apps/users/services.py` now supports `is_active` updates and refreshes `last_modification`
+- Service tests reorganized with additional validation and behavior checks for user lifecycle operations
 
 ### Fixed
-- adding a lambda function to retrieve now function in `src/api/v1/apps/users/models.py` file
+- Improved service error handling, rollback safety, and logging in `src/api/v1/apps/users/services.py`
 
-## [1.2.7]
+## [1.2.8]
 
 ### Added
 - functions session_fixture and client_fixture for database connection testing in `test/conftest.py`
