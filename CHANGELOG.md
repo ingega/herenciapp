@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `src/api/v1/apps/users/email_service.py` for sending verification emails
 - `create_pending_user()` service in `src/api/v1/apps/users/services.py` for inactive user registration and verification code generation
 - `generate_verification_token()` helper in `src/api/v1/auth/utils.py`
+- Added fastapi-mail for mail sending.
 
 ### Changed
 - Added `UserCreate` schema validation messages in `src/api/v1/apps/users/schemas.py` with Spanish password requirement text
