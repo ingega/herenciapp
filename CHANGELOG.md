@@ -13,10 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.2.3] - 2026-05-07
+
+### Added
+- function get_user_by_id in `src/api/v1/users/services.py`
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.2.2] - 2026-05-07
 
 ### Added
-- function get_user in `src/api/v1/users/services.py`
+- function get_user_by_email in `src/api/v1/users/services.py`
 
 ### Changed
 - N/A

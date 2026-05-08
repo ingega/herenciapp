@@ -19,3 +19,11 @@ def get_user_by_email(email: str) -> User | None:
         if not user:
             return None
         return user
+
+def get_user_by_id(user_id: int) -> User | None:
+    """Retrieves a user from the database by ID."""
+    with get_session() as session:
+        user = session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return None
+        return user
