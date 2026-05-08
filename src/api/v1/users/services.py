@@ -50,8 +50,89 @@ def get_user_by_email(email: str) -> User | None:
     Retrieves a user by email.
     Returns None if not found, ensuring consistent return types.
     """
-    with get_session() as session:
-        user = session.query(User).filter(User.email == email.lower().strip()).first()
-        if not user:
-            logger.warning(f"User not found for email: {email}")
-        return user
+    try:
+        with get_session() as session:
+            user = session.query(User).filter(User.email == email.lower().strip()).first()
+            if not user:
+                logger.warning(f"User not found for email: {email}")
+            return user
+    except Exception as e:
+        logger.error(f"Error retrieving user for email {email}: {e}")
+        return None
+
+def get_user_by_id(user_id: int) -> User | None:
+    """
+    Retrieves a user by ID.
+    Returns None if not found, ensuring consistent return types.
+    """
+    try:
+        with get_session() as session:
+                user = session.query(User).filter(User.id == user_id).first()
+                if not user:
+                    logger.warning(f"User not found for ID: {user_id}")
+                return user
+    except Exception as e:
+        logger.error(f"Error retrieving user ID {user_id}: {e}")
+        return None
+
+def list_users() -> list[User]:
+    """
+    Retrieves all users.
+    Returns an empty list if no users are found, ensuring consistent return types.
+    """
+    try:
+        with get_session() as session:
+                users = session.query(User).all()
+                if not users:
+                    logger.info("No users found in the database.")
+                return users
+    except Exception as e:
+        logger.error(f"Error listing users: {e}")
+        return []
+
+def update_user(user_id: int, email: str | None = None, 
+                plain_password: str | None = None) -> User | None:
+    """
+    Updates user information.
+    Returns the updated user or None if the user doesn't exist or an error occurs.
+    """
+    try:
+        with get_session() as session:
+            user = session.query(User).filter(User.id == user_id).first()
+            if not user:
+                logger.warning(f"Attempt to update non-existent user ID: {user_id}")
+                return None
+            
+            if email:
+                user.email = email.lower().strip() # Data normalization
+            if plain_password:
+                user.hashed_password = hash_password(plain_password)
+            
+            session.commit()
+            session.refresh(user)
+            logger.info(f"User ID {user_id} updated successfully.")
+            return user
+    except Exception as e:
+        logger.error(f"Error updating user ID {user_id}: {e}")
+        return None
+
+    
+def delete_user(user_id: int) -> bool:
+    """
+    Deletes a user by ID.
+    Returns True if deletion was successful, False otherwise.
+    """
+    try:
+        with get_session() as session:
+            user = session.query(User).filter(User.id == user_id).first()
+            if not user:
+                logger.warning(f"Attempt to delete non-existent user ID: {user_id}")
+                return False
+            
+            session.delete(user)
+            session.commit()
+            logger.info(f"User ID {user_id} deleted successfully.")
+            return True
+    except Exception as e:
+        logger.error(f"Error deleting user ID {user_id}: {e}")
+        return False

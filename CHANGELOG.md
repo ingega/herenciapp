@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.2.6] - 2026-05-07
+
+### Added
+- services in `src/api/users/services.py`
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.2.5] - 2026-05-07
 
 ### Added
