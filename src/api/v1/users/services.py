@@ -10,3 +10,12 @@ def create_user(email: str, hashed_password: str) -> User:
         session.commit()
         session.refresh(user)
         return user
+
+def get_user_by_email(email: str) -> User | None:
+    """Retrieves a user from the database by email."""
+    with get_session() as session:
+        # verify that email exists in the database, if not return None
+        user = session.query(User).filter(User.email == email).first()
+        if not user:
+            return None
+        return user
