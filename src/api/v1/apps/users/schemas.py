@@ -9,11 +9,11 @@ class UserCreate(BaseModel):
     @classmethod
     def password_strength(cls, v: str) -> str:
         if not re.search(r"[A-Z]", v):
-            raise ValueError("Password must contain at least one capital letter")
+            raise ValueError("Password debe contener al menos una letra mayúscula")
         if not re.search(r"[a-z]", v):
-            raise ValueError("Password must contain at least one lowercase letter")
+            raise ValueError("Password debe contener al menos una letra minúscula")
         if not re.search(r"\d", v):
-            raise ValueError("Password must contain at least one number")
+            raise ValueError("Password debe contener al menos un número")
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
-            raise ValueError("Password must contain at least one symbol")
+            raise ValueError("Password debe contener al menos un símbolo")
         return v

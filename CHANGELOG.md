@@ -13,17 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-## [1.3.1]
+## [1.3.2] - 2026-05-08
 
 ### Added
-- file `src/api/v1/apps/users/schemas.py` for users pydantic schemas
-- UserCreate schema in `src/api/v1/apps/users/schemas.py`
+- Verification fields `verification_code` and `code_expires_at` to `src/api/v1/apps/users/models.py`
+- `src/api/v1/apps/users/email_service.py` for sending verification emails
+- `create_pending_user()` service in `src/api/v1/apps/users/services.py` for inactive user registration and verification code generation
+- `generate_verification_token()` helper in `src/api/v1/auth/utils.py`
 
 ### Changed
+- Added `UserCreate` schema validation messages in `src/api/v1/apps/users/schemas.py` with Spanish password requirement text
+- Updated `src/__init__.py` version metadata to `1.3.2`
+- `src/api/v1/auth/utils.py` now includes secure token generation for email confirmation
 
 ### Fixed
+- Improved service creation flow with race-condition handling and rollback safety in `src/api/v1/apps/users/services.py`
 
-## [1.3.0] - 2026-05-08
+## [1.3.1]
 
 ### Added
 - `get_user_by_id`, `get_all_users`, and `delete_user` service functions in `src/api/v1/apps/users/services.py`

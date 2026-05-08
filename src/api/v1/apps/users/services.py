@@ -1,11 +1,12 @@
 # src/api/v1/apps/users/services.py
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Optional, List
 from sqlmodel import Session, select
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from src.api.v1.apps.users.models import User
-from src.api.v1.auth.utils import hash_password
+from src.api.v1.apps.users.schemas import UserCreate
+from src.api.v1.auth.utils import hash_password, generate_verification_token
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,52 @@ def create_user(session: Session, email: str, plain_password: str) -> User | Non
     except SQLAlchemyError as e:
         session.rollback()
         logger.error(f"Failed to create user {email}: {e}")
+        return None
+
+# create a temporary user, waiting for email confirmation before activating the account
+def create_pending_user(session: Session, user_data: UserCreate) -> User | None:
+    """
+    Creates a new user in an inactive state and prepares a verification code.
+    Returns the User object if successful, None if the email is taken or an error occurs.
+    """
+    # 1. Normalization (The "Veteran" move to avoid duplicate accounts)
+    email_clean = user_data.email.lower().strip()
+    
+    try:
+        # 2. Check if user already exists before attempting insertion
+        existing_user = session.exec(select(User).where(User.email == email_clean)).first()
+        if existing_user:
+            logger.warning(f"Registration attempt for existing email: {email_clean}")
+            return None
+
+        # 3. Prepare the database object
+        verification_code = generate_verification_token()
+        db_user = User(
+            email=email_clean,
+            hashed_password=hash_password(user_data.password),
+            is_active=False,  # Locked until verified
+            verification_code=verification_code
+            # Set expiration for 15 minutes from now
+            code_expires_at=datetime.now(timezone.utc) + timedelta(minutes=15)
+        )
+        
+        session.add(db_user)
+        session.commit() # The critical point where failures usually happen
+        session.refresh(db_user)
+        
+        # 4. Success Log
+        logger.info(f"Pending user created successfully: {email_clean}")
+        return db_user
+
+    except IntegrityError as e:
+        # This catches race conditions where two users try to register the same email simultaneously
+        session.rollback()
+        logger.error(f"Database integrity error during registration for {email_clean}: {str(e)}")
+        return None
+    except Exception as e:
+        # Catch-all for unexpected issues (connection drops, disk full, etc.)
+        session.rollback()
+        logger.critical(f"Unexpected system error creating user {email_clean}: {str(e)}")
         return None
 
 def update_user(session: Session, user_id: int, email: str | None = None, 
