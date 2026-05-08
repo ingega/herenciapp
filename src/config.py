@@ -43,7 +43,7 @@ class Settings(BaseSettings):
         if self.APP_MODE == "production":
             return f"postgresql://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{self.DB_NAME}"
         # Default to mock for safety
-        return f"postgresql://{self.MOCK_DB_USER}:{self.MOCK_DB_PASS}@{self.MOCK_DB_HOST}/{self.MOCK_DB_NAME}"
+        return f"postgresql://{self.MOCK_DB_USER}:{self.MOCK_DB_PASSWORD}@{self.MOCK_DB_HOST}/{self.MOCK_DB_NAME}"
 
 @lru_cache()
 def get_settings():
