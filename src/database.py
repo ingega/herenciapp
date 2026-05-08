@@ -46,3 +46,11 @@ def init_db():
     In production, we'll eventually transition this to Alembic migrations.
     """
     SQLModel.metadata.create_all(engine)
+
+# get a session for direct use in services (not recommended for routes)
+def get_session() -> Session:
+    """
+    Provides a new database session. 
+    This is for internal use in services, not for FastAPI routes.
+    """
+    return SessionLocal()

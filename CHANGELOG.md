@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.2.4] - 2026-05-07
+
+### Added
+- Authentication utilities in `src/api/auth/utils.py`
+- `get_session()` function in `src/database.py` for service layer database access
+
+### Changed
+- Enhanced user services in `src/api/v1/users/services.py` with logging, error handling, and data normalization
+- Moved password hashing utilities from `src/api/v1/users/utils.py` to `src/api/auth/utils.py`
+
+### Removed
+- `src/api/v1/users/__init__.py`
+- `src/api/v1/users/utils.py`
+
 ## [1.2.3] - 2026-05-07
 
 ### Added
