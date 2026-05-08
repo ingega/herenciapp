@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.2.7]
+
+### Added
+- test for configuration for database connection testin in `test/conftest.py`
+### Changed
+
+### Fixed
+
 ## [1.2.6] - 2026-05-07
 
 ### Added
