@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.2.1] - 2026-05-07
+
+### Added
+- User API structure with models, services, and utilities in `src/api/v1/users/`
+- User model moved to `src/api/v1/users/models.py`
+- User creation service in `src/api/v1/users/services.py`
+- Password hashing utility in `src/api/v1/users/utils.py`
+
+### Changed
+- Moved authentication models from `src/models/auth.py` to `src/api/v1/users/models.py`
+
+### Removed
+- `src/models/` directory and its contents
+
 ## [1.1.1] - 2026-05-05
 
 ### Added
