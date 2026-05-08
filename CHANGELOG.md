@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.2.8]
+
+### Added
+- test for services
+
+### Changed
+- N/A
+
+### Fixed
+- adding a lambda function to retrieve now function in `src/api/v1/apps/users/models.py` file
+
 ## [1.2.7]
 
 ### Added
