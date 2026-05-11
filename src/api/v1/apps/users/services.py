@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from src.api.v1.apps.users.models import User
 from src.api.v1.apps.users.schemas import UserCreate
 from src.api.v1.auth.utils import hash_password, generate_verification_token
+from src.api.v1.apps.users.email_service import send_verification_email
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ def create_user(session: Session, email: str, plain_password: str) -> User | Non
         return None
 
 # create a temporary user, waiting for email confirmation before activating the account
-def create_pending_user(session: Session, user_data: UserCreate) -> User | None:
+async def create_pending_user(session: Session, user_data: UserCreate) -> User | None:
     """
     Creates a new user in an inactive state and prepares a verification code.
     Returns the User object if successful, None if the email is taken or an error occurs.
@@ -103,6 +104,11 @@ def create_pending_user(session: Session, user_data: UserCreate) -> User | None:
             code_expires_at=datetime.now(timezone.utc) + timedelta(minutes=15)
         )
         
+        await send_verification_email(
+            email_to=db_user.email, 
+            code=db_user.verification_code
+        )
+
         session.add(db_user)
         session.commit() # The critical point where failures usually happen
         session.refresh(db_user)

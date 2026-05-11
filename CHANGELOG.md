@@ -8,10 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- N/A
 
 ### Changed
+- N/A
 
 ### Fixed
+- N/A
+
+## [1.3.3] - 2026-05-11
+
+### Added
+- a verification tests in `tests/unit/test_verification.py` using a mock send email function.
+
+### Changed
+- version label in `src/__init__.py`
+
+### Fixed
+- N/A
 
 ## [1.3.2] - 2026-05-08
 
