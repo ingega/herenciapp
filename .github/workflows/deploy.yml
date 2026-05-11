@@ -23,6 +23,11 @@ jobs:
           poetry install
       
       - name: Run Pytest
+        env:
+          # Dummy values to pass Pydantic validation during test collection
+          MAIL_USERNAME: dummy_user
+          MAIL_PASSWORD: dummy_password
+          MAIL_FROM: test@herenciapp.com
         run: poetry run pytest
 
       # 2. Optimization: SSH into EC2 and manage the "Kitchen Cleanup"

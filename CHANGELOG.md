@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - a verification tests in `tests/unit/test_verification.py` using a mock send email function.
 
 ### Changed
+- Added dummy variables for tests execution in `.github/workflows/deploy.yml`
 - version label in `src/__init__.py`
 
 ### Fixed

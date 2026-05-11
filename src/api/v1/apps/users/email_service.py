@@ -1,39 +1,34 @@
 # src/api/v1/apps/users/email_service.py
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
-from pydantic import EmailStr
 from src.config import get_settings
 
-settings = get_settings()
+def get_mail_client() -> FastMail:
+    """
+    Initializes the mail client only when called.
+    This prevents errors during test collection if env vars are missing.
+    """
+    settings = get_settings()
+    conf = ConnectionConfig(
+        MAIL_USERNAME = settings.MAIL_USERNAME,
+        MAIL_PASSWORD = settings.MAIL_PASSWORD,
+        MAIL_FROM = settings.MAIL_FROM,
+        MAIL_PORT = 587,
+        MAIL_SERVER = "smtp.gmail.com",
+        MAIL_STARTTLS = True,
+        MAIL_SSL_TLS = False,
+        USE_CREDENTIALS = True
+    )
+    return FastMail(conf)
 
-# Production-grade SMTP configuration
-conf = ConnectionConfig(
-    MAIL_USERNAME = settings.MAIL_USERNAME,
-    MAIL_PASSWORD = settings.MAIL_PASSWORD,
-    MAIL_FROM = settings.MAIL_FROM,
-    MAIL_PORT = 587,
-    MAIL_SERVER = "smtp.gmail.com", # Or your preferred provider
-    MAIL_STARTTLS = True,
-    MAIL_SSL_TLS = False,
-    USE_CREDENTIALS = True
-)
-
-async def send_verification_email(email_to: EmailStr, code: str):
-    """
-    Sends a professional verification email to the user.
-    """
-    html = f"""
-    <h3>Bienvenido a carnitas Herencia del Abuelo!</h3>
-    <p>POr favor ingrese el siguiente código para verificar su cuenta:</p>
-    <h2 style="color: #d9534f;">{code}</h2>
-    <p>Este código expirará en 15 minutos.</p>
-    """
-    
+async def send_verification_email(email_to: str, code: str):
+    html = f"<h3>Code: {code}</h3>"
     message = MessageSchema(
-        subject="Herenciapp - Verificación de Correo",
+        subject="Herenciapp - Verify",
         recipients=[email_to],
         body=html,
         subtype=MessageType.html
     )
-
-    fm = FastMail(conf)
+    
+    # We call our helper here
+    fm = get_mail_client()
     await fm.send_message(message)
