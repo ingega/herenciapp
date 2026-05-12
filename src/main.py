@@ -8,6 +8,7 @@ from src.config import settings
 from src.router import api_router
 from src.__init__ import __version__ as version
 from .database import init_db
+from .api.v1.apps.users.router import router as users_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,6 +24,7 @@ app = FastAPI(
 
 # routers
 app.include_router(api_router)  # main or system router
+app.include_router(users_router)  # user management router
 
 # Static Files
 app.mount("/static", StaticFiles(directory="src/static"), name="static")

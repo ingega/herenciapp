@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     MAIL_PORT: int = 587
     MAIL_SERVER: str = "smtp.gmail.com"
     MAIL_FROM_NAME: str = "Herencia del Abuelo"
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+    USE_CREDENTIALS: bool = True
+    VALIDATE_CERTS: bool = True
 
     ## Database Configurations
 

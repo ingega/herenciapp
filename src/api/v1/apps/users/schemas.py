@@ -1,4 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
+from datetime import datetime
+from uuid import UUID
 import re
 
 class UserCreate(BaseModel):
@@ -17,3 +19,12 @@ class UserCreate(BaseModel):
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
             raise ValueError("Password debe contener al menos un símbolo")
         return v
+
+class UserOut(BaseModel):
+    id: UUID
+    email: EmailStr
+    full_name: str | None = None
+    is_active: bool
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

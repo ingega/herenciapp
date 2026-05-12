@@ -16,6 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.3.4] - 2026-05-12
+
+### Added
+- Added `UserOut` schema in `src/api/v1/apps/users/schemas.py` for serialized user responses.
+- Included `users_router` from `src/api/v1/apps/users/router.py` in `src/main.py` to expose user management route handling.
+- Added new package files for user app routing in `src/api/v1/apps/users/__init__.py` and `src/api/v1/apps/users/router.py`.
+
+### Changed
+- Updated `README.md` content, formatting, and project branding to **Carnitas Herencia del Abuelo**.
+- Extended email configuration settings in `src/config.py` with `MAIL_STARTTLS`, `MAIL_SSL_TLS`, `USE_CREDENTIALS`, and `VALIDATE_CERTS`.
+
+### Fixed
+- N/A
+
 ## [1.3.3] - 2026-05-11
 
 ### Added
