@@ -1,6 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from datetime import datetime
-from uuid import UUID
 import re
 
 class UserCreate(BaseModel):
@@ -21,10 +20,8 @@ class UserCreate(BaseModel):
         return v
 
 class UserOut(BaseModel):
-    id: UUID
+    id: int
     email: EmailStr
-    full_name: str | None = None
     is_active: bool
-    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
