@@ -66,7 +66,7 @@ def test_get_all_users_empty_database(session: Session):
 
 @pytest.mark.asyncio
 async def test_get_user_by_email_logic(session: Session):
-    user_in = UserCreate(email="email_test@test.com", password="password123")
+    user_in = UserCreate(email="email_test@test.com", password="password123!")
     await services.create_user(session, user_in)
     
     # MUST await this one
