@@ -16,6 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.4.0] - 2026-05-14
+
+### Added
+- Added `src/api/v1/auth/services.py` to support verification token creation and email verification.
+- Added `VerificationToken` SQLModel in `src/api/v1/apps/users/models.py` for persistent token storage.
+- Added `UserVerificationSchema` and `TokenCreate` schemas in `src/api/v1/apps/users/schemas.py`.
+- Added email verification endpoints and enhanced logging in `src/api/v1/apps/users/router.py`.
+
+### Changed
+- Updated package version in `src/__init__.py` to `1.4.0`.
+- Updated `src/api/v1/apps/users/services.py` to use async verification flow, token generation, and stronger user retrieval handling.
+- Updated verification error details and duplicate-email messaging in `src/api/v1/apps/users/router.py`.
+
+### Fixed
+- Improved verification token persistence and email failure logging in `src/api/v1/apps/users/services.py`.
+
 ## [1.3.4] - 2026-05-12
 
 ### Added

@@ -5,18 +5,20 @@ from typing import Optional, List
 from sqlmodel import Session, select
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from src.api.v1.apps.users.models import User
-from src.api.v1.apps.users.schemas import UserCreate
+from src.api.v1.apps.users.schemas import UserCreate, TokenCreate
 from src.api.v1.auth.utils import hash_password, generate_verification_token
 from src.api.v1.apps.users.email_service import send_verification_email
+from src.api.v1.auth.services import create_verification_token
 
 logger = logging.getLogger(__name__)
 
-def get_user_by_email(session: Session, email: str) -> User | None:
+async def get_user_by_email(session: Session, email: str) -> User | None:
     """Retrieves a user by email with safety handling."""
     try:
         normalized_email = email.lower().strip()
         statement = select(User).where(User.email == normalized_email)
-        return session.exec(statement).first()
+        result = session.exec(statement).first()
+        return result
     except SQLAlchemyError as e:
         logger.error(f"Database error during user retrieval: {e}")
         return None
@@ -82,6 +84,7 @@ def create_user(session: Session, email: str, plain_password: str) -> User | Non
 async def create_pending_user(session: Session, user_data: UserCreate) -> User | None:
     """
     Creates a new user in an inactive state and prepares a verification code.
+    Creates a verification token and sends an email to the user.
     Returns the User object if successful, None if the email is taken or an error occurs.
     """
     # 1. Normalization (The "Veteran" move to avoid duplicate accounts)
@@ -94,26 +97,41 @@ async def create_pending_user(session: Session, user_data: UserCreate) -> User |
             logger.warning(f"Registration attempt for existing email: {email_clean}")
             return None
 
-        # 3. Prepare the database object
+        # 3 get the verification code ready before we create the user, so we can send the email in the same transaction
+        verification_code = generate_verification_token()
+        
+        # 4. Prepare the database object
         db_user = User(
             email=email_clean,
             hashed_password=hash_password(user_data.password),
             is_active=False,  # Locked until verified
-            verification_code=generate_verification_token(),
-            # Set expiration for 15 minutes from now
-            code_expires_at=datetime.now(timezone.utc) + timedelta(minutes=15)
-        )
-        
-        await send_verification_email(
-            email_to=db_user.email, 
-            code=db_user.verification_code
         )
 
-        session.add(db_user)
+        # add db_user
+        session.add(db_user) 
         session.commit() # The critical point where failures usually happen
         session.refresh(db_user)
         
-        # 4. Success Log
+        # with the user created, we can now create the token record in the database 
+
+        await create_verification_token(
+        session=session, 
+        user_id=db_user.id, 
+        token=verification_code
+    )
+        
+        # 6. Send the verification email (outside of the transaction to avoid delays)
+        try:
+            await send_verification_email(
+            email_to=db_user.email,
+            code=verification_code
+            )
+            logger.info(f"Verification email sent to {db_user.email}")
+        except Exception as e:
+            # We don't want to fail the whole registration if only the mail fails,
+            # but we must log it for the restaurant's admin.
+            logger.error(f"Failed to send email to {db_user.email}: {e}")
+        # 7. Success Log
         logger.info(f"Pending user created successfully: {email_clean}")
         return db_user
 
@@ -127,6 +145,17 @@ async def create_pending_user(session: Session, user_data: UserCreate) -> User |
         session.rollback()
         logger.critical(f"Unexpected system error creating user {email_clean}: {str(e)}")
         return None
+
+# finally aactivate user after email verification
+async def activate_user(db: Session, user: User):
+    """
+    Flips the switch to make the user active in the system.
+    """
+    user.is_active = True
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
 
 def update_user(session: Session, user_id: int, email: str | None = None, 
                 plain_password: str | None = None, is_active: bool | None = None) -> User | None:

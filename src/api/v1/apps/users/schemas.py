@@ -25,3 +25,26 @@ class UserOut(BaseModel):
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+class UserVerificationSchema(BaseModel):
+    """
+    Schema to validate the payload for the email verification endpoint.
+    """
+    email: EmailStr = Field(..., description="The email address of the user to verify")
+    token: str = Field(..., min_length=6, max_length=6, description="The 6-digit verification code")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "admin@herenciapp.com",
+                "token": "123456"
+            }
+        }
+
+class TokenCreate(BaseModel):
+    """
+    Schema for creating a verification token, used internally in the service layer.
+    """
+    user_id: int
+    token: str
+    expires_at: datetime

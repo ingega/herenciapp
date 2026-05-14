@@ -1,9 +1,14 @@
 # src/api/v1/apps/users/router.py
+import logging
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.config import get_settings, Settings
 from src.api.v1.apps.users import services, schemas
+from src.api.v1.auth import services as auth_services
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -15,11 +20,15 @@ async def register_user(
 ):
     # 1. Logic Check: Does the user already exist?
     # We refer to 'get_user_by_email' in our services module
-    existing_user = services.get_user_by_email(db, email=user_in.email)
+    existing_user = await services.get_user_by_email(db, email=user_in.email)
+    # debug
+    logger.info(f"Checking if user with email {user_in.email} already exists.")
+
     if existing_user:
+        logger.info(f"Database result for {user_in.email}: {existing_user}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="This email is already part of the Herencia family."
+            detail="This email is already part of the Herenciapp family."
         )
     
     # 2. Execution: Create inactive user & send verification email
@@ -32,5 +41,67 @@ async def register_user(
         # We don't want to leak sensitive server info in the detail
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="The kitchen had a hiccup sending your verification email. Please try again."
+            detail="There is a problem sending your verification email. Please try again."
         )
+
+router.post("/verify", status_code=status.HTTP_200_OK)
+async def verify_user_account(
+    token_data: schemas.UserVerificationSchema, 
+    db: Session = Depends(get_db)
+):
+    """
+    Endpoint to verify a user's email using the code sent to them.
+    """
+    # 1. Retrieve the user by email
+    user = await services.get_user_by_email(db, email=token_data.email)
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    # 2. Call the service to validate the token
+    is_valid = await auth_services.verify_registration_token(
+        db, user=user, token=token_data.token
+    )
+    
+    if not is_valid:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    
+    # 3. Activate the user
+    await services.activate_user(db, user=user)
+    
+    return {"message": "Account successfully verified"}
+
+@router.post("/verify", response_model=schemas.UserOut)
+async def verify_user_email(
+    payload: schemas.UserVerificationSchema, 
+    session: Session = Depends(get_db)
+):
+    
+    # 1. Identity Check: Does the user even exist?
+    user = await services.get_user_by_email(session, payload.email)
+    if not user:
+        print("I think: Attempted verification for non-existent email.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # 2. Validity Check: Is the token correct and active?
+    is_valid = await auth_services.verify_registration_token(
+        session, 
+        user=user, 
+        token=payload.token
+    )
+
+    if not is_valid:
+        print("I think: Token is either wrong, expired, or already used.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification token"
+        )
+
+    # 3. Activation: Flip the switch!
+    activated_user = await services.activate_user(session, user)
+    
+    print(f"User {payload.email} is now officially active.")
+    return activated_user
