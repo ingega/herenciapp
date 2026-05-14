@@ -33,6 +33,8 @@ class UserVerificationSchema(BaseModel):
     email: EmailStr = Field(..., description="The email address of the user to verify")
     token: str = Field(..., min_length=6, max_length=6, description="The 6-digit verification code")
 
+    model_config = ConfigDict(from_attributes=True)
+    
     class Config:
         json_schema_extra = {
             "example": {

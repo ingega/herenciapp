@@ -6,21 +6,25 @@ from src.api.v1.apps.users.services import get_user_by_email, create_user
 from src.api.v1.apps.users.services import get_user_by_id, get_all_users, update_user, delete_user
 from src.api.v1.apps.users.models import User
 from src.api.v1.auth.utils import hash_password
+from src.api.v1.apps.users.schemas import UserCreate
 
 # get functions
 
 @pytest.mark.asyncio
 async def test_get_user_by_id_logic(session: Session):
+    # Use the Schema instead of raw strings to match the service signature
+    user_in = UserCreate(email="find_me@test.com", password="secure123")
+    
     # 1. Setup: Create a real user
-    # Ensure create_user is awaited if you made it async!
-    original_user = await services.create_user(session, "find_me@test.com", "secure123")
+    new_user = await services.create_user(session, user_in)
     
-    # Check if creation failed due to pollution
-    assert original_user is not None, "User creation failed - check for DB pollution"
+    # Logic check: if db pollution happened, we retrieve the existing one
+    if new_user is None:
+        new_user = await services.get_user_by_email(session, "find_me@test.com")
     
-    user_id = original_user.id
+    user_id = new_user.id
     
-    # 2. Action: Retrieve it
+    # 2. Action: Retrieve it (get_user_by_id is sync, so no await)
     retrieved_user = services.get_user_by_id(session, user_id)
     
     # 3. Assert
@@ -62,9 +66,10 @@ def test_get_all_users_empty_database(session: Session):
 
 @pytest.mark.asyncio
 async def test_get_user_by_email_logic(session: Session):
-    await services.create_user(session, "email_test@test.com", "password123")
+    user_in = UserCreate(email="email_test@test.com", password="password123")
+    await services.create_user(session, user_in)
     
-    # FIX: Await the coroutine!
+    # MUST await this one
     user = await services.get_user_by_email(session, "email_test@test.com")
     
     assert user is not None

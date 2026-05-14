@@ -53,10 +53,10 @@ def get_all_users(session: Session, skip: int = 0, limit: int = 100) -> List[Use
         logger.error(f"Error fetching user list: {e}")
         return []
 
-def create_user(session: Session, email: str, plain_password: str) -> User | None:
+async def create_user(session: Session, email: str, plain_password: str) -> User | None:
     """Creates a user with full transaction safety and duplicate checks."""
     # Logic check before database hit
-    if get_user_by_email(session, email):
+    if await get_user_by_email(session, email):
         logger.warning(f"Registration blocked: {email} already exists.")
         return None
 

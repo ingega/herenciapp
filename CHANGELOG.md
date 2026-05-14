@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.4.1] - 2026-05-14
+
+### Added
+- N/A
+
+### Changed
+- added config dict in the VerificationToken schema in `src/api/v1/apps/users/schemas.py`
+
+### Fixed
+- async mode for create_user function in `src/api/v1/apps/users/services.py`
+
 ## [1.4.0] - 2026-05-14
 
 ### Added
