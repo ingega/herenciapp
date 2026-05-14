@@ -1,8 +1,7 @@
 from asyncio.log import logger
-from datetime import datetime, timezone
-from typing import Optional
-import pytest, time
+import time, pytest
 from sqlmodel import Session
+from src.api.v1.apps.users import services
 from src.api.v1.apps.users.services import get_user_by_email, create_user
 from src.api.v1.apps.users.services import get_user_by_id, get_all_users, update_user, delete_user
 from src.api.v1.apps.users.models import User
@@ -10,22 +9,23 @@ from src.api.v1.auth.utils import hash_password
 
 # get functions
 
-def test_get_user_by_id_logic(session: Session):
-    """
-    Verifies that we can find a specific user by their unique ID.
-    This is the foundation for profile pages and specific edits.
-    """
+@pytest.mark.asyncio
+async def test_get_user_by_id_logic(session: Session):
     # 1. Setup: Create a real user
-    original_user = create_user(session, "find_me@test.com", "secure123")
+    # Ensure create_user is awaited if you made it async!
+    original_user = await services.create_user(session, "find_me@test.com", "secure123")
+    
+    # Check if creation failed due to pollution
+    assert original_user is not None, "User creation failed - check for DB pollution"
+    
     user_id = original_user.id
-
-    # 2. Execution
-    found_user = get_user_by_id(session, user_id)
-
-    # 3. Assertion
-    assert found_user is not None
-    assert found_user.id == user_id
-    assert found_user.email == "find_me@test.com"
+    
+    # 2. Action: Retrieve it
+    retrieved_user = services.get_user_by_id(session, user_id)
+    
+    # 3. Assert
+    assert retrieved_user.id == user_id
+    assert retrieved_user.email == "find_me@test.com"
 
 def test_get_user_by_id_returns_none_if_missing(session: Session):
     """
@@ -60,22 +60,18 @@ def test_get_all_users_empty_database(session: Session):
     assert users_list == []
     assert len(users_list) == 0
 
-def test_get_user_by_email_logic(session: Session):
-    """
-    Verifies that we can find a specific user by their email.
-    This is the foundation for profile pages and specific edits.
-    """
-    # 1. Setup: Create a real user
-    _ = create_user(session, "find_me@test.com", "secure123")
+@pytest.mark.asyncio
+async def test_get_user_by_email_logic(session: Session):
+    await services.create_user(session, "email_test@test.com", "password123")
+    
+    # FIX: Await the coroutine!
+    user = await services.get_user_by_email(session, "email_test@test.com")
+    
+    assert user is not None
+    assert user.email == "email_test@test.com"
 
-    # 2. Execution: Find the user by email
-    found_user = get_user_by_email(session, "find_me@test.com")
-
-    # 3. Assertion
-    assert found_user is not None
-    assert found_user.email == "find_me@test.com"
-
-def test_get_user_by_email_returns_none_if_missing(session: Session):
+@pytest.mark.asyncio
+async def test_get_user_by_email_returns_none_if_missing(session: Session):
     """
     Ensures the service returns None (not a crash) if the email is invalid.
     """
