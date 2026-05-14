@@ -13,7 +13,7 @@ from src.api.v1.apps.users.schemas import UserCreate
 @pytest.mark.asyncio
 async def test_get_user_by_id_logic(session: Session):
     # Use the Schema instead of raw strings to match the service signature
-    user_in = UserCreate(email="find_me@test.com", password="secure123")
+    user_in = UserCreate(email="find_me@test.com", password="secure123!")
     
     # 1. Setup: Create a real user
     new_user = await services.create_user(session, user_in)
