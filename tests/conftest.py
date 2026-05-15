@@ -3,6 +3,7 @@ from typing import Generator
 from sqlalchemy import create_engine, StaticPool
 from sqlmodel import SQLModel, Session, create_engine
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from src.main import app
 from src.database import get_db
@@ -39,3 +40,8 @@ def client_fixture(session: Session) -> Generator[TestClient, None, None]:
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()
+
+@pytest.fixture
+async def client():
+    async with AsyncClient(app=app, base_url="http://testserver") as ac:
+        yield ac

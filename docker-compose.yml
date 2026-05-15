@@ -1,6 +1,8 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      target: builder
     container_name: herenciapp_prod
     restart: always
     ports:

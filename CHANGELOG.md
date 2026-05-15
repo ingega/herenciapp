@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.5] - 2026-05-15
 
 ### Added
-- enpoints verification test to `test/integration/test_using_verification.py`
+- enpoints verification test to `test/integration/test_user_verification.py`
 
 ### Changed
 - Bumpoing version in `__init__.py` file
