@@ -1,11 +1,11 @@
 # src/api/v1/apps/users/services.py
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import logging
 from typing import Optional, List
 from sqlmodel import Session, select
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from src.api.v1.apps.users.models import User
-from src.api.v1.apps.users.schemas import UserCreate, TokenCreate
+from src.api.v1.apps.users.schemas import UserCreate
 from src.api.v1.auth.utils import hash_password, generate_verification_token
 from src.api.v1.apps.users.email_service import send_verification_email
 from src.api.v1.auth.services import create_verification_token

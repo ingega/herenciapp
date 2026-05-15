@@ -12,7 +12,7 @@ from src.api.v1.apps.users.schemas import UserCreate
 @pytest.mark.asyncio
 async def test_get_user_by_id_logic(session: Session):
     # 1. Setup: Create a schema object
-    user_in = UserCreate(email="find_me@test.com", password="Secure123!")
+    user_in = UserCreate(email="find_me@test.com", plain_password="Secure123!")
     
     # 2. Execution: Await the creation
     new_user = await create_user(session, user_in)
