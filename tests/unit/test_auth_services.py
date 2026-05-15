@@ -14,7 +14,7 @@ async def test_get_user_by_id_logic(session: Session):
     user_in = UserCreate(email="find_me@test.com", password="Secure123!")
     
     # 2. Execution: Await the creation
-    
+
     new_user = await create_user(session, user_in)
     
     # Safety check for DB pollution
@@ -32,7 +32,7 @@ def test_get_user_by_id_returns_none_if_missing(session: Session):
     """
     Ensures the service returns None (not a crash) if the ID is invalid.
     """
-    found = get_user_by_id(session, 8888)
+    found = await get_user_by_id(session, 8888)
     assert found is None
 
 @pytest.mark.asyncio
@@ -78,7 +78,8 @@ async def test_get_user_by_email_returns_none_if_missing(session: Session):
 def test_email_normalization_works(session: Session):
     # Setup: Use the service to create the user so we test the full flow
     email = "Admin@Herenciapp.com"
-    create_user(session=session, email=email, password="Password123!")
+    new_user = UserCreate(email=email, password="Password123!")
+    create_user(session=session, user_in=new_user)
 
     # Execution: Search with messy casing and spaces
     messy_email = "  ADMIN@herenciapp.com  "
@@ -93,8 +94,9 @@ def test_email_normalization_works(session: Session):
 
 def test_create_duplicate_user_fails(session: Session):
     email = "test@test.com"
-    create_user(session, email, "Wrongpass123!")
-    
+    new_user = UserCreate(email=email, password="Wrongpass123!")
+    create_user(session, user_in=new_user)
+
     # Try to create the same user again
     duplicate = create_user(session, email, "Different_pass123!")
     
@@ -107,7 +109,8 @@ def test_update_user_logic(session: Session):
     all in one update cycle.
     """
     # 1. Setup
-    user = create_user(session, "original@test.com", "Old-pass1234!")
+    new_user = UserCreate(email="original@test.com", password="Old-pass1234!")
+    user = create_user(session, user_in=new_user)
     user_id = user.id
 
     # 2. Execution
@@ -132,7 +135,8 @@ def test_update_user_timestamp_changes(session: Session):
     updated on every save.
     """
     # 1. Setup
-    user = create_user(session, "time@test.com", "Password123!")
+    new_user = UserCreate(email="time@test.com", password="Password123!")
+    user = create_user(session, user_in=new_user)
     initial_mod_time = user.last_modification
     
     # We add a tiny sleep to ensure the clock moves forward
