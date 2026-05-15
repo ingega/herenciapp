@@ -33,7 +33,7 @@ async def test_get_user_by_id_returns_none_if_missing(session: Session):
     """
     Ensures the service returns None (not a crash) if the ID is invalid.
     """
-    found = await get_user_by_id(session, 8888)
+    found = get_user_by_id(session, 8888)
     assert found is None
 
 @pytest.mark.asyncio
@@ -69,11 +69,12 @@ async def test_get_user_by_email_logic(session: Session):
     assert user is not None
     assert user.email == "email_test@test.com"
 
-def test_get_user_by_email_returns_none_if_missing(session: Session):
+@pytest.mark.asyncio
+async def test_get_user_by_email_returns_none_if_missing(session: Session):
     """
     Ensures the service returns None (not a crash) if the email is invalid.
     """
-    found = get_user_by_email(session, "nonexistent@test.com")
+    found = await get_user_by_email(session, "nonexistent@test.com")
     assert found is None
 
 @pytest.mark.asyncio
