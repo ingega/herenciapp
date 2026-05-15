@@ -14,7 +14,7 @@ async def test_user_verification_flow_success(client, session):
     }
     
     # Correctly awaiting the ASYNC client
-    register_response = await client.post("/api/v1/users/register", json=user_data)
+    register_response = client.post("/api/v1/users/register", json=user_data)
     
     # If you still get a 404, check if the prefix in main.py is correct!
     assert register_response.status_code == status.HTTP_201_CREATED
