@@ -41,7 +41,7 @@ def test_verification_fails_with_wrong_token(client, session):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 @pytest.mark.asyncio
-async def test_verification_fails_for_missing_user(client):
+def test_verification_fails_for_missing_user(client):
     """
     Identity check: Reject verification for emails not in the system
     """
@@ -49,7 +49,7 @@ async def test_verification_fails_for_missing_user(client):
         "email": "ghost@herenciapp.com",
         "token": "anytoken"
     }
-    response = await client.post("/api/v1/users/verify", json=verify_payload)
+    response = client.post("/api/v1/users/verify", json=verify_payload)
     
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert "User not found" in response.json()["detail"]
