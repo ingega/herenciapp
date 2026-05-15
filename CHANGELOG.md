@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.4.5] - 2026-05-15
+
+### Added
+- enpoints verification test to `test/integration/test_using_verification.py`
+
+### Changed
+- Bumpoing version in `__init__.py` file
+
+### Fixed
+- N/A
+
 ## [1.4.4]
 
 ### Added
