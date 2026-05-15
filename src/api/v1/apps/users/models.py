@@ -4,7 +4,7 @@ from sqlmodel import SQLModel, Field
 from typing import Optional
 from datetime import datetime, timezone
 
-class User(SQLModel, table=True): # type: ignore
+class User(SQLModel, table=True):
     # id bigserial maps to Optional[int] with primary_key=True
     id: Optional[int] = Field(default=None, primary_key=True)
     email: str = Field(unique=True, index=True, nullable=False)
