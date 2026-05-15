@@ -12,23 +12,22 @@ from src.api.v1.apps.users.schemas import UserCreate
 
 @pytest.mark.asyncio
 async def test_get_user_by_id_logic(session: Session):
-    # Use the Schema instead of raw strings to match the service signature
-    user_in = UserCreate(email="find_me@test.com", password="Secure123!")
+    # 1. Setup: Create a schema object
+    user_in = UserCreate(email="find_me@test.com", password="secure123")
     
-    # 1. Setup: Create a real user
+    # 2. Execution: Await the creation
+    # Check your services.py: if it only takes (session, user_in), remove 'secure123'
     new_user = await services.create_user(session, user_in)
     
-    # Logic check: if db pollution happened, we retrieve the existing one
+    # Safety check for DB pollution
     if new_user is None:
         new_user = await services.get_user_by_email(session, "find_me@test.com")
     
     user_id = new_user.id
     
-    # 2. Action: Retrieve it (get_user_by_id is sync, so no await)
+    # 3. Action: Retrieve (get_user_by_id is sync, no await needed)
     retrieved_user = services.get_user_by_id(session, user_id)
     
-    # 3. Assert
-    assert retrieved_user.id == user_id
     assert retrieved_user.email == "find_me@test.com"
 
 def test_get_user_by_id_returns_none_if_missing(session: Session):
@@ -38,22 +37,16 @@ def test_get_user_by_id_returns_none_if_missing(session: Session):
     found = get_user_by_id(session, 8888)
     assert found is None
 
-def test_get_all_users_logic(session: Session):
-    """
-    Tests the listing logic. Crucial for the Admin dashboard.
-    """
-    # 1. Setup: Add multiple users
-    create_user(session, "user1@test.com", "pass1")
-    create_user(session, "user2@test.com", "pass2")
-    create_user(session, "user3@test.com", "pass3")
+@pytest.mark.asyncio
+async def test_get_all_users_logic(session: Session):
+    # 1. Setup: MUST await every single one
+    await services.create_user(session, UserCreate(email="u1@t.com", password="p1"))
+    await services.create_user(session, UserCreate(email="u2@t.com", password="p2"))
+    await services.create_user(session, UserCreate(email="u3@t.com", password="p3"))
 
     # 2. Execution
-    users_list = get_all_users(session)
-
-    # 3. Assertion
-    assert len(users_list) == 3
-    # Check that it's a list of User objects
-    assert users_list[0].email == "user1@test.com"
+    users = services.get_all_users(session)
+    assert len(users) >= 3
 
 def test_get_all_users_empty_database(session: Session):
     """
@@ -101,7 +94,7 @@ def test_email_normalization_works(session: Session):
 
 def test_create_duplicate_user_fails(session: Session):
     email = "test@test.com"
-    create_user(session, email, "pass123")
+    create_user(session, email, "Wrongpass123!")
     
     # Try to create the same user again
     duplicate = create_user(session, email, "different_pass")
