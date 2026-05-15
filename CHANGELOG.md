@@ -16,7 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
-## [1.4.2]
+## [1.4.3] 2026-05-15
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- Refactored importations for auth tests in `test/unit/test_auth_services.py`
+
+## [1.4.2] 2026-05-15
 
 ### Added
 - N/A
