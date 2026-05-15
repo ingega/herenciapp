@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.4.2]
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- Async for verify existin user in function `create_user` in `src/app/v1/apps/users/services.py`
+- Added async logic for functions in `test/unit/test_auth_services`
+
 ## [1.4.1] - 2026-05-14
 
 ### Added

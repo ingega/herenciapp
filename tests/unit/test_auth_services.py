@@ -39,14 +39,15 @@ def test_get_user_by_id_returns_none_if_missing(session: Session):
 
 @pytest.mark.asyncio
 async def test_get_all_users_logic(session: Session):
-    # 1. Setup: MUST await every single one
-    await services.create_user(session, UserCreate(email="u1@t.com", password="p1"))
-    await services.create_user(session, UserCreate(email="u2@t.com", password="p2"))
-    await services.create_user(session, UserCreate(email="u3@t.com", password="p3"))
-
-    # 2. Execution
+    # 1. Setup: MUST use await and UserCreate schemas
+    await services.create_user(session, UserCreate(email="u1@t.com", password="Password1234!"))
+    await services.create_user(session, UserCreate(email="u2@t.com", password="Password1234!"))
+    
+    # 2. Execution (get_all_users is currently sync in your file)
     users = services.get_all_users(session)
-    assert len(users) >= 3
+    
+    # 3. Assert
+    assert len(users) >= 2
 
 def test_get_all_users_empty_database(session: Session):
     """
@@ -150,24 +151,20 @@ def test_update_user_timestamp_changes(session: Session):
 
 # delete functions
 
-def test_delete_user_lifecycle(session: Session):
-    """
-    Verifies that a user is truly removed from the kitchen.
-    """
+@pytest.mark.asyncio
+async def test_delete_user_lifecycle(session: Session):
     # 1. Setup
-    user = create_user(session, "delete_me@test.com", "pass")
+    user_in = UserCreate(email="delete_me@test.com", password="password123")
+    user = await services.create_user(session, user_in)
     user_id = user.id
 
     # 2. Execution & Assertion
-    # First, verify they exist
-    assert get_user_by_id(session, user_id) is not None
+    assert services.get_user_by_id(session, user_id) is not None
     
-    # Delete them
-    success = delete_user(session, user_id)
+    # Check your services.py: if delete_user is sync, keep it like this:
+    success = services.delete_user(session, user_id)
     assert success is True
-
-    # Verify they are gone
-    assert get_user_by_id(session, user_id) is None
+    assert services.get_user_by_id(session, user_id) is None
 
 def test_delete_non_existent_user_returns_false(session: Session):
     """

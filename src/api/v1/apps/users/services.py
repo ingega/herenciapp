@@ -56,7 +56,8 @@ def get_all_users(session: Session, skip: int = 0, limit: int = 100) -> List[Use
 async def create_user(session: Session, email: str, plain_password: str) -> User | None:
     """Creates a user with full transaction safety and duplicate checks."""
     # Logic check before database hit
-    if await get_user_by_email(session, email):
+    existing_user = await get_user_by_email(session, email)
+    if existing_user:
         logger.warning(f"Registration blocked: {email} already exists.")
         return None
 
