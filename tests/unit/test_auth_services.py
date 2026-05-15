@@ -28,7 +28,7 @@ async def test_get_user_by_id_logic(session: Session):
     
     assert retrieved_user.email == "find_me@test.com"
 
-def test_get_user_by_id_returns_none_if_missing(session: Session):
+async def test_get_user_by_id_returns_none_if_missing(session: Session):
     """
     Ensures the service returns None (not a crash) if the ID is invalid.
     """
@@ -75,15 +75,16 @@ async def test_get_user_by_email_returns_none_if_missing(session: Session):
     found = get_user_by_email(session, "nonexistent@test.com")
     assert found is None
 
-def test_email_normalization_works(session: Session):
+@pytest.mark.asyncio
+async def test_email_normalization_works(session: Session):
     # Setup: Use the service to create the user so we test the full flow
     email = "Admin@Herenciapp.com"
     new_user = UserCreate(email=email, password="Password123!")
-    create_user(session=session, user_in=new_user)
+    await create_user(session=session, user_in=new_user)
 
     # Execution: Search with messy casing and spaces
     messy_email = "  ADMIN@herenciapp.com  "
-    found_user = get_user_by_email(session=session, email=messy_email)
+    found_user = await get_user_by_email(session=session, email=messy_email)
 
     # Assertion
     assert found_user is not None
@@ -92,25 +93,27 @@ def test_email_normalization_works(session: Session):
 
 # post functions
 
-def test_create_duplicate_user_fails(session: Session):
+@pytest.mark.asyncio
+async def test_create_duplicate_user_fails(session: Session):
     email = "test@test.com"
     new_user = UserCreate(email=email, password="Wrongpass123!")
-    create_user(session, user_in=new_user)
+    await create_user(session, user_in=new_user)
 
     # Try to create the same user again
-    duplicate = create_user(session, email, "Different_pass123!")
+    duplicate = await create_user(session, user_in=UserCreate(email=email, password="Different_pass123!"))
     
     assert duplicate is None
 
 # update functions
-def test_update_user_logic(session: Session):
+@pytest.mark.asyncio
+async def test_update_user_logic(session: Session):
     """
     Tests email normalization, password hashing, and status change
     all in one update cycle.
     """
     # 1. Setup
     new_user = UserCreate(email="original@test.com", password="Old-pass1234!")
-    user = create_user(session, user_in=new_user)
+    user = await create_user(session, user_in=new_user)
     user_id = user.id
 
     # 2. Execution
@@ -129,14 +132,15 @@ def test_update_user_logic(session: Session):
     # We don't check the hash value directly, but we check it changed
     assert updated.hashed_password != hash_password("Old-pass1234!") 
 
-def test_update_user_timestamp_changes(session: Session):
+@pytest.mark.asyncio
+async def test_update_user_timestamp_changes(session: Session):
     """
     Crucial for Herenciapp: verify that last_modification is 
     updated on every save.
     """
     # 1. Setup
     new_user = UserCreate(email="time@test.com", password="Password123!")
-    user = create_user(session, user_in=new_user)
+    user = await create_user(session, user_in=new_user)
     initial_mod_time = user.last_modification
     
     # We add a tiny sleep to ensure the clock moves forward

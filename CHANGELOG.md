@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.4.4]
+
+### Added
+- N/A
+
+### Changed
+- Bumped version in `__initi__.py`
+
+### Fixed
+- Async function in `test/unit/test_auth_services.py`
+
 ## [1.4.3] 2026-05-15
 
 ### Added
