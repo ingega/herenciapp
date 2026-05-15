@@ -16,13 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.4.7]
+
+### Added
+- N/A
+
+### Changed
+- refactored main users route in `src/main.py`
+- refactored tests in `test/integration/test_user_verification.py`
+- Bumping version in `__init__.py` file
+
+### Fixed
+- N/A
+
 ## [1.4.6] - 2026-05-15
 
 ### Added
 - N/A
 
 ### Changed
-- Bumpoing version in `__init__.py` file
+- Bumping version in `__init__.py` file
 
 ### Fixed
 - adding builder for test in `docker-compose.yml`

@@ -24,7 +24,7 @@ app = FastAPI(
 
 # routers
 app.include_router(api_router)  # main or system router
-app.include_router(users_router)  # user management router
+app.include_router(users_router, prefix="/api/v1") # users router with versioning prefix
 
 # Static Files
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
