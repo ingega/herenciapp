@@ -53,32 +53,33 @@ def get_all_users(session: Session, skip: int = 0, limit: int = 100) -> List[Use
         logger.error(f"Error fetching user list: {e}")
         return []
 
-async def create_user(session: Session, email: str, plain_password: str) -> User | None:
+async def create_user(session: Session, user_in: UserCreate) -> User | None:
     """Creates a user with full transaction safety and duplicate checks."""
     # Logic check before database hit
-    existing_user = await get_user_by_email(session, email)
+    existing_user = await get_user_by_email(session, user_in.email)
     if existing_user:
-        logger.warning(f"Registration blocked: {email} already exists.")
+        logger.warning(f"Registration blocked: {user_in.email} already exists.")
         return None
 
     try:
+        hashed = hash_password(user_in.password)
         new_user = User(
-            email=email.lower().strip(),
-            hashed_password=hash_password(plain_password),
+            email=user_in.email.lower().strip(),
+            hashed_password=hashed,
             is_active=True
         )
         session.add(new_user)
         session.commit()
         session.refresh(new_user)
-        logger.info(f"User {email} created successfully.")
+        logger.info(f"User {user_in.email} created successfully.")
         return new_user
     except IntegrityError:
         session.rollback()
-        logger.warning(f"Integrity error: Duplicate email race condition for {email}")
+        logger.warning(f"Integrity error: Duplicate email race condition for {user_in.email}")
         return None
     except SQLAlchemyError as e:
         session.rollback()
-        logger.error(f"Failed to create user {email}: {e}")
+        logger.error(f"Failed to create user {user_in.email}: {e}")
         return None
 
 # create a temporary user, waiting for email confirmation before activating the account
