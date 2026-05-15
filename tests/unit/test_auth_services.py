@@ -13,10 +13,9 @@ from src.api.v1.apps.users.schemas import UserCreate
 @pytest.mark.asyncio
 async def test_get_user_by_id_logic(session: Session):
     # 1. Setup: Create a schema object
-    user_in = UserCreate(email="find_me@test.com", password="secure123")
+    user_in = UserCreate(email="find_me@test.com", password="Secure123!")
     
     # 2. Execution: Await the creation
-    # Check your services.py: if it only takes (session, user_in), remove 'secure123'
     new_user = await services.create_user(session, user_in)
     
     # Safety check for DB pollution
@@ -25,7 +24,7 @@ async def test_get_user_by_id_logic(session: Session):
     
     user_id = new_user.id
     
-    # 3. Action: Retrieve (get_user_by_id is sync, no await needed)
+    # 3. Action: Retrieve
     retrieved_user = services.get_user_by_id(session, user_id)
     
     assert retrieved_user.email == "find_me@test.com"
