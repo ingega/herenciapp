@@ -2,7 +2,6 @@
 import logging
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
-from sqlmodel import select
 from src.database import get_db
 from src.config import get_settings, Settings
 from src.api.v1.apps.users import services, schemas

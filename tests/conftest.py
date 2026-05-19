@@ -1,4 +1,4 @@
-import pytest
+import pytest, logging
 from typing import Generator
 from sqlalchemy import create_engine, StaticPool
 from sqlmodel import SQLModel, Session, create_engine
@@ -6,6 +6,13 @@ from fastapi.testclient import TestClient
 
 from src.main import app
 from src.database import get_db
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# debug routes
+for route in app.routes:
+    logger.info(f'valid route: {route.path}')
 
 # 1. Setup an in-memory SQLite database for testing
 sqlite_url = "sqlite://"

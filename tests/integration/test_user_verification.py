@@ -1,6 +1,7 @@
 # tests/integration/test_using_verification.py
 import pytest
 from fastapi import status
+from sqlmodel import select
 from src.api.v1.apps.users.models import VerificationToken
 
 def test_user_verification_flow_success(client, session):
