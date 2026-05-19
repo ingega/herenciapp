@@ -40,7 +40,6 @@ def test_verification_fails_with_wrong_token(client, session):
     
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-@pytest.mark.asyncio
 def test_verification_fails_for_missing_user(client):
     """
     Identity check: Reject verification for emails not in the system

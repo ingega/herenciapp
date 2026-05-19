@@ -2,6 +2,7 @@
 import logging
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
+from sqlmodel import select
 from src.database import get_db
 from src.config import get_settings, Settings
 from src.api.v1.apps.users import services, schemas
@@ -48,16 +49,16 @@ async def verify_user_email(
     session: Session = Depends(get_db)
 ):
     
-    # 1. Identity Check: Does the user even exist?
+    # 1. Identity Check
     user = await services.get_user_by_email(session, payload.email)
+
     if not user:
-        print("I think: Attempted verification for non-existent email.")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
 
-    # 2. Validity Check: Is the token correct and active?
+    # 2. Token Validation
     is_valid = await auth_services.verify_registration_token(
         session, 
         user=user, 
@@ -65,14 +66,12 @@ async def verify_user_email(
     )
 
     if not is_valid:
-        print("I think: Token is either wrong, expired, or already used.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired verification token"
         )
 
-    # 3. Activation: Flip the switch!
+    # 3. Activate User
     activated_user = await services.activate_user(session, user)
-    
-    print(f"User {payload.email} is now officially active.")
+
     return activated_user
