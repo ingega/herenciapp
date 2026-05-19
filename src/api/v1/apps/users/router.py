@@ -19,7 +19,6 @@ async def register_user(
     settings: Settings = Depends(get_settings)
 ):
     # 1. Logic Check: Does the user already exist?
-    # We refer to 'get_user_by_email' in our services module
     existing_user = await services.get_user_by_email(db, email=user_in.email)
     # debug
     logger.info(f"Checking if user with email {user_in.email} already exists.")
@@ -32,44 +31,16 @@ async def register_user(
         )
     
     # 2. Execution: Create inactive user & send verification email
-    # I'll call our async service that handles the password hashing and email logic
     try:
         new_user = await services.create_pending_user(db, user_in)
         return new_user
     except Exception as e:
-        # Production-grade error handling: log the error and notify the user
-        # We don't want to leak sensitive server info in the detail
+        # error handling: log the error and notify the user
+        # Don't leak sensitive server info in the detail
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="There is a problem sending your verification email. Please try again."
         )
-
-router.post("/verify", status_code=status.HTTP_200_OK)
-async def verify_user_account(
-    token_data: schemas.UserVerificationSchema, 
-    db: Session = Depends(get_db)
-):
-    """
-    Endpoint to verify a user's email using the code sent to them.
-    """
-    # 1. Retrieve the user by email
-    user = await services.get_user_by_email(db, email=token_data.email)
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    # 2. Call the service to validate the token
-    is_valid = await auth_services.verify_registration_token(
-        db, user=user, token=token_data.token
-    )
-    
-    if not is_valid:
-        raise HTTPException(status_code=400, detail="Invalid or expired token")
-    
-    # 3. Activate the user
-    await services.activate_user(db, user=user)
-    
-    return {"message": "Account successfully verified"}
 
 @router.post("/verify", response_model=schemas.UserOut)
 async def verify_user_email(
