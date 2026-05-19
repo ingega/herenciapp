@@ -1,12 +1,12 @@
 # tests/integration/test_using_verification.py
 import pytest
 from fastapi import status
+from src.api.v1.apps.users.models import VerificationToken
 
 def test_user_verification_flow_success(client, session):
     user_data = {
         "email": "partner_test@herenciapp.com",
-        "password": "SecurePassword123!",
-        "full_name": "Test Partner"
+        "password": "SecurePassword123!"
     }
     
     # 1. Register - Path updated to match main.py (no /api/v1)
@@ -29,7 +29,7 @@ def test_user_verification_flow_success(client, session):
     assert verify_response.status_code == status.HTTP_200_OK
 
 def test_verification_fails_with_wrong_token(client, session):
-    user_data = {"email": "security@test.com", "password": "Password123!", "full_name": "Sec"}
+    user_data = {"email": "security@test.com", "password": "Password123!"}
     client.post("/users/register", json=user_data)
     
     verify_payload = {
@@ -49,7 +49,7 @@ def test_verification_fails_for_missing_user(client):
         "email": "ghost@herenciapp.com",
         "token": "anytoken"
     }
-    response = client.post("/api/v1/users/verify", json=verify_payload)
+    response = client.post("/users/verify", json=verify_payload)
     
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert "User not found" in response.json()["detail"]
