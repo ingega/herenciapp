@@ -49,6 +49,8 @@ RUN echo "=== BLUEPRINT ARCHITECTURAL DE HERENCIAPP ===" \
     && ls -R src/ \
     && echo "=== [$(date '+%Y-%m-%d %H:%M:%S')] ARCHITECT BLUEPRINT ===" >> installation-debug.txt
 
+RUN apt-get update && apt-get install -y curl
+
 # 3. Exponer el puerto de la app
 EXPOSE 8001
 
