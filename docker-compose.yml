@@ -15,7 +15,8 @@ services:
       timeout: 10s
       retries: 3
     depends_on:
-      - db
+      db:
+        condition: service_healthy # Wait for the database to be healthy before starting the web service
   db:
     image: postgres:15-alpine # Alpine is small version, saving disk space
     volumes:
@@ -26,7 +27,6 @@ services:
       - POSTGRES_DB=${MOCK_DB_NAME}
     ports:
       - "5432:5432"
-    condition: service_healthy  # Don't boot web until db passes its health check
 
 volumes:
   postgres_data:
