@@ -2,7 +2,7 @@ services:
   web:
     build:
       context: .
-      target: builder
+      target: runtime
     container_name: herenciapp_prod
     # restart: always
     ports:
@@ -18,7 +18,8 @@ services:
       db:
         condition: service_healthy # Wait for the database to be healthy before starting the web service
     volumes:
-      - /home/ec2-user/fastapi-projects/herenciapp/installation-debug.txt:/app/installation-debug.txt
+      # debug logs, this line must be removed or comented in external projects
+      - ./installation-debug.txt:/app/installation-debug.txt
   db:
     image: postgres:15-alpine # Alpine is small version, saving disk space
     volumes:
