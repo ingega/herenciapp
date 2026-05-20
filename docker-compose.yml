@@ -4,6 +4,7 @@ services:
       context: .
       target: builder
     container_name: herenciapp_prod
+    command: poetry run uvicorn src.main:app --host 0.0.0.0 --port 8001
     restart: always
     ports:
       - "8001:8001"
