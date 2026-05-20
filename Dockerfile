@@ -56,4 +56,12 @@ RUN echo """=== STARTING UVICORN ===""" \
 && echo "=== [$(date '+%Y-%m-%d %H:%M:%S')] STARTING UVICORN ===" >> installation-debug.txt
 
 # 4. Punto de entrada (Al estar en el PATH, llamará a uvicorn de forma transparente y global)
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD sh -c '\
+echo "=== CONTAINER STARTED $(date) ===" >> /app/installation-debug.txt && \
+echo "=== TESTING PYTHON ===" >> /app/installation-debug.txt && \
+python --version >> /app/installation-debug.txt 2>&1 && \
+echo "=== TESTING UVICORN ===" >> /app/installation-debug.txt && \
+which uvicorn >> /app/installation-debug.txt 2>&1 && \
+echo "=== STARTING APP ===" >> /app/installation-debug.txt && \
+uvicorn src.main:app --host 0.0.0.0 --port 8001 \
+>> /app/installation-debug.txt 2>&1'
