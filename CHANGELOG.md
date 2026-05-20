@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.4.8]
+
+### Added
+- N/A
+
+### Changed
+- Refactored Dockerfile and yml files for deploying in EC2
+
+### Fixed
+- Test for verification endpoint
+
 ## [1.4.7]
 
 ### Added
