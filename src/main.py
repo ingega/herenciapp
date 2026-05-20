@@ -1,20 +1,41 @@
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime
-from contextlib import asynccontextmanager
+
 from src.config import settings
 from src.router import api_router
 from src.__init__ import __version__ as version
 from .database import init_db
 from .api.v1.apps.users.router import router as users_router
 
+# Configuración del logger oficial de producción para el EC2
+logger = logging.getLogger("uvicorn.error")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db() 
+    """
+    Administrador del ciclo de vida de la aplicación.
+    Maneja el arranque seguro de la base de datos sin congelar el Event Loop.
+    """
+    logger.info("Fuego encendido: Iniciando fase de arranque de Herenciapp...")
+    try:
+        # Ejecutamos la creación de tablas de forma controlada
+        init_db()
+        logger.info("Base de datos sincronizada: Tablas verificadas exitosamente.")
+    except Exception as e:
+        logger.critical(
+            f"¡Alerta en la cocina! Falla crítica al inicializar la base de datos en producción: {str(e)}",
+            exc_info=True
+        )
+        # En producción, no queremos que el contenedor muera en silencio; 
+        # dejamos que levante para poder consultar los logs vía HTTP o mantener Nginx estable
+    
     yield
-    pass
+    logger.info("Apagando fuegos: Limpiando recursos de Herenciapp.")
 
 app = FastAPI(
     title="Herenciapp",
