@@ -3,7 +3,7 @@
 from sqlmodel import create_engine, SQLModel, Session
 from sqlalchemy.orm import sessionmaker
 from .config import settings
-from src.utils import file_debug, log_debug
+from src.utils import file_debug
 
 # 1. Database URL selection (Production vs. Mock/Sandbox)
 # This allows us to switch environments just by changing the .env file
