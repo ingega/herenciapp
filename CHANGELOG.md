@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.4.9]
+
+### Added
+- Debugging prints in Dockerfile, and database.py, main.py and confing.py in `src/app/v1/apps`
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.4.8]
 
 ### Added

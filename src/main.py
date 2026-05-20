@@ -17,25 +17,22 @@ logger = logging.getLogger("uvicorn.error")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Administrador del ciclo de vida de la aplicación.
-    Maneja el arranque seguro de la base de datos sin congelar el Event Loop.
-    """
-    logger.info("Fuego encendido: Iniciando fase de arranque de Herenciapp...")
-    try:
-        # Ejecutamos la creación de tablas de forma controlada
-        init_db()
-        logger.info("Base de datos sincronizada: Tablas verificadas exitosamente.")
-    except Exception as e:
-        logger.critical(
-            f"¡Alerta en la cocina! Falla crítica al inicializar la base de datos en producción: {str(e)}",
-            exc_info=True
-        )
-        # En producción, no queremos que el contenedor muera en silencio; 
-        # dejamos que levante para poder consultar los logs vía HTTP o mantener Nginx estable
+    print("===================================================", flush=True)
+    print("[LIFESPAN] El contenedor de Herenciapp se está encendiendo...", flush=True)
+    print(f"[LIFESPAN] Modo de Ejecución detectado: Settings.APP_MODE = '{settings.APP_MODE}'", flush=True)
     
+    print("[LIFESPAN] Intentando disparar init_db()...", flush=True)
+    try:
+        init_db()
+        print("[LIFESPAN] init_db() se ejecutó limpiamente.", flush=True)
+    except Exception as e:
+        print(f"[LIFESPAN CRITICAL] La inicialización tiró una excepción: {str(e)}", flush=True)
+        print("[LIFESPAN CRITICAL] Mantendremos la aplicación viva para auditoría visual de logs.", flush=True)
+    
+    print("[LIFESPAN] Fase de arranque terminada. Listo para recibir comandas en puerto 8001.", flush=True)
+    print("===================================================", flush=True)
     yield
-    logger.info("Apagando fuegos: Limpiando recursos de Herenciapp.")
+    print("[LIFESPAN] Apagando el servidor web de Herenciapp.", flush=True)
 
 app = FastAPI(
     title="Herenciapp",
