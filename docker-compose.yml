@@ -18,7 +18,7 @@ services:
       db:
         condition: service_healthy # Wait for the database to be healthy before starting the web service
     volumes:
-      - ./installation-debug.txt:/app/installation-debug.txt
+      - /home/ec2-user/fastapi-projects/herenciapp/installation-debug.txt:/app/installation-debug.txt
   db:
     image: postgres:15-alpine # Alpine is small version, saving disk space
     volumes:
