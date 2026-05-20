@@ -27,6 +27,12 @@ services:
       - POSTGRES_DB=${MOCK_DB_NAME}
     ports:
       - "5432:5432"
+    healthcheck:
+      # Production-grade health check: makes sure the DB is listening and accepting passwords
+      test: ["CMD-SHELL", "pg_isready -U ${MOCK_DB_USER} -d ${MOCK_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
