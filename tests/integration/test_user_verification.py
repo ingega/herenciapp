@@ -35,7 +35,7 @@ def test_verification_fails_with_wrong_token(client, session):
     
     verify_payload = {
         "email": "security@test.com",
-        "token": "WRONG_TOKEN_12345"
+        "token": "000000" # 6 digits exacts
     }
     response = client.post("/users/verify", json=verify_payload)
     
@@ -47,7 +47,7 @@ def test_verification_fails_for_missing_user(client):
     """
     verify_payload = {
         "email": "ghost@herenciapp.com",
-        "token": "anytoken"
+        "token": "000000"
     }
     response = client.post("/users/verify", json=verify_payload)
     
