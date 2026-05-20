@@ -7,7 +7,7 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-RUN echo "=== STARTING BUILDER STAGE ==="
+RUN echo "=== [$(date '+%Y-%m-%d %H:%M:%S')] INICIANDO ETAPA BUILDER ===" >> installation-debug.txt
 
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
@@ -35,7 +35,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     # del sistema operativo del contenedor
     PATH="/app/.venv/bin:$PATH"
 
-RUN echo "=== STARTING RUNTIME STAGE ==="
+RUN echo "=== [$(date '+%Y-%m-%d %H:%M:%S')] INICIANDO ETAPA DE EJECUCIÓN ===" >> installation-debug.txt
 
 # 1. Copiar ÚNICAMENTE el entorno virtual compilado y limpio de la etapa anterior
 COPY --from=builder /app/.venv /app/.venv
@@ -47,13 +47,13 @@ COPY static/ /app/static/
 
 RUN echo "=== BLUEPRINT ARCHITECTURAL DE HERENCIAPP ===" \
     && ls -R src/ \
-    && echo "=== BLUEPRINT ARCHITECTURAL DE HERENCIAPP ===" > installation-debug.txt
+    && echo "=== [$(date '+%Y-%m-%d %H:%M:%S')] ARCHITECT BLUEPRINT ===" >> installation-debug.txt
 
 # 3. Exponer el puerto de la app
 EXPOSE 8001
 
 RUN echo """=== STARTING UVICORN ===""" \
-&& echo "=== STARTING UVICORN ===" > installation-debug.txt
+&& echo "=== [$(date '+%Y-%m-%d %H:%M:%S')] STARTING UVICORN ===" >> installation-debug.txt
 
 # 4. Punto de entrada (Al estar en el PATH, llamará a uvicorn de forma transparente y global)
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001"]

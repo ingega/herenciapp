@@ -11,28 +11,29 @@ from src.router import api_router
 from src.__init__ import __version__ as version
 from .database import init_db
 from .api.v1.apps.users.router import router as users_router
+from src.utils import file_debug
 
 # Configuración del logger oficial de producción para el EC2
 logger = logging.getLogger("uvicorn.error")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("===================================================", flush=True)
-    print("[LIFESPAN] El contenedor de Herenciapp se está encendiendo...", flush=True)
-    print(f"[LIFESPAN] Modo de Ejecución detectado: Settings.APP_MODE = '{settings.APP_MODE}'", flush=True)
+    file_debug("===================================================")
+    file_debug("[LIFESPAN] El contenedor de Herenciapp se está encendiendo...")
+    file_debug(f"[LIFESPAN] Modo de Ejecución detectado: Settings.APP_MODE = '{settings.APP_MODE}'")
     
-    print("[LIFESPAN] Intentando disparar init_db()...", flush=True)
+    file_debug("[LIFESPAN] Intentando disparar init_db()...")
     try:
         init_db()
-        print("[LIFESPAN] init_db() se ejecutó limpiamente.", flush=True)
+        file_debug("[LIFESPAN] init_db() se ejecutó limpiamente.")
     except Exception as e:
-        print(f"[LIFESPAN CRITICAL] La inicialización tiró una excepción: {str(e)}", flush=True)
-        print("[LIFESPAN CRITICAL] Mantendremos la aplicación viva para auditoría visual de logs.", flush=True)
+        file_debug(f"[LIFESPAN CRITICAL] La inicialización tiró una excepción: {str(e)}")
+        file_debug("[LIFESPAN CRITICAL] Mantendremos la aplicación viva para auditoría visual de logs.")
     
-    print("[LIFESPAN] Fase de arranque terminada. Listo para recibir comandas en puerto 8001.", flush=True)
-    print("===================================================", flush=True)
+    file_debug("[LIFESPAN] Fase de arranque terminada. Listo para recibir comandas en puerto 8001.")
+    file_debug("===================================================")
     yield
-    print("[LIFESPAN] Apagando el servidor web de Herenciapp.", flush=True)
+    file_debug("[LIFESPAN] Apagando el servidor web de Herenciapp.")
 
 app = FastAPI(
     title="Herenciapp",
