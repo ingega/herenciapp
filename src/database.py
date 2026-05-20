@@ -14,7 +14,11 @@ DATABASE_URL = settings.DATABASE_URL
 engine = create_engine(
     DATABASE_URL, 
     echo=settings.DEBUG,
-    future=True
+    future=True,
+    pool_size=5,          # Máximo de conexiones persistentes abiertas simultáneamente
+    max_overflow=10,      # Conexiones adicionales permitidas en picos altos de tráfico
+    pool_timeout=30,      # Segundos de espera antes de lanzar un timeout si el pool está lleno
+    pool_recycle=1800     # Recicla las conexiones cada 30 minutos para evitar hilos zombis
 )
 
 # 3. Session Factory
