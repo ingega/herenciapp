@@ -46,12 +46,14 @@ COPY templates/ /app/templates/
 COPY static/ /app/static/
 
 RUN echo "=== BLUEPRINT ARCHITECTURAL DE HERENCIAPP ===" \
-    && ls -R src/
+    && ls -R src/ \
+    && echo "=== BLUEPRINT ARCHITECTURAL DE HERENCIAPP ===" > installation-debug.txt
 
 # 3. Exponer el puerto de la app
 EXPOSE 8001
 
-RUN echo """=== STARTING UVICORN ==="""
+RUN echo """=== STARTING UVICORN ===""" \
+&& echo "=== STARTING UVICORN ===" > installation-debug.txt
 
 # 4. Punto de entrada (Al estar en el PATH, llamará a uvicorn de forma transparente y global)
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001"]
