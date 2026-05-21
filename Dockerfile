@@ -1,4 +1,4 @@
-# --- Stage 1: Builder (La cocina de preparación) ---
+# --- Stage 1: Builder ---
 FROM python:3.13-slim AS builder
 
 WORKDIR /app
