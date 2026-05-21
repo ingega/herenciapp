@@ -43,7 +43,7 @@ COPY --from=builder /app/.venv /app/.venv
 # 2. Copiar el código fuente indispensable estructurado para producción
 COPY src/ /app/src/
 COPY templates/ /app/templates/
-COPY static/ /app/static/
+COPY src/static/ /app/static/
 
 RUN echo "=== BLUEPRINT ARCHITECTURAL DE HERENCIAPP ===" \
     && ls -R src/ \
