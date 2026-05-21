@@ -2,7 +2,7 @@ services:
   web:
     build:
       context: .
-      target: builder
+      target: production
     container_name: herenciapp_prod
     restart: always
     ports:
