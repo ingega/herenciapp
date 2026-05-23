@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.5.1] 2026-05-23
+
+### Added
+- placeholder for main logic `src/templates/main.html`
+
+### Changed
+- Adding logic to reach main
+
+### Fixed
+- N/A
+
 ## [1.5.0] 2026-05-23
 
 ### Added

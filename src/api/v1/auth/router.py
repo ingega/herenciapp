@@ -1,6 +1,7 @@
-
+# src/api/v1/auth/router.py
 import logging
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, status
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from src.config import settings
 
@@ -17,6 +18,19 @@ async def login(request: Request):
         request=request,
         name="login.html",
         context={
-            "config": settings  # Inyectamos la instancia global de configuración
+            "config": settings
         }
     )
+
+@router.post("/login")
+async def loggin_process(request: Request):
+    # --- PLACEHOLDER ZONE ---
+    # Right now, there's no auth logic or JWT generation yet.
+    # We simply accept ANY submission and redirect immediately to /main.
+    # ------------------------
+    
+    return {
+        "status": "success",
+        "message": "Authentication successful",
+        "redirect_url": "/main"
+    }

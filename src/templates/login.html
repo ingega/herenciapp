@@ -34,7 +34,7 @@
                     
                     <div id="errorAlert" class="alert alert-danger text-start small py-2 d-none" role="alert"></div>
                     
-                    <form id="loginForm">
+                    <form id="loginForm" action="/auth/login" method="POST">
                         <div class="mb-3 text-start">
                             <label for="email" class="form-label small fw-semibold text-secondary">Correo Electrónico</label>
                             <input type="email" class="form-control" id="email" required autocomplete="email" placeholder="nombre@correo.com">
@@ -95,7 +95,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
         if (response.ok) {
             // ÉXITO: El usuario inició sesión correctamente -> Redirección limpia al Dashboard corporativo
-            window.location.href = '/dashboard';
+            window.location.href = data.redirect_url;
         } else {
             // ERROR: Captura el error de FastAPI (401 credenciales inválidas / 403 cuenta no verificada)
             const errorMsg = data.detail || 'Credenciales inválidas. Revisa tu correo o contraseña.';
