@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Verificar Cuenta - {{ config.APP_NAME }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .verify-card {
+        max-width: 450px;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    /* Estilizado para los inputs de código de verificación */
+    .token-input {
+        letter-spacing: 0.5rem;
+        font-size: 1.5rem;
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center min-vh-100">
+    <div class="row justify-content-center w-100 m-0">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
+            <div class="card verify-card p-4 mx-auto">
+                <div class="card-body text-center">
+                    
+                    {% if config.SHOW_LOGO %}
+                        <div class="mb-3">
+                            <img src="{{ url_for('static', path='images/' + config.RESTAURANT_LOGO_NAME) }}" 
+                                 alt="{{ config.RESTAURANT_NAME }} Logo" 
+                                 class="img-fluid rounded mx-auto d-block" 
+                                 style="max-height: 80px; object-fit: contain;">
+                        </div>
+                    {% endif %}
+                    
+                    <h3 class="card-title fw-bold text-dark mb-1">Verificación de Cuenta</h3>
+                    <p class="text-muted small mb-4">Ingresa el código de 6 dígitos enviado a tu correo electrónico corporativo.</p>
+                    
+                    <div id="statusAlert" class="alert d-none text-start small py-2" role="alert"></div>
+                    
+                    <form id="verificationForm">
+                        <div class="mb-3 text-start">
+                            <label for="email" class="form-label small fw-semibold text-secondary">Confirmar Correo Electrónico</label>
+                            <input type="email" class="form-control" id="email" required autocomplete="email" placeholder="nombre@correo.com">
+                        </div>
+                        
+                        <div class="mb-4 text-start">
+                            <label for="token" class="form-label small fw-semibold text-secondary">Código de Verificación</label>
+                            <input type="text" class="form-control token-input" id="token" required 
+                                   maxlength="6" minlength="6" placeholder="000000" pattern="\d{6}"
+                                   title="El código debe ser exactamente de 6 números.">
+                            <div class="form-text text-muted small" style="font-size: 0.72rem;">
+                                Revisa tu bandeja de entrada o la carpeta de spam.
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="submitBtn" class="btn btn-warning btn-lg w-100 fw-bold text-dark mb-3">Activar Cuenta</button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p class="small text-muted mb-0">¿El código expiró? <a href="/auth/resend" class="text-warning fw-semibold text-decoration-none">Reenviar código</a></p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('verificationForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Detener recarga de pantalla
+    
+    const email = document.getElementById('email').value.trim();
+    const token = document.getElementById('token').value.trim();
+    const statusAlert = document.getElementById('statusAlert');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Limpiar alertas previas
+    statusAlert.classList.add('d-none');
+    statusAlert.classList.remove('alert-danger', 'alert-success');
+    statusAlert.innerText = '';
+
+    // Bloqueo visual de carga
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Verificando...';
+
+    try {
+        // Enviar la petición POST limpia en formato JSON respetando al 100% tu Schema
+        const response = await fetch('/users/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                token: token
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // ÉXITO: El usuario fue activado (activated_user)
+            statusAlert.classList.add('alert-success');
+            statusAlert.innerText = '¡Cuenta activada con éxito! Redirigiéndote al inicio de sesión...';
+            statusAlert.classList.remove('d-none');
+            
+            // Esperar 2 segundos para dar feedback visual antes de mandar al login
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2500);
+            
+        } else {
+            // ERROR: Captura el error de FastAPI (400 token inválido / 404 no encontrado)
+            const errorMsg = data.detail || 'Código de verificación incorrecto o expirado.';
+            statusAlert.classList.add('alert-danger');
+            statusAlert.innerText = errorMsg;
+            statusAlert.classList.remove('d-none');
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Activar Cuenta';
+        }
+    } catch (err) {
+        // Error físico de conexión local
+        statusAlert.classList.add('alert-danger');
+        statusAlert.innerText = 'Error de conexión. No se pudo validar el código con Herenciapp.';
+        statusAlert.classList.remove('d-none');
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Activar Cuenta';
+    }
+});
+</script>
+{% endblock %}

@@ -1,5 +1,4 @@
 # src/database.py
-
 from sqlmodel import create_engine, SQLModel, Session
 from sqlalchemy.orm import sessionmaker
 from .config import settings
@@ -45,13 +44,10 @@ def get_db():
     """
 
     ### debugging: adding flush=True to ensure logs are printed immediately in Docker
-    file_debug("[DEBUG DB] Generando sesión de base de datos...")
     db = SessionLocal()
     try:
         yield db
     finally:
-        ### debugging: adding flush=True to ensure logs are printed immediately in Docker
-        file_debug("[DEBUG DB] Cerrando sesión de base de datos...")
         db.close()
 
 # 5. Database Initialization
@@ -60,12 +56,9 @@ def init_db():
     Creates the tables defined in our models. 
     In production, we'll eventually transition this to Alembic migrations.
     """
-    file_debug("[DEBUG DB] Iniciando la función init_db(). Creando tablas de SQLModel...")
     try:
         SQLModel.metadata.create_all(engine)
-        file_debug("[DEBUG DB] SQLModel.metadata.create_all completado exitosamente sin errores.")
     except Exception as e:
-        file_debug(f"[CRITICAL DB] Error devastador al mapear tablas: {type(e).__name__} -> {str(e)}")
         raise e
 
 # get a session for direct use in services (not recommended for routes)

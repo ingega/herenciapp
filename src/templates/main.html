@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <h1>Bienvenido a herenciapp</h1>
+        <div class="mb-4">
+            <img src="{{ url_for('static', path='images/' + config.RESTAURANT_LOGO_NAME) }}" 
+                alt="{{ config.RESTAURANT_NAME }} Logo" 
+                class="img-fluid rounded" 
+                style="max-height: 120px; object-fit: contain;">
+        </div>
+        <p>Sistema de gestión para carnitas herencia del abuelo.</p>
+    </div>
+{% endblock %}

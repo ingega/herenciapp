@@ -17,9 +17,6 @@ services:
     depends_on:
       db:
         condition: service_healthy # Wait for the database to be healthy before starting the web service
-    volumes:
-      # debug logs, this line must be removed or comented in external projects
-      - ./installation-debug.txt:/app/installation-debug.txt
   db:
     image: postgres:15-alpine # Alpine is small version, saving disk space
     volumes:
