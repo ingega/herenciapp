@@ -1,7 +1,9 @@
 import logging
 from contextlib import asynccontextmanager
+import pathlib
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime
@@ -11,29 +13,18 @@ from src.router import api_router
 from src.__init__ import __version__ as version
 from .database import init_db
 from .api.v1.apps.users.router import router as users_router
-from src.utils import file_debug
+from .api.v1.auth.router import router as auth_router
 
 # Configuración del logger oficial de producción para el EC2
 logger = logging.getLogger("uvicorn.error")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    file_debug("===================================================")
-    file_debug("[LIFESPAN] El contenedor de Herenciapp se está encendiendo...")
-    file_debug(f"[LIFESPAN] Modo de Ejecución detectado: Settings.APP_MODE = '{settings.APP_MODE}'")
-    
-    file_debug("[LIFESPAN] Intentando disparar init_db()...")
     try:
         init_db()
-        file_debug("[LIFESPAN] init_db() se ejecutó limpiamente.")
     except Exception as e:
-        file_debug(f"[LIFESPAN CRITICAL] La inicialización tiró una excepción: {str(e)}")
-        file_debug("[LIFESPAN CRITICAL] Mantendremos la aplicación viva para auditoría visual de logs.")
-    
-    file_debug("[LIFESPAN] Fase de arranque terminada. Listo para recibir comandas en puerto 8001.")
-    file_debug("===================================================")
+        logging.log(logging.ERROR, f"[LIFESPAN CRITICAL] init raise an exception: {str(e)}")
     yield
-    file_debug("[LIFESPAN] Apagando el servidor web de Herenciapp.")
 
 app = FastAPI(
     title="Herenciapp",
@@ -41,12 +32,28 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# avoid return sensitive information in validation errors
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    # We just return a generic message without the details of the validation errors to avoid leaking sensitive information about the server's internals or the expected data format. This is a security best practice in production environments.
+    return JSONResponse(
+        status_code=422,
+        content={"detail": "Validation error: Invalid data provided, review the format."}
+    )
+
 # routers
 app.include_router(api_router)  # main or system router
 app.include_router(users_router) # users router
+app.include_router(auth_router) # auth router
 
 # Static Files
-app.mount("/static", StaticFiles(directory="src/static"), name="static")
+CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
+STATIC_DIR = CURRENT_DIR / "static"
+
+# debug propurposes: check if static dir exists and log the result
+if STATIC_DIR.exists() and STATIC_DIR.is_dir():
+    logger.info(f"Static directory found at: {STATIC_DIR}")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 templates = Jinja2Templates(directory="src/templates")
 templates.env.globals.update(config=settings)
@@ -59,5 +66,15 @@ async def read_root(request: Request):
         context={
             "current_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "version": version
+        }
+    )
+
+@app.get("/main")
+async def main(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="main.html",
+        context={
+            "config": settings  # Inyectamos la instancia global de configuración
         }
     )

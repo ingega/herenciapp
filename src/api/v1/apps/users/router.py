@@ -1,11 +1,16 @@
 # src/api/v1/apps/users/router.py
 import logging
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Request
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from src.database import get_db
-from src.config import get_settings, Settings
+from src.config import get_settings, Settings, settings
 from src.api.v1.apps.users import services, schemas
 from src.api.v1.auth import services as auth_services
+
+
+templates = Jinja2Templates(directory="src/templates")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,6 +47,22 @@ async def register_user(
             detail="There is a problem sending your verification email. Please try again."
         )
 
+@router.get("/register", response_class=HTMLResponse)
+async def get_register_page(request: Request):
+    """
+    Renders the registration template for Herencia del Abuelo.
+    Passes context matching professional UX layouts.
+    """
+    return templates.TemplateResponse(
+        request=request,
+        name="register.html", 
+        context={
+            "config": settings,
+            "title": "Register Account - Herencia del Abuelo"
+        }
+    )
+
+
 @router.post("/verify", response_model=schemas.UserOut)
 async def verify_user_email(
     payload: schemas.UserVerificationSchema, 
@@ -74,3 +95,18 @@ async def verify_user_email(
     activated_user = await services.activate_user(session, user)
 
     return activated_user
+
+# Mapea la interfaz visual que el JavaScript está buscando tras el registro exitoso
+@router.get("/verification", response_class=HTMLResponse)
+async def get_verification_page(request: Request):
+    """
+    Renders the intermediate email verification notification page.
+    Passes configuration to ensure branding and logos load properly.
+    """
+    return templates.TemplateResponse(
+        request=request,
+        name="verification.html",
+        context={
+            "config": settings  # Inyectamos la instancia global de configuración
+        }
+    )

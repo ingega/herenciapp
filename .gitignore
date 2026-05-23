@@ -224,3 +224,9 @@ __pycache__/
 .pytest_cache/
 .vscode/
 *.pem
+
+# another files
+installation-debug.txt
+/installation-debug.txt
+/installation-debug.txt/
+/installation-debug.txt/*.*

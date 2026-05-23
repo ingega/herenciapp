@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.5.0] 2026-05-23
+
+### Added
+- register template in `src/templates/register.html`
+
+### Changed
+- removing the txt debug deploying files
+
+### Fixed
+- relative static path in `src/main.py`
+
 ## [1.4.9]
 
 ### Added

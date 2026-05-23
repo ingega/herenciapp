@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - {{ config.RESTAURANT_NAME if config else 'Herencia del Abuelo' }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .login-card {
+        max-width: 450px;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center min-vh-100">
+    <div class="row justify-content-center w-100 m-0">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
+            <div class="card login-card p-4 mx-auto">
+                <div class="card-body text-center">
+                    
+                    {% if config and config.SHOW_LOGO %}
+                        <div class="mb-3">
+                            <img src="{{ url_for('static', path='images/' + config.RESTAURANT_LOGO_NAME) }}" 
+                                 alt="{{ config.RESTAURANT_NAME }} Logo" 
+                                 class="img-fluid rounded mx-auto d-block" 
+                                 style="max-height: 80px; object-fit: contain;">
+                        </div>
+                    {% endif %}
+                    
+                    <h3 class="card-title fw-bold text-dark mb-1">Iniciar Sesión</h3>
+                    <p class="text-muted small mb-4">Ingresa al panel de administración de {{ config.RESTAURANT_NAME if config else 'Herencia del Abuelo' }}</p>
+                    
+                    <div id="errorAlert" class="alert alert-danger text-start small py-2 d-none" role="alert"></div>
+                    
+                    <form id="loginForm">
+                        <div class="mb-3 text-start">
+                            <label for="email" class="form-label small fw-semibold text-secondary">Correo Electrónico</label>
+                            <input type="email" class="form-control" id="email" required autocomplete="email" placeholder="nombre@correo.com">
+                        </div>
+                        
+                        <div class="mb-4 text-start">
+                            <label for="password" class="form-label small fw-semibold text-secondary">Contraseña</label>
+                            <input type="password" class="form-control" id="password" required autocomplete="current-password" placeholder="••••••••">
+                        </div>
+                        
+                        <button type="submit" id="submitBtn" class="btn btn-warning btn-lg w-100 fw-bold text-dark mb-3">Iniciar Sesión</button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p class="small text-muted mb-0">¿No tienes una cuenta? <a href="/users/register" class="text-warning fw-semibold text-decoration-none">Registrarme</a></p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Detener recarga de pantalla
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const errorAlert = document.getElementById('errorAlert');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Limpiar estados de alerta previos
+    errorAlert.classList.add('d-none');
+    errorAlert.innerText = '';
+
+    // Bloqueo visual de carga
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Iniciando sesión...';
+
+    try {
+        // Enviar la petición POST limpia en formato JSON respetando al 100% tu API REST
+        const response = await fetch('/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // ÉXITO: El usuario inició sesión correctamente -> Redirección limpia al Dashboard corporativo
+            window.location.href = '/dashboard';
+        } else {
+            // ERROR: Captura el error de FastAPI (401 credenciales inválidas / 403 cuenta no verificada)
+            const errorMsg = data.detail || 'Credenciales inválidas. Revisa tu correo o contraseña.';
+            errorAlert.innerText = errorMsg;
+            errorAlert.classList.remove('d-none');
+            
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Iniciar Sesión';
+        }
+    } catch (err) {
+        // Error físico de conexión o servidor local apagado
+        errorAlert.innerText = 'Error de conexión. No se pudo conectar con el servidor de Herenciapp.';
+        errorAlert.classList.remove('d-none');
+        
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Iniciar Sesión';
+    }
+});
+</script>
+{% endblock %}
