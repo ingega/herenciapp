@@ -34,7 +34,7 @@
                     
                     <div id="errorAlert" class="alert alert-danger text-start small py-2 d-none" role="alert"></div>
                     
-                    <form id="loginForm" action="/auth/login" method="POST">
+                    <form id="loginForm">
                         <div class="mb-3 text-start">
                             <label for="email" class="form-label small fw-semibold text-secondary">Correo Electrónico</label>
                             <input type="email" class="form-control" id="email" required autocomplete="email" placeholder="nombre@correo.com">
@@ -62,51 +62,63 @@
 {% block extra_scripts %}
 <script>
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
-    e.preventDefault(); // Detener recarga de pantalla
+    e.preventDefault(); 
 
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
     const errorAlert = document.getElementById('errorAlert');
     const submitBtn = document.getElementById('submitBtn');
 
-    // Limpiar estados de alerta previos
     errorAlert.classList.add('d-none');
     errorAlert.innerText = '';
-
-    // Bloqueo visual de carga
     submitBtn.disabled = true;
     submitBtn.innerText = 'Iniciando sesión...';
 
     try {
-        // Enviar la petición POST limpia en formato JSON respetando al 100% tu API REST
         const response = await fetch('/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
+            // CRITICAL: Tells the browser NOT to follow background redirects automatically
+            redirect: 'manual', 
             body: JSON.stringify({
                 email: email,
                 password: password
             })
         });
 
-        const data = await response.json();
+        // Evaluate the server status using a Case condition
+        switch (response.status) {
+            case 200:
+                // SUCCESS: Read destination JSON payload
+                const data = await response.json();
+                window.location.href = data.redirect_url;
+                break;
 
-        if (response.ok) {
-            // ÉXITO: El usuario inició sesión correctamente -> Redirección limpia al Dashboard corporativo
-            window.location.href = data.redirect_url;
-        } else {
-            // ERROR: Captura el error de FastAPI (401 credenciales inválidas / 403 cuenta no verificada)
-            const errorMsg = data.detail || 'Credenciales inválidas. Revisa tu correo o contraseña.';
-            errorAlert.innerText = errorMsg;
-            errorAlert.classList.remove('d-none');
-            
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Iniciar Sesión';
+            case 303:
+            case 302:
+            case 401:
+                // AUTHENTICATION FAILURE: The global exception handler threw a 303 page redirect
+                errorAlert.innerText = 'Incorrect email or password. Please try again.';
+                errorAlert.classList.remove('d-none');
+                
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Iniciar Sesión';
+                break;
+
+            default:
+                // OTHER API ERRORS (e.g., 500 Server Error)
+                errorAlert.innerText = 'An unexpected server error occurred. Please contact support.';
+                errorAlert.classList.remove('d-none');
+                
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Iniciar Sesión';
         }
+
     } catch (err) {
-        // Error físico de conexión o servidor local apagado
+        // Only hits this block if there's a REAL network outage or the backend is turned off!
         errorAlert.innerText = 'Error de conexión. No se pudo conectar con el servidor de Herenciapp.';
         errorAlert.classList.remove('d-none');
         

@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     SHOW_LOGO: bool = True
     
     # Environment config
-    DEBUG: bool = True
+    DEBUG: bool = False
 
     # Email Configurations
     MAIL_USERNAME: str | None = None
@@ -49,6 +49,10 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore"  # Ignore extra fields in .env to prevent errors
     )
+
+    # cookie
+    COOKIE_SECURE: bool = False  # Set to True in production when using HTTPS
+
 
     @property
     def DATABASE_URL(self) -> str:

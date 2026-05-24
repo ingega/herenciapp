@@ -1,19 +1,22 @@
+# src/main.py
 import logging
 from contextlib import asynccontextmanager
 import pathlib
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, HTTPException, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime
 
+from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
 from src.router import api_router
 from src.__init__ import __version__ as version
 from .database import init_db
 from .api.v1.apps.users.router import router as users_router
 from .api.v1.auth.router import router as auth_router
+from .api.v1.apps.orders.router import router as orders_router
 
 # Configuración del logger oficial de producción para el EC2
 logger = logging.getLogger("uvicorn.error")
@@ -35,24 +38,47 @@ app = FastAPI(
 # avoid return sensitive information in validation errors
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    # We just return a generic message without the details of the validation errors to avoid leaking sensitive information about the server's internals or the expected data format. This is a security best practice in production environments.
+    # We just return a generic message without the details of the validation errors to avoid 
+    # leaking sensitive information about the server's internals or the expected data format. 
+    # This is a security best practice in production environments.
     return JSONResponse(
         status_code=422,
         content={"detail": "Validation error: Invalid data provided, review the format."}
     )
 
+# Custom exception handler for HTTPException to handle 401 Unauthorized globally
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    """
+    Smart exception handler. 
+    If the request comes from an AJAX fetch (JSON/POST), it passes the raw status code.
+    If it's a page navigation (GET), it redirects cleanly.
+    """
+    # 1. Check if the request is an asynchronous data submission
+    if request.method == "POST" or "application/json" in request.headers.get("accept", ""):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"status": "error", "detail": exc.detail}
+        )
+    
+    # 2. Fallback for standard UI browser tabs (GET requests)
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        response = RedirectResponse(url="/auth/login", status_code=status.HTTP_303_SEE_OTHER)
+        response.delete_cookie("access_token")
+        return response
+
+    return RedirectResponse(url="/auth/login")
+
 # routers
 app.include_router(api_router)  # main or system router
 app.include_router(users_router) # users router
 app.include_router(auth_router) # auth router
+app.include_router(orders_router, prefix="/orders") # orders router
 
 # Static Files
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 STATIC_DIR = CURRENT_DIR / "static"
 
-# debug propurposes: check if static dir exists and log the result
-if STATIC_DIR.exists() and STATIC_DIR.is_dir():
-    logger.info(f"Static directory found at: {STATIC_DIR}")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 templates = Jinja2Templates(directory="src/templates")
@@ -70,11 +96,13 @@ async def read_root(request: Request):
     )
 
 @app.get("/main")
-async def main(request: Request):
+async def main(request: Request, 
+               current_user: dict = Depends(get_current_user_from_cookie)):
     return templates.TemplateResponse(
         request=request,
         name="main.html",
         context={
-            "config": settings  # Inyectamos la instancia global de configuración
+            "config": settings,
+            "current_user": current_user  # current user data from the JWT payload
         }
     )
