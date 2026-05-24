@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.6.2]
+
+### Added
+- Template for orders in `src/templates`
+
+### Changed
+- N/A
+
+### Fixed
+- enpoint logic for orders enpoint in `src/app/v1/apps/orders/router.py`
+
 ## [1.6.1]
 
 ### Added 2026-05-24

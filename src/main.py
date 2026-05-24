@@ -16,6 +16,7 @@ from src.__init__ import __version__ as version
 from .database import init_db
 from .api.v1.apps.users.router import router as users_router
 from .api.v1.auth.router import router as auth_router
+from .api.v1.apps.orders.router import router as orders_router
 
 # Configuración del logger oficial de producción para el EC2
 logger = logging.getLogger("uvicorn.error")
@@ -72,6 +73,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
 app.include_router(api_router)  # main or system router
 app.include_router(users_router) # users router
 app.include_router(auth_router) # auth router
+app.include_router(orders_router, prefix="/orders") # orders router
 
 # Static Files
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
