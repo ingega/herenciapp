@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - auth flow in `src/app/v2/auth/auth.py`
+- function get_current_user_from_cookie in `src/api/v1/auth/auth.py`
+- 
 
 ### Changed
 - added env variables in `.env` file

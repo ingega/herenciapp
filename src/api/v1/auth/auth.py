@@ -1,3 +1,7 @@
+# src/api/v1/auth/auth.py
+from fastapi import Request, HTTPException, status, Depends
+from fastapi.responses import RedirectResponse
+from typing import Optional
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
@@ -36,3 +40,30 @@ def verify_access_token(token: str) -> Optional[dict]:
         return payload
     except JWTError:
         return None
+    
+async def get_current_user_from_cookie(request: Request) -> dict:
+    """
+    FastAPI Dependency that extracts and validates the JWT from an HttpOnly cookie.
+    If valid, returns the user data payload.
+    If invalid or missing, raises an authorization exception or handles redirection.
+    """
+    # 1. Look for the cookie named 'access_token' in the incoming request
+    token = request.cookies.get("access_token")
+    
+    if not token:
+        # No token found! Raise a credentials exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
+    # 2. Verify the signature and expiration using your utility function
+    payload = verify_access_token(token)
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token invalid or expired"
+        )
+        
+    # 3. Return the payload data (e.g., {"sub": "user@email.com", "role": "admin"})
+    return payload

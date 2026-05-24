@@ -50,6 +50,10 @@ class Settings(BaseSettings):
         extra="ignore"  # Ignore extra fields in .env to prevent errors
     )
 
+    # cookie
+    COOKIE_SECURE: bool = False  # Set to True in production when using HTTPS
+
+
     @property
     def DATABASE_URL(self) -> str:
         """Dynamically builds the connection string based on APP_MODE"""

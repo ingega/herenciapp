@@ -1,13 +1,15 @@
+# src/main.py
 import logging
 from contextlib import asynccontextmanager
 import pathlib
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, HTTPException, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime
 
+from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
 from src.router import api_router
 from src.__init__ import __version__ as version
@@ -35,11 +37,30 @@ app = FastAPI(
 # avoid return sensitive information in validation errors
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    # We just return a generic message without the details of the validation errors to avoid leaking sensitive information about the server's internals or the expected data format. This is a security best practice in production environments.
+    # We just return a generic message without the details of the validation errors to avoid 
+    # leaking sensitive information about the server's internals or the expected data format. 
+    # This is a security best practice in production environments.
     return JSONResponse(
         status_code=422,
         content={"detail": "Validation error: Invalid data provided, review the format."}
     )
+
+# Custom exception handler for HTTPException to handle 401 Unauthorized globally
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    """
+    Interceptors exceptions. If a 401 occurs on a page request, 
+    it wipes any bad cookie and sends the user back to the login gate.
+    """
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        # Clear the invalid cookie and route them to your auth/login page view
+        response = RedirectResponse(url="/auth/login", status_code=status.HTTP_303_SEE_OTHER)
+        response.delete_cookie("access_token")
+        return response
+        
+    # Fallback for other standard HTTP exceptions (like 404, 500, etc.)
+    # If your app has custom templates for those, you can render them here.
+    return RedirectResponse(url="/auth/login")
 
 # routers
 app.include_router(api_router)  # main or system router
@@ -70,11 +91,13 @@ async def read_root(request: Request):
     )
 
 @app.get("/main")
-async def main(request: Request):
+async def main(request: Request, 
+               current_user: dict = Depends(get_current_user_from_cookie)):
     return templates.TemplateResponse(
         request=request,
         name="main.html",
         context={
-            "config": settings  # Inyectamos la instancia global de configuración
+            "config": settings,
+            "current_user": current_user  # current user data from the JWT payload
         }
     )
