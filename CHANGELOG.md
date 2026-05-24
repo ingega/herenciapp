@@ -16,6 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.6.1]
+
+### Added 2026-05-24
+- Added placeholder orders template in `src/templates/orders.html`
+- `router.py` in `src/app/v1/orders/`
+- orders endpoint in `src/app/v1/orders/router.py`
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.6.0]
 
 ### Added
