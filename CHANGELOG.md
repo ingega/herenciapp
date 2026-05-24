@@ -19,10 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.6.0]
 
 ### Added
-- N/A
+- auth flow in `src/app/v2/auth/auth.py`
 
 ### Changed
-- N/A
+- added env variables in `.env` file
+- bumping version in `src/__init__.py` file
 
 ### Fixed
 - N/A
