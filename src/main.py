@@ -49,17 +49,23 @@ async def validation_exception_handler(request, exc):
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
     """
-    Interceptors exceptions. If a 401 occurs on a page request, 
-    it wipes any bad cookie and sends the user back to the login gate.
+    Smart exception handler. 
+    If the request comes from an AJAX fetch (JSON/POST), it passes the raw status code.
+    If it's a page navigation (GET), it redirects cleanly.
     """
+    # 1. Check if the request is an asynchronous data submission
+    if request.method == "POST" or "application/json" in request.headers.get("accept", ""):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"status": "error", "detail": exc.detail}
+        )
+    
+    # 2. Fallback for standard UI browser tabs (GET requests)
     if exc.status_code == status.HTTP_401_UNAUTHORIZED:
-        # Clear the invalid cookie and route them to your auth/login page view
         response = RedirectResponse(url="/auth/login", status_code=status.HTTP_303_SEE_OTHER)
         response.delete_cookie("access_token")
         return response
-        
-    # Fallback for other standard HTTP exceptions (like 404, 500, etc.)
-    # If your app has custom templates for those, you can render them here.
+
     return RedirectResponse(url="/auth/login")
 
 # routers
@@ -71,9 +77,6 @@ app.include_router(auth_router) # auth router
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 STATIC_DIR = CURRENT_DIR / "static"
 
-# debug propurposes: check if static dir exists and log the result
-if STATIC_DIR.exists() and STATIC_DIR.is_dir():
-    logger.info(f"Static directory found at: {STATIC_DIR}")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 templates = Jinja2Templates(directory="src/templates")

@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     SHOW_LOGO: bool = True
     
     # Environment config
-    DEBUG: bool = True
+    DEBUG: bool = False
 
     # Email Configurations
     MAIL_USERNAME: str | None = None

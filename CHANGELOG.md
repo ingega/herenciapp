@@ -21,14 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - auth flow in `src/app/v2/auth/auth.py`
 - function get_current_user_from_cookie in `src/api/v1/auth/auth.py`
-- 
+- Added template for orders panel
 
 ### Changed
 - added env variables in `.env` file
 - bumping version in `src/__init__.py` file
 
 ### Fixed
-- N/A
+- Enhanced error handling for 401 in `src/main.py`
 
 ## [1.5.1] 2026-05-23
 

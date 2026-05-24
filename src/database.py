@@ -2,20 +2,15 @@
 from sqlmodel import create_engine, SQLModel, Session
 from sqlalchemy.orm import sessionmaker
 from .config import settings
-from src.utils import file_debug
 
 # 1. Database URL selection (Production vs. Mock/Sandbox)
 # This allows us to switch environments just by changing the .env file
 
 DATABASE_URL = settings.DATABASE_URL
 
-file_debug(f"[DEBUG DB] Cargando URL del motor: "
-           f"{DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else DATABASE_URL}")
-
 # 2. Create the Engine
 # 'echo=False' for production to keep logs clean; 'echo=True' for debugging
-### debugging: adding flush=True to ensure logs are printed immediately in Docker
-file_debug("[DEBUG DB] Instanciando create_engine...")
+
 engine = create_engine(
     DATABASE_URL, 
     echo=settings.DEBUG,

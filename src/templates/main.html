@@ -1,14 +1,153 @@
 {% extends "base.html" %}
 
+{% block title %}Dashboard - {{ config.RESTAURANT_NAME | default('Herencia del Abuelo') }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Premium Sidebar Grid Structure */
+    .dashboard-wrapper {
+        display: flex;
+        min-height: 100vh;
+    }
+    .sidebar-panel {
+        width: 260px;
+        background-color: #212529;
+        color: #fff;
+    }
+    .content-viewport {
+        flex-grow: 1;
+        background-color: #f8f9fa;
+    }
+    .clickable-card-img {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+    }
+    .clickable-card-img:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+    }
+    /* Subtle breathing effect for the Online Badge */
+    .pulse-badge {
+        animation: pulse-animation 2s infinite;
+    }
+    @keyframes pulse-animation {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <div class="container">
-        <h1>Bienvenido a herenciapp</h1>
-        <div class="mb-4">
-            <img src="{{ url_for('static', path='images/' + config.RESTAURANT_LOGO_NAME) }}" 
-                alt="{{ config.RESTAURANT_NAME }} Logo" 
-                class="img-fluid rounded" 
-                style="max-height: 120px; object-fit: contain;">
+<div class="dashboard-wrapper">
+    <aside class="sidebar-panel p-3 d-flex flex-column shadow">
+        <div class="text-center my-3">
+            <h4 class="fw-bold text-warning mb-1">{{ config.RESTAURANT_NAME | default('Herencia App') }}</h4>
+            <span class="badge bg-success px-3 py-2 rounded-pill small pulse-badge shadow-sm">
+                <i class="bi bi-circle-fill me-1"></i> STATUS: ONLINE
+            </span>
         </div>
-        <p>Sistema de gestión para carnitas herencia del abuelo.</p>
-    </div>
+        <hr class="text-secondary">
+        
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item mb-2">
+                <a href="/main" class="nav-link active bg-warning text-dark fw-bold">
+                    <i class="me-2">📊</i> Panel Principal
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a href="/orders/get_orders" class="nav-link text-white opacity-75 hover-opacity-100">
+                    <i class="me-2">📋</i> Gestión de Órdenes
+                </a>
+            </li>
+        </ul>
+        
+        <hr class="text-secondary">
+        <div class="d-grid">
+            <a href="/auth/login" class="btn btn-outline-danger btn-smfw-semibold">
+                🚪 Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+    <main class="content-viewport p-4">
+        <header class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom bg-white p-3 rounded shadow-sm">
+            <div>
+                <span class="text-muted small d-block">Usuario Conectado</span>
+                <strong class="text-dark fs-5">👋 {{ current_user.sub | default('admin@herenciapp.com') }}</strong>
+            </div>
+            <div class="text-end">
+                <span id="liveDate" class="text-secondary d-block small fw-semibold">Cargando fecha...</span>
+                <span id="liveClock" class="fs-4 fw-bold text-dark font-monospace">00:00:00</span>
+            </div>
+        </header>
+
+        <section class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-4">
+                <div class="card border-0 shadow-sm p-3 bg-white border-start border-4 border-warning">
+                    <div class="text-muted small fw-bold text-uppercase">Órdenes Pendientes</div>
+                    <div class="fs-2 fw-bold text-dark mt-1">12</div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-4">
+                <div class="card border-0 shadow-sm p-3 bg-white border-start border-4 border-success">
+                    <div class="text-muted small fw-bold text-uppercase">Ventas del Día</div>
+                    <div class="fs-2 fw-bold text-dark mt-1">$4,850.00</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row">
+            <div class="col-12 col-lg-8 col-xl-6">
+                <div class="card border-0 shadow-sm overflow-hidden clickable-card-img" id="ordersActionCard">
+                    <div class="card-header bg-dark text-white fw-bold py-3">
+                        📦 Acceso Rápido a Cocina
+                    </div>
+                    <div class="position-relative bg-white text-center p-4">
+                        <img src="{{ url_for('static', path='images/orders.png') }}" 
+                             alt="Orders Panel Navigation" 
+                             class="img-fluid rounded shadow-sm d-block mx-auto"
+                             onerror="this.onerror=null; this.src='https://placehold.co/600x350?text=Orders+Module+Placeholder';">
+                        
+                        <div class="card-body px-0 pb-0 mt-3 text-start">
+                            <h5 class="card-title fw-bold text-dark">Módulo Operativo de Comensales</h5>
+                            <p class="card-text text-muted small mb-0">Haz clic directo en la tarjeta superior para procesar e inspeccionar el flujo vivo de solicitudes en cocina.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // AUTOMATED REAL-TIME METRIC WORKER (Ticking Clock Execution)
+    function initializeLiveClock() {
+        const liveClockElement = document.getElementById('liveClock');
+        const liveDateElement = document.getElementById('liveDate');
+        
+        const localeOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+
+        setInterval(() => {
+            const now = new Date();
+            
+            // 1. Dynamic Watch Extraction
+            liveClockElement.innerText = now.toLocaleTimeString('es-MX', { hour12: false });
+            
+            // 2. Dynamic Calendar Extraction
+            liveDateElement.innerText = now.toLocaleDateString('es-MX', localeOptions);
+        }, 1000);
+    }
+
+    // INTERACTIVE ROUTING ACTION POINT
+    document.getElementById('ordersActionCard').addEventListener('click', function() {
+        // Clear window redirect sequence pointing directly to your new destination route
+        window.location.href = '/orders/get_orders';
+    });
+
+    // Run thread workers safely on DOM availability
+    document.addEventListener('DOMContentLoaded', initializeLiveClock);
+</script>
 {% endblock %}
