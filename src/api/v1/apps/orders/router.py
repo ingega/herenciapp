@@ -8,7 +8,7 @@ router = APIRouter(tags=["orders"])
 
 templates = Jinja2Templates(directory="src/templates")
 
-@router.get("/")
+@router.get("")
 async def get_orders(request: Request, 
                      current_user: dict = Depends(get_current_user_from_cookie)):
     return templates.TemplateResponse(
