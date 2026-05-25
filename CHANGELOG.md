@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Updating select statement instead query in `src/app/v1/auth/services.py`
+- Adding mock_send to avoid licking sending real emails in `tests/unit/test_creation_and_validation_token.py`
 
 ## [1.6.2]
 
