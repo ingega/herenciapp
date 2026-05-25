@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.6.3] 2026-05-25
+- testing for endpoints and functions in validation flow
+
+### Added
+- Unit test in `tests/unit/test_creation_and_validation_token.py`
+
+### Changed
+- N/A
+
+### Fixed
+- Updating select statement instead query in `src/app/v1/auth/services.py`
+
 ## [1.6.2]
 
 ### Added
