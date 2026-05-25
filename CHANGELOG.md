@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Unit test in `tests/unit/test_creation_and_validation_token.py`
 - Added MagicMock class to avoid send email licking in `tests/unit/test_creation_and_validation_token.py`
+- integration test for actual protected endpoint (main and orders/orders) in `test/integration/test_endpoint_main_and_orders.py`
 
 ### Changed
 - N/A
