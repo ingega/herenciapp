@@ -11,7 +11,7 @@ class TestProtectedEndpoints:
         Ensures anonymous users are blocked from secure areas 
         and redirected to the login interface.
         """
-        protected_urls = ["/main", "/orders/orders"]
+        protected_urls = ["/main", "/orders/"]
         
         for url in protected_urls:
             # CRITICAL: follow_redirects=False lets us capture the intermediate 303 status
