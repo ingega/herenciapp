@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.6.4]
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- Changing endpoint orders/orders for orders/ in `src/api/v1/apps/orders/route.py`
+
 ## [1.6.3] 2026-05-25
 - testing for endpoints and functions in validation flow
 
