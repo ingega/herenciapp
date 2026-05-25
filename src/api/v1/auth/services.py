@@ -2,12 +2,14 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from venv import logger
-from sqlmodel import Session
+from sqlmodel import Session, select
 from src.api.v1.apps.users.models import User, VerificationToken
 from src.api.v1.apps.users.schemas import TokenCreate
 
 
-async def create_verification_token(session: Session, user_id: int, token: str) -> Optional[VerificationToken]:
+async def create_verification_token(session: Session, 
+                                    user_id: int, 
+                                    token: str) -> Optional[VerificationToken]:
     try:
         # Create the actual Database Model instance
         db_token = VerificationToken(
@@ -26,17 +28,22 @@ async def create_verification_token(session: Session, user_id: int, token: str) 
         session.rollback()
         return None
 
-async def verify_registration_token(db: Session, user: User, token: str) -> bool:
+async def verify_registration_token(db: Session, 
+                                    user: User, 
+                                    token: str) -> bool:
     """
     Validates the 6-digit code against the database record for a specific user.
     """
     
     # 1. Fetch the token record
-    db_token = db.query(VerificationToken).filter(
+    # create a statement first
+    statement = select(VerificationToken).where(
         VerificationToken.user_id == user.id,
         VerificationToken.token == token,
         VerificationToken.is_used == False
-    ).first()
+    )
+    # execute the statement and get the first result
+    db_token = db.exec(statement).first()
 
     if not db_token:
         logger.warning(f"Token not found or already used for user {user.id}")
