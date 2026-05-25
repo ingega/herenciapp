@@ -21,13 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Unit test in `tests/unit/test_creation_and_validation_token.py`
+- Added MagicMock class to avoid send email licking in `tests/unit/test_creation_and_validation_token.py`
 
 ### Changed
 - N/A
 
 ### Fixed
 - Updating select statement instead query in `src/app/v1/auth/services.py`
-- Adding mock_send to avoid licking sending real emails in `tests/unit/test_creation_and_validation_token.py`
+- Adding mock_send to avoid licking sending real emails in `tests/unit/test_creation_and_validation_token.py` and `tests/integration/test_user_verification.py` 
 
 ## [1.6.2]
 

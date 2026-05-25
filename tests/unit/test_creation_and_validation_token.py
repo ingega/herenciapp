@@ -1,7 +1,5 @@
 # tests/unit/test_creation_and_validation_token.py
-import pytest
 from datetime import timedelta
-from unittest.mock import AsyncMock, patch
 from src.api.v1.auth.auth import create_access_token, verify_access_token
 
 """
@@ -13,9 +11,8 @@ Test will cover:
 3. Verification of an expired token to ensure it returns None.
 """
 
-@patch("src.api.v1.apps.users.email_service.FastMail", autospec=True)
 class TestTokenCreationAndValidation:
-    def test_create_and_verify_token(self, mock_send):
+    def test_create_and_verify_token(self):
         # Define a sample payload
         payload = {"user_id": 123, "username": "testuser@test.com"}
         
@@ -28,7 +25,7 @@ class TestTokenCreationAndValidation:
         assert verified_payload["user_id"] == payload["user_id"]
         assert verified_payload["username"] == payload["username"]
     
-    def test_expired_token(self, mock_send):
+    def test_expired_token(self):
         # Define a sample payload
         payload = {"user_id": 456, "username": "expireduser@expired.com"}
         
