@@ -16,6 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.6.7] 2026-05-26
+- branch name: add-orders-schemas
+  This version add the neccessary schemas for orders models.
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.6.6] 2026-05-26
 This version add the orders tables and schemas.
 
