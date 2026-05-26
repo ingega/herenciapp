@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   This version add the neccessary schemas for orders models.
 
 ### Added
-- N/A
+- file `src/api/v1/apps/orders/schemas.py`
+- Schemas for orders in `src/api/v1/apps/orders/schemas.py`
 
 ### Changed
 - N/A
