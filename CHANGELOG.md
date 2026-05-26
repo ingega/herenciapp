@@ -16,6 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.6.6] 2026-05-26
+This version add the orders tables and schemas.
+
+### Added
+- models in `src/api/v1/apps/orders/models.py`
+- models imporation in `alembic/env.py`
+
+### Changed
+- Adding sqlmodel importation to alembic script in `alembic/script.py.mako`
+
+### Fixed
+- Using smallintenger function from sqlalchemy in `src/api/v1/apps/orders/models.py` 
+
 ## [1.6.5] 2026-05-25
 Installation and configuration of alembic
 
