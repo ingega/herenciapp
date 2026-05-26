@@ -52,7 +52,7 @@ jobs:
 
             # Runs alembic migrations to keep your database schema up to date
             echo "--- Running Database Migrations ---"
-            docker compose exec -T web sh -c "cd /app && alembic upgrade head"
+            # docker compose exec -T web sh -c "cd /app && alembic upgrade head"
             
             echo "--- Cleanup ---"
             docker image prune -f
