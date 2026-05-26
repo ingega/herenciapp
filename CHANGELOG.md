@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.6.5] 2026-05-25
+Installation and configuration of alembic
+
+### Added
+- `alembic.ini` file and `alembic` directory
+
+### Changed
+- Changing connection for use of env in `alembic/env.py`
+
+### Fixed
+- N/A
+
 ## [1.6.4]
 
 ### Added
