@@ -42,18 +42,17 @@ jobs:
             set -e # Exit immediately if a command fails
             cd ~/fastapi-projects/herenciapp
             
-            echo "--- Current Directory Content ---"
-            ls -la
-            
             echo "--- Pulling latest code ---"
             git pull origin main
 
-            echo "--- Building Docker Image ---"
-            # We add --progress=plain to see the build logs in GitHub Actions
+            # add --progress=plain to see the build logs in GitHub Actions
             docker compose build --no-cache --progress=plain
             
-            echo "--- Starting Container ---"
             docker compose up -d
+
+            # Runs alembic migrations to keep your database schema up to date
+            echo "--- Running Database Migrations ---"
+            docker compose exec -T web poetry run alembic upgrade head
             
             echo "--- Cleanup ---"
             docker image prune -f
