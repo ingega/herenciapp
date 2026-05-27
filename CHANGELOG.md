@@ -16,6 +16,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.7.0]
+Branch name: products-endpoint
+This tag creates the endpoint for adding products, and the tests for the endpoint
+The bumping version is due to a new addition to save data.
+
+### Added
+- `services.py` in `src/api/v1/apss/orders/`
+- Class `Products`in `src/api/v1/apss/orders/services.py`
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.6.7] 2026-05-26
 - branch name: add-orders-schemas
   This version add the neccessary schemas for orders models.
