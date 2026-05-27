@@ -11,35 +11,35 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     POETRY_VIRTUALENVS_CREATE=true
 
-# Instalamos Poetry limpiamente en la etapa de compilación
 RUN pip install --no-cache-dir poetry
 
-# Copiamos los archivos de manifiesto de dependencias
 COPY pyproject.toml poetry.lock ./
 
 RUN echo "=== INSTALING DEPENDENCIES WITH POETRY ===" \
     && poetry config virtualenvs.create false \
     && poetry install --no-root --no-interaction --no-ansi
 
-# --- Stage 2: Final (El plato listo para el servidor de Herencia del Abuelo) ---
+# --- Stage 2: Final ---
 FROM python:3.13-slim AS production
 WORKDIR /app
 
-# Mantener configuraciones de optimización para logs en tiempo real
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
-    # LA MAGIA: Agregamos los binarios del entorno virtual al PATH 
-    # del sistema operativo del contenedor
     PATH="/app/.venv/bin:$PATH"
 
 # 1. Copiar ÚNICAMENTE el entorno virtual compilado y limpio de la etapa anterior
 COPY --from=builder /app/.venv /app/.venv
 
-# 2. Copiar el código fuente indispensable estructurado para producción
+# 2. Copy src code to the final image
 COPY src/ /app/src/
 COPY src/templates/ /app/templates/
 COPY src/static/ /app/static/
+
+# 3 copy Alembic files and folders
+
+COPY alembic.ini /app/
+COPY alembic/ /app/alembic/
 
 RUN echo "=== BLUEPRINT ARCHITECTURAL DE HERENCIAPP ===" \
     && ls -R src/
