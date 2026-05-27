@@ -1,114 +1,65 @@
 {% extends "base_nav.html" %}
 
-{% block title %}Products Catalogue - Soft Restaurant{% endblock %}
+{% block title %}Add Product - Herenciapp Restaurant{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-                <i class="fa-solid fa-boxes-stacked text-amber-500"></i> Menu & Products Catalogue
-            </h1>
-            <p class="text-sm text-gray-500 mt-1">Configure live menu dishes, inventory categories, and dynamic store pricing layouts.</p>
-        </div>
-        <div>
-            <button onclick="openModal()" class="w-full sm:w-auto bg-amber-500 text-slate-950 font-semibold px-5 py-2.5 rounded-xl shadow-md hover:bg-amber-400 active:scale-95 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-plus-circle text-lg"></i> Add New Product
-            </button>
-        </div>
+<div class="max-w-xl mx-auto space-y-6">
+    
+    <div class="border-b border-gray-200 pb-4">
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-plus-circle text-amber-500"></i> Registra nuevos platillos
+        </h1>
+        <p class="text-sm text-gray-500 mt-1">Agrega platillos como taco, bebida, postre, etc.</p>
     </div>
 
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         
-        <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                <i class="fa-solid fa-list-check text-slate-400"></i> Active Store Items
+        <div class="px-6 py-4 bg-slate-800 text-white flex justify-between items-center">
+            <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-amber-400">
+                <i class="fa-solid fa-hamburger"></i> Llena los campos con la informacion del platillo
             </span>
-            <div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 font-medium px-3 py-1 rounded-full flex items-center gap-1">
-                <i class="fa-solid fa-circle text-[8px] animate-pulse"></i> Live POS Terminal Database Linked
-            </div>
+            <span class="text-[10px] font-mono bg-slate-700 px-2 py-0.5 rounded border border-slate-600 text-slate-300">
+                v1.0 Ready
+            </span>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-100 text-slate-600 text-xs uppercase font-bold tracking-wider border-b border-gray-200">
-                        <th class="py-3 px-6">ID</th>
-                        <th class="py-3 px-6">Main Dish / Item Name</th>
-                        <th class="py-3 px-6">Category Badge</th>
-                        <th class="py-3 px-6 text-right">Unit Price</th>
-                    </tr>
-                </thead>
-                <tbody id="catalogue-table-body" class="divide-y divide-gray-100 text-sm text-gray-700">
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="py-3.5 px-6 font-mono text-xs text-gray-400">#001</td>
-                        <td class="py-3.5 px-6 font-semibold text-slate-900">Al Pastor Taco Especial</td>
-                        <td class="py-3.5 px-6">
-                            <span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">taco</span>
-                        </td>
-                        <td class="py-3.5 px-6 text-right font-semibold text-slate-900 font-mono">$25.00</td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="py-3.5 px-6 font-mono text-xs text-gray-400">#002</td>
-                        <td class="py-3.5 px-6 font-semibold text-slate-900">Mega Familiar Package (5 Personas)</td>
-                        <td class="py-3.5 px-6">
-                            <span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">package</span>
-                        </td>
-                        <td class="py-3.5 px-6 text-right font-semibold text-slate-900 font-mono">$380.00</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div id="product-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-gray-200 max-w-md w-full shadow-2xl overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="modal-container">
-        
-        <div class="bg-slate-800 px-6 py-4 flex justify-between items-center text-white">
-            <h3 class="font-bold text-lg flex items-center gap-2">
-                <i class="fa-solid fa-hamburger text-amber-500"></i> New Catalogue Item
-            </h3>
-            <button onclick="closeModal()" class="text-slate-400 hover:text-white transition">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-        </div>
-
-        <form id="create-product-form" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
+        <form id="add-product-form" onsubmit="handleFormSubmit(event)" class="p-6 space-y-5">
             
-            <div id="form-error-banner" class="hidden text-sm p-3 rounded-lg border flex items-start gap-2"></div>
+            <div id="form-feedback-banner" class="hidden text-sm p-3.5 rounded-xl border flex items-start gap-2"></div>
 
             <div>
-                <label for="main_dish" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Main Dish / Product Name</label>
-                <input type="text" id="main_dish" required maxlength="50" placeholder="e.g., Taco de Bistec con Queso"
-                       class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition">
+                <label for="main_dish" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nombre del producto:</label>
+                <input type="text" id="main_dish" required maxlength="50" placeholder="p.e., Taco blando, Combo herencia"
+                       class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition shadow-inner">
+                <p class="text-[11px] text-gray-400 mt-1">Maximum 50 characters allowed by Pydantic string limits.</p>
             </div>
 
             <div>
-                <label for="category" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Menu Category</label>
-                <select id="category" required class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition">
-                    <option value="" disabled selected>Select a soft restaurant tag...</option>
-                    <option value="taco">Taco Line Items</option>
-                    <option value="package">Combo / Multi-person Packages</option>
-                    <option value="beverage">Beverages & Soft Drinks</option>
+                <label for="category" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Categoria:</label>
+                <select id="category" required class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition shadow-inner">
+                    <option value="" disabled selected>Seleciona una categoria...</option>
+                    <option value="alimentos">alimentos</option>
+                    <option value="bebidas">bebidas</option>
+                    <option value="postres">postres</option>
                 </select>
             </div>
 
             <div>
-                <label for="price" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">POS Sales Price ($)</label>
+                <label for="price" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Precio actual($)</label>
                 <div class="relative">
                     <span class="absolute left-4 top-2.5 font-bold text-slate-400 text-sm">$</span>
-                    <input type="number" id="price" required min="0.00" max="9999.99" step="0.01" placeholder="0.00"
-                           class="w-full rounded-xl border border-gray-300 pl-8 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-mono transition">
+                    <input type="number" id="price" required min="0.00" max="999999.99" step="0.01" placeholder="0.00"
+                           class="w-full rounded-xl border border-gray-300 pl-8 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-mono transition shadow-inner">
                 </div>
+                <p class="text-[11px] text-gray-400 mt-1">max precio $999,999.00 incluye dos decimales.</p>
             </div>
 
-            <div class="flex justify-end gap-3 pt-3 border-t border-gray-100">
-                <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-gray-100 hover:bg-gray-200 transition">
-                    Cancel
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="reset" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition">
+                    limpiar campos
                 </button>
-                <button type="submit" id="submit-btn" class="px-5 py-2 rounded-xl text-sm font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-save"></i> Save Product
+                <button type="submit" id="submit-btn" class="px-6 py-2.5 rounded-xl text-sm font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow active:scale-95 transition flex items-center gap-2">
+                    <i class="fa-solid fa-save"></i> Agregar Product
                 </button>
             </div>
         </form>
@@ -116,70 +67,43 @@
 </div>
 
 <script>
-    // Modal Window Transitions Management
-    function openModal() {
-        const modal = document.getElementById('product-modal');
-        const container = document.getElementById('modal-container');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            container.classList.remove('scale-95', 'opacity-0');
-            container.classList.add('scale-100', 'opacity-100');
-        }, 10);
-    }
-
-    function closeModal() {
-        const modal = document.getElementById('product-modal');
-        const container = document.getElementById('modal-container');
-        container.classList.remove('scale-100', 'opacity-100');
-        container.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => {
-            modal.add('hidden');
-            document.getElementById('create-product-form').reset();
-            hideBanner();
-        }, 200);
-    }
-
-    function showBanner(message, isError = true) {
-        const banner = document.getElementById('form-error-banner');
-        banner.className = `text-sm p-3 rounded-lg border flex items-start gap-2 ${
-            isError ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+    function showFeedback(message, status = 'error') {
+        const banner = document.getElementById('form-feedback-banner');
+        banner.className = `text-sm p-3.5 rounded-xl border flex items-start gap-2 ${
+            status === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'
         }`;
-        banner.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'} mt-0.5"></i> <span>${message}</span>`;
+        banner.innerHTML = `<i class="fa-solid ${status === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} mt-0.5 text-base"></i> <span>${message}</span>`;
         banner.classList.remove('hidden');
     }
 
-    function hideBanner() {
-        document.getElementById('form-error-banner').classList.add('hidden');
-    }
-
-    // High speed async AJAX implementation back to FastAPI endpoint
     async function handleFormSubmit(event) {
         event.preventDefault();
         
         const submitBtn = document.getElementById('submit-btn');
-        const mainDishInput = document.getElementById('main_dish').value.trim();
-        const categoryInput = document.getElementById('category').value;
-        const priceInput = parseFloat(document.getElementById('price').value);
+        const form = document.getElementById('add-product-form');
+        const mainDish = document.getElementById('main_dish').value.trim();
+        const category = document.getElementById('category').value;
+        const price = parseFloat(document.getElementById('price').value);
 
-        // Client side validation gate checks
-        if (!mainDishInput || !categoryInput || isNaN(priceInput)) {
-            showBanner("Please ensure all Soft Restaurant fields are correctly populated.");
+        // Security baseline checks
+        if (!mainDish || !category || isNaN(price)) {
+            showFeedback("Please fill out all operational context criteria correctly.");
             return;
         }
 
-        // Lock form during submission
+        // Lock button interaction during server handshake
         submitBtn.disabled = true;
-        submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Saving...`;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing Request...`;
 
         const payload = {
-            main_dish: mainDishInput,
-            category: categoryInput,
-            price: priceInput
+            main_dish: mainDish,
+            category: category,
+            price: price
         };
 
         try {
-            // POST request directed to our secure endpoint path
-            const response = await fetch("/products", {
+            // Streaming context payload straight to our verified green-tested endpoint
+            const response = await fetch("/orders/products", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -188,60 +112,24 @@
             });
 
             if (response.status === 201) {
-                const newProduct = await response.json();
-                
-                // Dynamically inject the newly added database row into the UI viewport
-                appendProductToTable(newProduct);
-                
-                // Display success confirmation before closing out the viewport anchor
-                showBanner("Menu item successfully catalogued!", false);
-                setTimeout(() => {
-                    closeModal();
-                }, 1000);
+                const data = await response.json();
+                showFeedback(`Successfully registered item #${data.id}: "${data.main_dish}" into database inventory context!`, 'success');
+                form.reset();
             } else if (response.status === 422) {
-                showBanner("Validation Error: Input format did not pass Pydantic layer boundaries.");
+                showFeedback("Validation Error (422): Submission structure did not conform to backend Pydantic boundaries.");
+            } else if (response.status === 403 || response.status === 401) {
+                showFeedback("Authentication Error: Credentials missing or expired from browser session state context.");
             } else {
-                showBanner(`Server rejected request with status code: ${response.status}`);
+                showFeedback(`Server rejected database insertion with status code: ${response.status}`);
             }
         } catch (error) {
-            console.error("AJAX Operations Error:", error);
-            showBanner("Network connectivity fault. Unable to stream to Herenciapp API.");
+            console.error("AJAX Pipeline Error Execution:", error);
+            showFeedback("Network infrastructure fault. Unable to establish a line channel to the backend API cluster.");
         } finally {
-            // Restore submission controls mapping
+            // Unlock control handlers mapping
             submitBtn.disabled = false;
-            submitBtn.innerHTML = `<i class="fa-solid fa-save"></i> Save Product`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-save"></i> Commit Product`;
         }
-    }
-
-    function appendProductToTable(product) {
-        const tbody = document.getElementById('catalogue-table-body');
-        const row = document.createElement('tr');
-        row.className = "hover:bg-slate-50 transition border-b border-gray-100 bg-amber-50/30 font-medium animate-fade-in";
-        
-        // Dynamic styling dictionary according to category schemas
-        const badges = {
-            taco: "bg-emerald-50 text-emerald-700 border-emerald-200",
-            package: "bg-indigo-50 text-indigo-700 border-indigo-200",
-            beverage: "bg-amber-50 text-amber-700 border-amber-200"
-        };
-        const badgeClass = badges[product.category] || "bg-gray-50 text-gray-700 border-gray-200";
-
-        row.innerHTML = `
-            <td class="py-3.5 px-6 font-mono text-xs text-gray-500 font-bold">#${product.id}</td>
-            <td class="py-3.5 px-6 text-slate-900 font-semibold">${escapeHtml(product.main_dish)}</td>
-            <td class="py-3.5 px-6">
-                <span class="px-2.5 py-1 text-xs font-semibold rounded-md border ${badgeClass}">${product.category}</span>
-            </td>
-            <td class="py-3.5 px-6 text-right font-bold text-slate-950 font-mono">$${parseFloat(product.price).toFixed(2)}</td>
-        `;
-        
-        // Prepend so the newest restaurant items immediately peak top row
-        tbody.insertBefore(row, tbody.firstChild);
-    }
-
-    // Protection asset utility wrapper against Cross-Site Scripting vulnerabilities
-    function escapeHtml(str) {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 </script>
 {% endblock %}
