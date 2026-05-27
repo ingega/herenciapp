@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - products test suite in `tests/integration/test_products.py`
+- `base_nav.html` template in `src/templates`
+- `products.html` template in `src/templates`
 
 ### Changed
 - Added a mock app for test suite in `tests/conftest.py`
