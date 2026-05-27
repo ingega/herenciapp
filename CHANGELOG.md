@@ -24,6 +24,7 @@ The bumping version is due to a new addition to save data.
 ### Added
 - `services.py` in `src/api/v1/apss/orders/`
 - Class `Products`in `src/api/v1/apss/orders/services.py`
+- endpoint POST orders/products in `src/api/v1/apss/orders/routes.py`
 
 ### Changed
 - N/A
