@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.7.1]
+
+### Added
+- products test suite in `tests/integration/test_products.py`
+
+### Changed
+- Added a mock app for test suite in `tests/conftest.py`
+- Added a get_session for mock tests in `tests/conftest.py`
+
+### Fixed
+- N/A
+
 ## [1.7.0]
 Branch name: products-endpoint
 This tag creates the endpoint for adding products, and the tests for the endpoint

@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, Session, create_engine
 from fastapi.testclient import TestClient
 
 from src.main import app
-from src.database import get_db
+from src.database import get_db, get_session
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,6 +43,11 @@ def client_fixture(session: Session) -> Generator[TestClient, None, None]:
         return session
 
     app.dependency_overrides[get_db] = get_session_override
+    app.dependency_overrides[get_session] = get_session_override
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()
+
+@pytest.fixture(name="app")
+def app_fixture():
+    return app
