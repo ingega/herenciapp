@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - file `src/api/v1/apps/orders/schemas.py`
 - Schemas for orders in `src/api/v1/apps/orders/schemas.py`
+- `orders` image in `src/static/images`
 
 ### Changed
 - N/A
