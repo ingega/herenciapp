@@ -14,6 +14,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Fixed
+- Added mocked access token for auth validation in tests in `src/tests/conftest.py`
+
+## [1.7.1]
+
+### Added
+- products test suite in `tests/integration/test_products.py`
+- `base_nav.html` template in `src/templates`
+- `products.html` template in `src/templates`
+- test for product template in `tests/integration/test_products_template.py`
+
+### Changed
+- Added a mock app for test suite in `tests/conftest.py`
+- Added a get_session for mock tests in `tests/conftest.py`
+
+### Fixed
+- N/A
+
+## [1.7.0]
+Branch name: products-endpoint
+This tag creates the endpoint for adding products, and the tests for the endpoint
+The bumping version is due to a new addition to save data.
+
+### Added
+- `services.py` in `src/api/v1/apss/orders/`
+- Class `Products`in `src/api/v1/apss/orders/services.py`
+- endpoint POST orders/products in `src/api/v1/apss/orders/routes.py`
+
+### Changed
+- N/A
+
+### Fixed
 - N/A
 
 ## [1.6.7] 2026-05-26

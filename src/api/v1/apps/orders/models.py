@@ -12,6 +12,7 @@ class PayMethod(str, Enum):
     CARD = "card"
     TRANSFER = "transfer"
     CRYPTO = "crypto"
+    MIXED = "mixed"  # For orders paid with multiple methods (e.g., part cash, part card)
 
 
 class ItemPrepStatus(str, Enum):

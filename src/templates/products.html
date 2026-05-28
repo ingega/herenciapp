@@ -1,0 +1,135 @@
+{% extends "base_nav.html" %}
+
+{% block title %}Add Product - Herenciapp Restaurant{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto space-y-6">
+    
+    <div class="border-b border-gray-200 pb-4">
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-plus-circle text-amber-500"></i> Registra nuevos platillos
+        </h1>
+        <p class="text-sm text-gray-500 mt-1">Agrega platillos como taco, bebida, postre, etc.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        
+        <div class="px-6 py-4 bg-slate-800 text-white flex justify-between items-center">
+            <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-amber-400">
+                <i class="fa-solid fa-hamburger"></i> Llena los campos con la informacion del platillo
+            </span>
+            <span class="text-[10px] font-mono bg-slate-700 px-2 py-0.5 rounded border border-slate-600 text-slate-300">
+                v1.0 Ready
+            </span>
+        </div>
+
+        <form id="add-product-form" onsubmit="handleFormSubmit(event)" class="p-6 space-y-5">
+            
+            <div id="form-feedback-banner" class="hidden text-sm p-3.5 rounded-xl border flex items-start gap-2"></div>
+
+            <div>
+                <label for="main_dish" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nombre del producto:</label>
+                <input type="text" id="main_dish" required maxlength="50" placeholder="p.e., Taco blando, Combo herencia"
+                       class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition shadow-inner">
+                <p class="text-[11px] text-gray-400 mt-1">Maximum 50 characters allowed by Pydantic string limits.</p>
+            </div>
+
+            <div>
+                <label for="category" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Categoria:</label>
+                <select id="category" required class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition shadow-inner">
+                    <option value="" disabled selected>Seleciona una categoria...</option>
+                    <option value="alimentos">alimentos</option>
+                    <option value="bebidas">bebidas</option>
+                    <option value="postres">postres</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="price" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Precio actual($)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-2.5 font-bold text-slate-400 text-sm">$</span>
+                    <input type="number" id="price" required min="0.00" max="999999.99" step="0.01" placeholder="0.00"
+                           class="w-full rounded-xl border border-gray-300 pl-8 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-mono transition shadow-inner">
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1">max precio $999,999.00 incluye dos decimales.</p>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="reset" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition">
+                    limpiar campos
+                </button>
+                <button type="submit" id="submit-btn" class="px-6 py-2.5 rounded-xl text-sm font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow active:scale-95 transition flex items-center gap-2">
+                    <i class="fa-solid fa-save"></i> Agregar Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showFeedback(message, status = 'error') {
+        const banner = document.getElementById('form-feedback-banner');
+        banner.className = `text-sm p-3.5 rounded-xl border flex items-start gap-2 ${
+            status === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'
+        }`;
+        banner.innerHTML = `<i class="fa-solid ${status === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} mt-0.5 text-base"></i> <span>${message}</span>`;
+        banner.classList.remove('hidden');
+    }
+
+    async function handleFormSubmit(event) {
+        event.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-btn');
+        const form = document.getElementById('add-product-form');
+        const mainDish = document.getElementById('main_dish').value.trim();
+        const category = document.getElementById('category').value;
+        const price = parseFloat(document.getElementById('price').value);
+
+        // Security baseline checks
+        if (!mainDish || !category || isNaN(price)) {
+            showFeedback("Please fill out all operational context criteria correctly.");
+            return;
+        }
+
+        // Lock button interaction during server handshake
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing Request...`;
+
+        const payload = {
+            main_dish: mainDish,
+            category: category,
+            price: price
+        };
+
+        try {
+            // Streaming context payload straight to our verified green-tested endpoint
+            const response = await fetch("/orders/products", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.status === 201) {
+                const data = await response.json();
+                showFeedback(`el alimento "${data.main_dish}" ha sido agregado al inventario de la base de datos! con el id ${data.id}`, 'success');
+                form.reset();
+            } else if (response.status === 422) {
+                showFeedback("Error de validación (422): La estructura de envío no cumple con los límites backend de Pydantic.");
+            } else if (response.status === 403 || response.status === 401) {
+                showFeedback("Error de autenticación: Credenciales faltantes o expiradas del estado de sesión del navegador.");
+            } else {
+                showFeedback(`Server rejected database insertion with status code: ${response.status}`);
+            }
+        } catch (error) {
+            console.error("AJAX Pipeline Error Execution:", error);
+            showFeedback("Error de infraestructura de red. No se pudo establecer un canal de comunicación con el clúster API backend.");
+        } finally {
+            // Unlock control handlers mapping
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class="fa-solid fa-save"></i> Commit Product`;
+        }
+    }
+</script>
+{% endblock %}

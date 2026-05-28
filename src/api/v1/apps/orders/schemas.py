@@ -29,7 +29,7 @@ class FlavorCatalogueRead(FlavorCatalogueBase):
 # ==========================================
 class ProductBase(SQLModel):
     main_dish: str = Field(max_length=50)
-    category: str = Field(max_length=30, description="e.g., taco, dessert, beverage")
+    category: str = Field(max_length=30, description="e.g., food, dessert, beverage")
     price: Decimal = Field(default=0.00, max_digits=6, decimal_places=2)
 
 
