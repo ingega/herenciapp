@@ -1,10 +1,11 @@
 # src/api/v1/apps/orders/router.py
-from fastapi import APIRouter, status, Request, Depends
+from fastapi import APIRouter, status, Request, Depends, HTTPException
 from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
-from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead
+from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUpdate
 from src.api.v1.apps.orders.services import ProductService
+from src.api.v1.apps.orders.models import Product
 from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
 from src.database import get_session
@@ -55,3 +56,24 @@ def create_new_product(product_in: ProductCreate,
     
     product_service = ProductService(session)
     return product_service.create_product(product_in)
+
+@router.patch("/products/{product_id}", response_model=ProductRead)
+async def update_product(product_update: ProductUpdate,
+                         product_id: int, 
+                         current_user: dict = Depends(get_current_user_from_cookie),
+                         session: Session = Depends(get_session)
+                         ):
+    
+    product_service = ProductService(session)
+    
+    return product_service.update_product(product_id=product_id, product_in=product_update)
+
+@router.delete("/products/{product_id}")
+async def update_product(product_id: int, 
+                         current_user: dict = Depends(get_current_user_from_cookie),
+                         session: Session = Depends(get_session)
+                         ):
+    
+    product_service = ProductService(session)
+    
+    return product_service.delete_product(product_id=product_id)

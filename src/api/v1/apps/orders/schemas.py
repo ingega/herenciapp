@@ -40,6 +40,12 @@ class ProductCreate(ProductBase):
 class ProductRead(ProductBase):
     id: int
 
+class ProductUpdate(SQLModel):
+    main_dish: Optional[str] = Field(default=None, max_length=50)
+    category: Optional[str] = Field(default=None, max_length=30)
+    price: Optional[condecimal(max_digits=6, decimal_places=2)] = Field(default=None)
+
+
 
 class ProductWithFlavors(ProductRead):
     flavors: List[FlavorCatalogueRead] = []
