@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Fixed
-- N/A
+- Added mocked access token for auth validation in tests in `src/tests/conftest.py`
 
 ## [1.7.1]
 
@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - products test suite in `tests/integration/test_products.py`
 - `base_nav.html` template in `src/templates`
 - `products.html` template in `src/templates`
+- test for product template in `tests/integration/test_products_template.py`
 
 ### Changed
 - Added a mock app for test suite in `tests/conftest.py`

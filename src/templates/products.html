@@ -113,18 +113,18 @@
 
             if (response.status === 201) {
                 const data = await response.json();
-                showFeedback(`Successfully registered item #${data.id}: "${data.main_dish}" into database inventory context!`, 'success');
+                showFeedback(`el alimento "${data.main_dish}" ha sido agregado al inventario de la base de datos! con el id ${data.id}`, 'success');
                 form.reset();
             } else if (response.status === 422) {
-                showFeedback("Validation Error (422): Submission structure did not conform to backend Pydantic boundaries.");
+                showFeedback("Error de validación (422): La estructura de envío no cumple con los límites backend de Pydantic.");
             } else if (response.status === 403 || response.status === 401) {
-                showFeedback("Authentication Error: Credentials missing or expired from browser session state context.");
+                showFeedback("Error de autenticación: Credenciales faltantes o expiradas del estado de sesión del navegador.");
             } else {
                 showFeedback(`Server rejected database insertion with status code: ${response.status}`);
             }
         } catch (error) {
             console.error("AJAX Pipeline Error Execution:", error);
-            showFeedback("Network infrastructure fault. Unable to establish a line channel to the backend API cluster.");
+            showFeedback("Error de infraestructura de red. No se pudo establecer un canal de comunicación con el clúster API backend.");
         } finally {
             // Unlock control handlers mapping
             submitBtn.disabled = false;

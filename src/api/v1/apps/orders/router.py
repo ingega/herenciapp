@@ -44,7 +44,7 @@ async def get_add_product_page(
         name="products.html",
         context={
             "config": settings,
-            "user": current_user  # Keeps base_nav.html context happy
+            "user": current_user # for nav_bar
         }
     )
 
@@ -52,7 +52,6 @@ async def get_add_product_page(
 def create_new_product(product_in: ProductCreate, 
                        current_user: dict = Depends(get_current_user_from_cookie),
                        session: Session = Depends(get_session)):
-    # Simply pass the session into our Service engine, and let it do the lifting!
+    
     product_service = ProductService(session)
     return product_service.create_product(product_in)
-
