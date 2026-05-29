@@ -9,12 +9,11 @@ from src.api.v1.apps.orders.models import Product
 # DATA SETUP FIXTURE (Authenticated for product creation)
 # ==============================================================================
 @pytest.fixture(scope="function")
-def setup_product(app, authorized_client_cookies):
+def setup_product(client, authorized_client_cookies):
     """
     Creates a baseline product in the catalogue to reuse across test cases.
     Injects authorized cookies to safely bypass authentication during creation.
     """
-    client = TestClient(app)
     
     # Act: creates an authorized user
     client.cookies.update(authorized_client_cookies)
@@ -38,15 +37,16 @@ class TestUpdateDeleteProducts:
     # ==============================================================================
     # TEST 1: Unauthenticated User (No Cookie / Missing Credentials)
     # ==============================================================================
-    def test_products_update_unauthenticated_redirects(self, app, setup_product):
+    def test_products_update_unauthenticated_redirects(self,client, setup_product):
         """
         Ensure that accessing the protected UI route without an active session
         or auth cookie results in a clean redirect or unauthorized handling.
         """
-        # Initialize an clean client with no credentials context
-        client = TestClient(app)
         
         product_id = setup_product["id"]
+
+        # Act: once product retreived, clear the cookie
+        client.cookies.clear()
         
         # Act: Execute the patch request
         response = client.patch(
@@ -95,5 +95,62 @@ class TestUpdateDeleteProducts:
         assert float(db_product.price) == 32.00
         # Assert: Verify that others fields remains untouched
         assert db_product.main_dish == "taco de carnitas"
+
+    # ==============================================================================
+    # TEST 3: Unauthenticated User (No Cookie / Missing Credentials) for delete endpoint
+    # ==============================================================================
+    def test_products_delete_unauthenticated_redirects(self, client, setup_product):
+        """
+        Ensure that accessing the protected UI route without an active session
+        or auth cookie results in a clean redirect or unauthorized handling.
+        """
+        
+        product_id = setup_product["id"]
+
+        # Act: once product retreived, clear the cookie
+        client.cookies.clear()
+        
+        # Act: Execute the patch request
+        response = client.delete(
+            f"/orders/products/{product_id}", 
+            follow_redirects=False
+        )
+        
+        # Assert: Authentication blocks and redirects to login layout
+        assert response.status_code == status.HTTP_303_SEE_OTHER
+        assert response.headers["location"] == "/auth/login"
     
+    # ==============================================================================
+    # TEST 4: test the DELETE orders/products/{id} enpoint 
+    # ==============================================================================
+    def test_products_delete(self, client, authorized_client_cookies,setup_product, session):
+        """
+        Ensure that accessing the protected UI route without an active session
+        or auth cookie results in a clean redirect or unauthorized handling.
+        """
+        # Act: creates an authorized user
+        client.cookies.update(authorized_client_cookies)
+        
+        # Act: retrieve the product id
+        product_id = setup_product["id"]
+
+        # Assert that the product exists
+        assert product_id is not None
+        
+        # Act: Execute the delete request
+        response = client.delete(
+            f"/orders/products/{product_id}", 
+            follow_redirects=False
+        )
+        
+        # Assert:  Verify that response is succesfully
+        assert response.status_code == 200
+        
+        # Act: clean the session for database updated veryfication
+        session.expire_all()
+
+        # Act: creates a query of the deleted row
+        db_product = session.get(Product, product_id)
+        # Assert: query executed successfully
+        assert db_product is None
     
