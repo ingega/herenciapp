@@ -2,6 +2,7 @@
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
+from src.api.v1.apps.orders.models import Product
 
 # 1. app fixture in tests/conftest.py 
 # ==============================================================================
@@ -61,17 +62,15 @@ class TestUpdateDeleteProducts:
     # ==============================================================================
     # TEST 2: test the PATCH orders/products/{id} enpoint 
     # ==============================================================================
-    def test_products_update(self, app, authorized_client_cookies,setup_product):
+    def test_products_update(self, client, authorized_client_cookies,setup_product, session):
         """
         Ensure that accessing the protected UI route without an active session
         or auth cookie results in a clean redirect or unauthorized handling.
         """
-        # Initialize an clean client with no credentials context
-        client = TestClient(app)
-
         # Act: creates an authorized user
         client.cookies.update(authorized_client_cookies)
         
+        # Act: retrieve the product id
         product_id = setup_product["id"]
         
         # Act: Execute the patch request
@@ -85,5 +84,16 @@ class TestUpdateDeleteProducts:
         assert response.status_code == status.HTTP_200_OK
         # Assert: Verify that the price was successfully changed
         assert float(data["price"]) == 32.00 # response sends strings types
+        # Act: clean the session for database updated veryfication
+        session.expire_all()
+        session.rollback()
+        # Act: creates a db object
+        db_product = session.get(Product, product_id)
+        # Assert: query executed successfully
+        assert db_product is not None
+        # Assert: Verify the information in database
+        assert float(db_product.price) == 32.00
+        # Assert: Verify that others fields remains untouched
+        assert db_product.main_dish == "taco de carnitas"
     
     

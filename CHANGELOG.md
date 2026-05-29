@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Fixed
-- Added response status code 200 to patch product endpoint in `src.api.v1.apps.orders.router.py` 
+- N/A 
 
 ## [1.7.2] 2026-05-28
 Added endpoints for updata and delete products
@@ -30,7 +30,7 @@ Bumped version
 - N/A
 
 ### Fixed
-- N/A
+- Added response status code 200 to patch product endpoint in `src.api.v1.apps.orders.router.py`
 
 ## [1.7.1]
 
