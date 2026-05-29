@@ -57,7 +57,8 @@ def create_new_product(product_in: ProductCreate,
     product_service = ProductService(session)
     return product_service.create_product(product_in)
 
-@router.patch("/products/{product_id}", response_model=ProductRead)
+@router.patch("/products/{product_id}", 
+              response_model=ProductRead, status_code=status.HTTP_200_OK)
 async def update_product(product_update: ProductUpdate,
                          product_id: int, 
                          current_user: dict = Depends(get_current_user_from_cookie),

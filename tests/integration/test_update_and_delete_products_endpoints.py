@@ -58,4 +58,32 @@ class TestUpdateDeleteProducts:
         assert response.status_code == status.HTTP_303_SEE_OTHER
         assert response.headers["location"] == "/auth/login"
     
+    # ==============================================================================
+    # TEST 2: test the PATCH orders/products/{id} enpoint 
+    # ==============================================================================
+    def test_products_update(self, app, authorized_client_cookies,setup_product):
+        """
+        Ensure that accessing the protected UI route without an active session
+        or auth cookie results in a clean redirect or unauthorized handling.
+        """
+        # Initialize an clean client with no credentials context
+        client = TestClient(app)
+
+        # Act: creates an authorized user
+        client.cookies.update(authorized_client_cookies)
+        
+        product_id = setup_product["id"]
+        
+        # Act: Execute the patch request
+        response = client.patch(
+            f"/orders/products/{product_id}", 
+            json={"price": 32.00},
+            follow_redirects=False
+        )
+        data = response.json()
+        # Assert:  Verify that response code is a 200 OK
+        assert response.status_code == status.HTTP_200_OK
+        # Assert: Verify that the price was successfully changed
+        assert float(data["price"]) == 32.00 # response sends strings types
+    
     
