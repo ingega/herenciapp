@@ -24,6 +24,7 @@ Bumped version
 ### Added
 - Update product Schema in `src/api/v1/orders/schemas.py`
 - enpoints for update/delete in `src/api/v1/orders/router.py`
+- test for update/delete products endpoints in `test/integration/test_update_and_delete_products_enpoints.py`
 
 ### Changed
 - N/A
