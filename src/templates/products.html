@@ -58,8 +58,11 @@
                 <button type="reset" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition">
                     limpiar campos
                 </button>
-                <button type="submit" id="submit-btn" class="px-6 py-2.5 rounded-xl text-sm font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow active:scale-95 transition flex items-center gap-2">
-                    <i class="fa-solid fa-save"></i> Agregar Product
+                <button type="submit" id="submit-btn" class="px-6 py-2.5 rounded-xl text-sm font-bold text-slate-950 bg-green-500 hover:bg-amber-400 shadow active:scale-95 transition flex items-center gap-2">
+                    <i class="fa-solid fa-save"></i> Agregar Producto
+                </button>
+                <button type="button" id="edit-btn" class="px-6 py-2.5 rounded-xl text-sm font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow active:scale-95 transition flex items-center gap-2">
+                    <i class="fa-solid fa-save"></i> Editar productos
                 </button>
             </div>
         </form>
@@ -75,11 +78,22 @@
         banner.innerHTML = `<i class="fa-solid ${status === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} mt-0.5 text-base"></i> <span>${message}</span>`;
         banner.classList.remove('hidden');
     }
+    // first verify if the button clicked was for edit, we need to skipe validations
+    // because button acts just like a router
+    const editBtn = document.getElementById('edit-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            console.log("DEBUG: Edit button clicked. Routing to maintenance screen immediately...");
+            window.location.href = "/orders/products/update";
+        });
+    }
 
+    // if the button clicked is submit type, validate and insert the new record
     async function handleFormSubmit(event) {
         event.preventDefault();
         
         const submitBtn = document.getElementById('submit-btn');
+        const editBtn = document.getElementById('edit-btn');
         const form = document.getElementById('add-product-form');
         const mainDish = document.getElementById('main_dish').value.trim();
         const category = document.getElementById('category').value;
@@ -90,7 +104,7 @@
             showFeedback("Please fill out all operational context criteria correctly.");
             return;
         }
-
+        
         // Lock button interaction during server handshake
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing Request...`;

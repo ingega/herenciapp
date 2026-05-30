@@ -31,7 +31,7 @@ Bumped version
 - test for template products/updte in `tests/integration/test_update_products.py`
 
 ### Changed
-- N/A
+- Added a edit button for products/update endpoint in `src/templates/product_update.html`
 
 ### Fixed
 - Added response status code 200 to patch product endpoint in `src.api.v1.apps.orders.router.py`
