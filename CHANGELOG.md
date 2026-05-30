@@ -14,7 +14,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Fixed
-- Added mocked access token for auth validation in tests in `src/tests/conftest.py`
+- N/A 
+
+## [1.7.2] 2026-05-28
+Added endpoints for updata and delete products
+Added logs in documentation
+Bumped version
+
+### Added
+- Update product Schema in `src/api/v1/orders/schemas.py`
+- enpoints for update/delete in `src/api/v1/orders/router.py`
+- test for update/delete products endpoints in `test/integration/test_update_and_delete_products_enpoints.py`
+- endpoint to retrieve product by id in `src/api/v1/apss/orders/routes.py`
+- template for update/delete product in `src/templates`
+- test for enppoint orders/products/{id} in `tests/integration/test_products.py`
+- test for template products/updte in `tests/integration/test_update_products.py`
+
+### Changed
+- Added a edit button for products/update endpoint in `src/templates/product_update.html`
+
+### Fixed
+- Added response status code 200 to patch product endpoint in `src.api.v1.apps.orders.router.py`
 
 ## [1.7.1]
 
@@ -29,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a get_session for mock tests in `tests/conftest.py`
 
 ### Fixed
-- N/A
+- Added mocked access token for auth validation in tests in `src/tests/conftest.py`
 
 ## [1.7.0]
 Branch name: products-endpoint

@@ -4,7 +4,7 @@ from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from src.api.v1.apps.orders.models import Product
-from src.api.v1.apps.orders.schemas import ProductCreate, ProductBase
+from src.api.v1.apps.orders.schemas import ProductCreate, ProductBase, ProductUpdate
 
 
 class ProductService:
@@ -48,7 +48,7 @@ class ProductService:
         self.session.refresh(db_product)
         return db_product
 
-    def update_product(self, product_id: int, product_in: ProductBase) -> Product:
+    def update_product(self, product_id: int, product_in: ProductUpdate) -> Product:
         """
         Fetches the target model, maps the payload updates dynamically using 
         Pydantic's update rules, and persists changes.
