@@ -25,6 +25,9 @@ Bumped version
 - Update product Schema in `src/api/v1/orders/schemas.py`
 - enpoints for update/delete in `src/api/v1/orders/router.py`
 - test for update/delete products endpoints in `test/integration/test_update_and_delete_products_enpoints.py`
+- endpoint to retrieve product by id in `src/api/v1/apss/orders/routes.py`
+- template for update/delete product in `src/templates`
+- test for enppoint orders/products/{id} in `tests/integration/test_products.py`
 
 ### Changed
 - N/A
@@ -56,9 +59,6 @@ The bumping version is due to a new addition to save data.
 - `services.py` in `src/api/v1/apss/orders/`
 - Class `Products`in `src/api/v1/apss/orders/services.py`
 - endpoint POST orders/products in `src/api/v1/apss/orders/routes.py`
-- endpoint to retrieve product by id in `src/api/v1/apss/orders/routes.py`
-- template for update/delete product in `src/templates`
-- test for enppoint orders/products/{id} in `tests/integration/test_products.py`
 
 ### Changed
 - N/A
