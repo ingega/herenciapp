@@ -1,0 +1,174 @@
+{% extends "base_nav.html" %}
+
+{% block content %}
+<div class="w-full max-w-lg mx-auto bg-gray-800 rounded-xl shadow-2xl border border-gray-700 p-8 my-10">
+    <h2 class="text-2xl font-bold text-center text-amber-500 mb-6 tracking-wide uppercase">
+        Actualizar platillo
+    </h2>
+    
+    <p class="text-sm text-gray-400 text-center mb-6">
+        Selecciona el platillo que quieras actualizar.
+    </p>
+
+    <div class="mb-6">
+        <label for="productSelect" class="block text-sm font-semibold text-gray-300 mb-2">
+            Lista de platillos actuales
+        </label>
+        <select id="productSelect" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200">
+            <option value="" disabled selected>-- Selecciona un platillo para llenar los campos --</option>
+            {% for product in products %}
+                <option value="{{ product.id }}">{{ product.main_dish }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <hr class="border-gray-700 my-6">
+
+    <form id="maintenanceForm" class="space-y-5 hidden opacity-0 transition-opacity duration-300">
+        <input type="hidden" id="productId">
+
+        <div>
+            <label for="mainDish" class="block text-sm font-medium text-gray-300 mb-1">
+                platillo
+            </label>
+            <input type="text" id="mainDish" required
+                   class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all">
+        </div>
+
+        <div>
+            <label for="category" class="block text-sm font-medium text-gray-300 mb-1">
+                categoria
+            </label>
+            <select id="category" required
+                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all">
+                <option value="alimentos">Alimentos</option>
+                <option value="bebidas">Bebidas</option>
+                <option value="postres">Postres</option>
+                <option value="otros">Otra</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="price" class="block text-sm font-medium text-gray-300 mb-1">
+                Precio ($)
+            </label>
+            <input type="number" id="price" step="0.01" min="0.00" required
+                   class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 pt-4">
+            <button type="button" id="btnUpdate"
+                    class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-3 px-4 rounded-lg shadow-md transition-colors duration-200 uppercase tracking-wider text-sm">
+                Actualizar producto
+            </button>
+            
+            <button type="button" id="btnDelete"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors duration-200 uppercase tracking-wider text-sm">
+                Eliminar Producto
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const productSelect = document.getElementById('productSelect');
+    const maintenanceForm = document.getElementById('maintenanceForm');
+    
+    const txtId = document.getElementById('productId');
+    const txtMainDish = document.getElementById('mainDish');
+    const selCategory = document.getElementById('category');
+    const txtPrice = document.getElementById('price');
+    
+    const btnUpdate = document.getElementById('btnUpdate');
+    const btnDelete = document.getElementById('btnDelete');
+
+    // 1. EVENT LISTENER: Fetch Product Data on Dropdown Change
+    productSelect.addEventListener('change', async (e) => {
+        const targetId = e.target.value;
+
+        // Unhide form smoothly with CSS opacity transitions
+        maintenanceForm.classList.remove('hidden');
+        setTimeout(() => {
+            maintenanceForm.classList.remove('opacity-0');
+        }, 50);
+        if (!targetId) return;
+
+        try {
+            const response = await fetch(`/orders/products/${targetId}`);
+            if (!response.ok) throw new Error('Could not retrieve product information.');
+            
+            const product = await response.json();
+            
+            // Map JSON properties straight to input field elements
+            txtId.value = product.id;
+            txtMainDish.value = product.main_dish;
+            selCategory.value = product.category;
+            txtPrice.value = parseFloat(product.price).toFixed(2);
+
+        } catch (err) {
+            alert(`Error loading entry details: ${err.message}`);
+        }
+    });
+
+    // 2. ACTION HANDLER: Trigger Background PATCH Mutation Call
+    btnUpdate.addEventListener('click', async () => {
+        const id = txtId.value;
+        const payload = {
+            main_dish: txtMainDish.value,
+            category: selCategory.value,
+            price: parseFloat(txtPrice.value)
+        };
+
+        if (!txtMainDish.value || isNaN(payload.price)) {
+            alert('Please populate all fields with valid information before updating.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/orders/products/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.status === 200) {
+                alert('Información actualizada con éxito!');
+                window.location.href = '/main';
+            } else {
+                const errData = await response.json();
+                alert(`Update failed: ${JSON.stringify(errData.detail || 'Invalid data schema provided.')}`);
+            }
+        } catch (err) {
+            alert(`Network execution exception: ${err.message}`);
+        }
+    });
+
+    // 3. ACTION HANDLER: Trigger Background DELETE Mutation Call
+    btnDelete.addEventListener('click', async () => {
+        const id = txtId.value;
+        const dishName = txtMainDish.value;
+
+        if (!confirm(`Estás segur@ de eliminar el prodcuto "${dishName}" del menú?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/orders/products/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.status === 200 || response.status === 204) {
+                alert('Product has been successfully removed from inventory tracking.');
+                window.location.href = '/main';
+            } else {
+                const errData = await response.json();
+                alert(`Deletion denied: ${JSON.stringify(errData.detail || 'Cascade integrity check triggered.')}`);
+            }
+        } catch (err) {
+            alert(`Network execution exception: ${err.message}`);
+        }
+    });
+</script>
+{% endblock %}
