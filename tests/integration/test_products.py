@@ -124,3 +124,37 @@ def test_create_product_success(client: TestClient,
     db_product = session.get(Product, data["id"])
     assert db_product is not None
     assert db_product.main_dish == "Gringa Especial"
+
+    # -------------------------------------------------------------------------
+    # 6. Test: Assert 200 OK, Validate Output Schema & DB Persistence
+    # usign get_product_by_id endpoint
+    # -------------------------------------------------------------------------
+def test_create_product_success(client: TestClient, 
+                                session: Session, mock_authenticated_user):
+    """
+    Asserts a successful post returns 201, matches our ProductRead serialization shape,
+    and accurately writes the row into our active test database session.
+    """
+    payload = {
+        "main_dish": "Gringa Especial",
+        "category": "package",
+        "price": 85.00
+    }
+    
+    response = client.post("orders/products", json=payload)
+    
+    # 4. Assert Response status code is explicitly 201 CREATED
+    assert response.status_code == 201
+    
+    data = response.json()
+    product_id = data['id']
+
+    # Act: retreive the prodcut information trough the endpoint
+    response = client.get(f"orders/products/{product_id}")
+    # 5. Assert response JSON structure mirrors the ProductRead output shape exactly
+    new_data = response.json()
+    
+    assert product_id == new_data["id"]
+    assert data["main_dish"] == new_data["main_dish"]
+    assert data["category"] == new_data["category"]
+    assert data["price"] == new_data["price"]

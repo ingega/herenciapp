@@ -58,6 +58,7 @@ The bumping version is due to a new addition to save data.
 - endpoint POST orders/products in `src/api/v1/apss/orders/routes.py`
 - endpoint to retrieve product by id in `src/api/v1/apss/orders/routes.py`
 - template for update/delete product in `src/templates`
+- test for enppoint orders/products/{id} in `tests/integration/test_products.py`
 
 ### Changed
 - N/A
