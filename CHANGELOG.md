@@ -14,7 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Fixed
-- N/A 
+- N/A
+
+## [1.7.3]
+
+### Added
+- N/A
+
+### Changed
+- Refactored main.html adding style and elements
+
+### Fixed
+- N/A
 
 ## [1.7.2] 2026-05-28
 Added endpoints for updata and delete products
