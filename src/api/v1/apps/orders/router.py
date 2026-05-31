@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUpdate
 from src.api.v1.apps.orders.services import ProductService
+from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.models import Product
 from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
@@ -119,3 +120,32 @@ async def get_product_by_id(
         ) 
 
     return product
+
+# --- Flavors endpoints init ---
+# Flavors is for selection or pick of the main_dish selection.
+#
+# === Flavors endpoints end ===
+
+@router.get("/flavors/{id}", 
+            response_model=FlavorCatalogueRead, 
+            status_code=status.HTTP_200_OK)
+async def get_flavor_by_id(
+    id: int,
+    request: Request,
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session)
+    ) -> FlavorCatalogueRead | None:
+    """
+    Returns an individual flavor information
+    """
+
+    product_service = ProductService(session)
+    flavor = product_service.get_flavor_by_id(id=id)
+
+    if not flavor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Flavor with ID index token {id} could not be located."
+        ) 
+
+    return flavor
