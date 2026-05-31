@@ -112,3 +112,31 @@ class TestFlavorsEndpoints:
         # Assert: Validation errors are returned for incomplete or invalid data
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     
+    # ==============================================================================
+    # TEST 3: Test that invalid data types or formats trigger validation errors
+    # ==============================================================================
+    def test_flavor_create_(self,client, setup_flavor):
+        """
+        Verify that providing valid data for flavor creation results in successful 
+        creation and correct response structure.
+        """
+        product_id = setup_flavor["id"]
+        # Act: Set the payload for flavor creation, but omit required fields or provide invalid data
+        flavor_payload = {
+            "product_id": product_id,
+            "description": "chicken"
+        }
+        # Act: Execute the post request
+        response = client.post(
+            f"/orders/flavors", 
+            json=flavor_payload,
+            follow_redirects=False
+        )
+
+        # Assert: Successful creation and correct response structure
+        assert response.status_code == status.HTTP_201_CREATED
+        response_data = response.json()
+        # Assert the response
+        assert "id" in response_data
+        assert response_data["product_id"] == product_id
+        assert response_data["description"] == "chicken"
