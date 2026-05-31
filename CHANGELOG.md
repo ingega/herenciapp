@@ -26,7 +26,7 @@ This version added the templates for flavors handling
 - added all the logic for update and delete flavors in `src/templates/flavors/list.html`
 
 ### Changed
-- N/A
+- Added flavors option to main nav bar in `src/templates/base_nav.html`
 
 ### Fixed
 - N/A
