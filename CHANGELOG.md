@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.8.1] 2026-05-31
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- removing items from list in `tests/integration/test_endpoint_main_and_orders.py`
+
 ## [1.8.0] 2026-05-31
 This version add the flavors endpoints, templates and tests
 
