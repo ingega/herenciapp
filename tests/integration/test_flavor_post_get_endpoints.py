@@ -115,7 +115,7 @@ class TestFlavorsEndpoints:
     # ==============================================================================
     # TEST 3: Test that invalid data types or formats trigger validation errors
     # ==============================================================================
-    def test_flavor_create_(self,client, setup_flavor):
+    def test_flavor_create_valid_data(self,client, session, setup_flavor):
         """
         Verify that providing valid data for flavor creation results in successful 
         creation and correct response structure.
@@ -140,3 +140,15 @@ class TestFlavorsEndpoints:
         assert "id" in response_data
         assert response_data["product_id"] == product_id
         assert response_data["description"] == "chicken"
+
+        # Bonus assert, verify that also ths database add the new record
+        # Act: clean the session for database updated veryfication
+        session.expire_all()
+        session.rollback()
+        # Act: creates a db object
+        db_product = session.get(FlavorCatalogue, product_id)
+        # Assert: query executed successfully
+        assert db_product is not None
+        # Assert: Verify the information in database
+        assert int(db_product.product_id) == product_id  # db sends string types
+        assert db_product.description == "chicken"
