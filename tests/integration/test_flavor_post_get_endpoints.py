@@ -113,7 +113,7 @@ class TestFlavorsEndpoints:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     
     # ==============================================================================
-    # TEST 3: Test that invalid data types or formats trigger validation errors
+    # TEST 3: Test the flavor creation endpoint
     # ==============================================================================
     def test_flavor_create_valid_data(self,client, session, setup_flavor):
         """
@@ -152,3 +152,39 @@ class TestFlavorsEndpoints:
         # Assert: Verify the information in database
         assert int(db_product.product_id) == product_id  # db sends string types
         assert db_product.description == "chicken"
+    
+    # ==============================================================================
+    # TEST 4: Test the get flavor endpoint
+    # ==============================================================================
+    def test_flavor_get(self,client, setup_flavor):
+        """
+        Verify that the get flavor endpoint returns the correct data for an existing flavor.
+        """
+        product_id = setup_flavor["id"]
+        # step 1: create a flavor to be retrieved
+        # Act: Set the payload for flavor creation, but omit required fields or provide invalid data
+        flavor_payload = {
+            "product_id": product_id,
+            "description": "taco de carnitas"
+        }
+        # Act: Execute the post request
+        response = client.post(
+            f"/orders/flavors", 
+            json=flavor_payload,
+            follow_redirects=False
+        )
+
+        # Assert: Successful creation and correct response structure
+        assert response.status_code == status.HTTP_201_CREATED
+        response_data = response.json()
+        flavor_id = response_data["id"]
+        # now we have the flavor id, we can test the get endpoint
+        get_flavor_response = client.get(
+            f"/orders/flavors/{flavor_id}",
+            follow_redirects=False
+        )
+        # Assert: Successful retrieval and correct response structure
+        assert get_flavor_response.status_code == status.HTTP_200_OK
+        assert "id" in get_flavor_response.json()
+        assert get_flavor_response.json()["product_id"] == product_id
+        assert get_flavor_response.json()["description"] == "taco de carnitas"
