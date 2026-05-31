@@ -5,8 +5,6 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 from src.api.v1.apps.orders.models import Product
 from src.api.v1.apps.users.services import create_user
-
-# Assuming your authentication engine exposes the dependency function
 from src.api.v1.auth.auth import get_current_user_from_cookie
 
 

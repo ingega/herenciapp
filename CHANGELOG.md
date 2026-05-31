@@ -26,7 +26,7 @@ This version add the flavors endpoints, templates and tests
 
 
 ### Changed
-- N/A
+- Added protected routes in `tests/integration/test_endpoint_main_and_orders.py`
 
 ### Fixed
 - N/A
