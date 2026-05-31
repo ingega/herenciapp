@@ -4,7 +4,7 @@ from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUpdate
-from src.api.v1.apps.orders.services import ProductService
+from src.api.v1.apps.orders.services import FlavorService, ProductService
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.models import Product
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -139,13 +139,13 @@ async def get_flavor_by_id(
     Returns an individual flavor information
     """
 
-    product_service = ProductService(session)
-    flavor = product_service.get_flavor_by_id(id=id)
+    flavor_service = FlavorService(session)
+    flavor = flavor_service.get_flavor_by_id(flavor_id=id)
 
     if not flavor:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Flavor with ID index token {id} could not be located."
+            detail=f"Flavor with ID index {id} could not be located."
         ) 
 
     return flavor
