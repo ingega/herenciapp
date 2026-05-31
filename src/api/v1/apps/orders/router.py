@@ -4,7 +4,8 @@ from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUpdate
-from src.api.v1.apps.orders.services import ProductService
+from src.api.v1.apps.orders.services import FlavorService, ProductService
+from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.models import Product
 from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
@@ -70,7 +71,7 @@ async def update_product(product_update: ProductUpdate,
     return product_service.update_product(product_id=product_id, product_in=product_update)
 
 @router.delete("/products/{product_id}")
-async def update_product(product_id: int, 
+async def delete_product(product_id: int, 
                          current_user: dict = Depends(get_current_user_from_cookie),
                          session: Session = Depends(get_session)
                          ):
@@ -119,3 +120,64 @@ async def get_product_by_id(
         ) 
 
     return product
+
+# --- Flavors endpoints init ---
+# Flavors is for selection or pick of the main_dish selection.
+#
+##########################################
+
+@router.post("/flavors", response_model=FlavorCatalogueRead, status_code=status.HTTP_201_CREATED)
+def create_new_flavor(flavor_in: FlavorCatalogueCreate, 
+                      current_user: dict = Depends(get_current_user_from_cookie),
+                      session: Session = Depends(get_session)):
+    
+    flavor_service = FlavorService(session)
+    return flavor_service.create_flavor(flavor_in=flavor_in)
+
+@router.patch("/flavors/{flavor_id}", 
+              response_model=FlavorCatalogueRead, status_code=status.HTTP_200_OK)
+async def update_flavor(flavor_update: FlavorCatalogueUpdate,
+                         flavor_id: int, 
+                         current_user: dict = Depends(get_current_user_from_cookie),
+                         session: Session = Depends(get_session)
+                         ):
+    
+    flavor_service = FlavorService(session)
+    
+    return flavor_service.update_flavor(flavor_id=flavor_id, flavor_in=flavor_update)
+
+@router.delete("/flavors/{flavor_id}")
+async def delete_flavor(flavor_id: int, 
+                         current_user: dict = Depends(get_current_user_from_cookie),
+                         session: Session = Depends(get_session)
+                         ):
+    
+    flavor_service = FlavorService(session)
+    
+    return flavor_service.delete_flavor(flavor_id=flavor_id)
+
+@router.get("/flavors/{id}", 
+            response_model=FlavorCatalogueRead, 
+            status_code=status.HTTP_200_OK)
+async def get_flavor_by_id(
+    id: int,
+    request: Request,
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session)
+    ) -> FlavorCatalogueRead | None:
+    """
+    Returns an individual flavor information
+    """
+
+    flavor_service = FlavorService(session)
+    flavor = flavor_service.get_flavor_by_id(flavor_id=id)
+
+    if not flavor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Flavor with ID index {id} could not be located."
+        ) 
+
+    return flavor
+
+######### --- Flavors endpoints end --- ##############

@@ -55,7 +55,7 @@ class Product(SQLModel, table=True):
     __tablename__ = "products"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    main_dish: str = Field(max_length=50, index=True)
+    main_dish: str = Field(max_length=50, index=True, unique=True)  # e.g., taco, burger, soda
     category: str = Field(max_length=30, index=True)  # package, taco, beverage
     price: condecimal(max_digits=6, decimal_places=2) = Field()
 

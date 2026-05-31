@@ -16,6 +16,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.8.0] 2026-05-31
+This version add the flavors endpoints, templates and tests
+
+### Added
+- endpoint get_flavor_by_id in `src/api/v1/apps/orders/router.py`
+- schemas for flavors in `src/api/v1/apps/orders/schemas.py`
+- endpoints for flavors in `src/api/v1/apps/orders/router.py`
+- test for post and get endpoints in `test/integration/test_flavor_post_get_endpoint.py`
+- test for patch and delete endpoints in `test/integration/test_flavor_patch_delete_endpoint.py`
+
+
+### Changed
+- Added protected routes in `tests/integration/test_endpoint_main_and_orders.py`
+
+### Fixed
+- N/A
+
 ## [1.7.3]
 
 ### Added

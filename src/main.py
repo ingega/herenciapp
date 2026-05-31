@@ -18,7 +18,7 @@ from .api.v1.apps.users.router import router as users_router
 from .api.v1.auth.router import router as auth_router
 from .api.v1.apps.orders.router import router as orders_router
 
-# Configuración del logger oficial de producción para el EC2
+# logger config
 logger = logging.getLogger("uvicorn.error")
 
 @asynccontextmanager
