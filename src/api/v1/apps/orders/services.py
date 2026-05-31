@@ -3,7 +3,7 @@
 from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
-from src.api.v1.apps.orders.models import Product
+from src.api.v1.apps.orders.models import FlavorCatalogue, Product
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate, ProductCreate, ProductBase, ProductUpdate
 
 
@@ -89,16 +89,16 @@ class FlavorService:
         """
         Retrieve all catalogued flavors with safe pagination parameters.
         """
-        statement = select(FlavorCatalogueRead).offset(skip).limit(limit)
+        statement = select(FlavorCatalogue).offset(skip).limit(limit)
         results = self.session.exec(statement)
         return results.all()
 
-    def get_flavor_by_id(self, flavor_id: int) -> FlavorCatalogueRead:
+    def get_flavor_by_id(self, flavor_id: int) -> FlavorCatalogue:
         """
         Retrieve a specific flavor. Throws an explicit 404 if missing,
         which gracefully shortcuts to your error middleware.
         """
-        flavor = self.session.get(FlavorCatalogueRead, flavor_id)
+        flavor = self.session.get(FlavorCatalogue, flavor_id)
         if not flavor:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -106,20 +106,20 @@ class FlavorService:
             )
         return flavor
 
-    def create_flavor(self, flavor_in: FlavorCatalogueCreate) -> FlavorCatalogueRead:
+    def create_flavor(self, flavor_in: FlavorCatalogueCreate) -> FlavorCatalogue:
         """
         Maps the inbound validation schema seamlessly into a database record,
         persists it safely, and returns the tracking instance.
         """
         # Convert schema payload to database model entity
-        db_flavor = FlavorCatalogueRead.model_validate(flavor_in)
+        db_flavor = FlavorCatalogue.model_validate(flavor_in)
         
         self.session.add(db_flavor)
         self.session.commit()
         self.session.refresh(db_flavor)
         return db_flavor
 
-    def update_flavor(self, flavor_id: int, flavor_in: FlavorCatalogueUpdate) -> FlavorCatalogueRead:
+    def update_flavor(self, flavor_id: int, flavor_in: FlavorCatalogueUpdate) -> FlavorCatalogue:
         """
         Fetches the target model, maps the payload updates dynamically using 
         Pydantic's update rules, and persists changes.
