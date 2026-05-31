@@ -20,7 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This version add the flavors endpoints, templates and tests
 
 ### Added
-- N/A
+- endpoint get_flavor_by_id in `src/api/v1/apps/orders/router.py`
+- schemas for flavors in `src/api/v1/apps/orders/schemas.py`
+
 
 ### Changed
 - N/A
