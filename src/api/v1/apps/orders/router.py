@@ -71,7 +71,7 @@ async def update_product(product_update: ProductUpdate,
     return product_service.update_product(product_id=product_id, product_in=product_update)
 
 @router.delete("/products/{product_id}")
-async def update_product(product_id: int, 
+async def delete_product(product_id: int, 
                          current_user: dict = Depends(get_current_user_from_cookie),
                          session: Session = Depends(get_session)
                          ):
@@ -124,7 +124,37 @@ async def get_product_by_id(
 # --- Flavors endpoints init ---
 # Flavors is for selection or pick of the main_dish selection.
 #
-# === Flavors endpoints end ===
+##########################################
+
+@router.post("/flavors", response_model=FlavorCatalogueRead, status_code=status.HTTP_201_CREATED)
+def create_new_flavor(flavor_in: FlavorCatalogueCreate, 
+                      current_user: dict = Depends(get_current_user_from_cookie),
+                      session: Session = Depends(get_session)):
+    
+    flavor_service = FlavorService(session)
+    return flavor_service.create_flavor(flavor_in=flavor_in)
+
+@router.patch("/flavors/{flavor_id}", 
+              response_model=FlavorCatalogueRead, status_code=status.HTTP_200_OK)
+async def update_flavor(flavor_update: FlavorCatalogueUpdate,
+                         flavor_id: int, 
+                         current_user: dict = Depends(get_current_user_from_cookie),
+                         session: Session = Depends(get_session)
+                         ):
+    
+    flavor_service = FlavorService(session)
+    
+    return flavor_service.update_flavor(flavor_id=flavor_id, flavor_in=flavor_update)
+
+@router.delete("/flavors/{flavor_id}")
+async def delete_flavor(flavor_id: int, 
+                         current_user: dict = Depends(get_current_user_from_cookie),
+                         session: Session = Depends(get_session)
+                         ):
+    
+    flavor_service = FlavorService(session)
+    
+    return flavor_service.delete_flavor(flavor_id=flavor_id)
 
 @router.get("/flavors/{id}", 
             response_model=FlavorCatalogueRead, 
@@ -149,3 +179,5 @@ async def get_flavor_by_id(
         ) 
 
     return flavor
+
+######### --- Flavors endpoints end --- ##############
