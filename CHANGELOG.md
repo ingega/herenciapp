@@ -22,6 +22,7 @@ This version add the flavors endpoints, templates and tests
 ### Added
 - endpoint get_flavor_by_id in `src/api/v1/apps/orders/router.py`
 - schemas for flavors in `src/api/v1/apps/orders/schemas.py`
+- endpoints to CRUD flavors in `src/api/v1/apps/orders/router.py`
 
 
 ### Changed
