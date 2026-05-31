@@ -16,6 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.9.0] 2026-05-31
+This version added the templates for flavors handling
+
+### Added
+- template for flavors handling in `src/templates/flavors/list.html`
+- endpoint for ui in `src/api/v1/apps/orders/routes.py`
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.8.1] 2026-05-31
 
 ### Added

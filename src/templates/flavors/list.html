@@ -1,0 +1,124 @@
+{% extends "base_nav.html" %}
+
+{% block title %}Sabores - Herenciapp Restaurant{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-gray-200">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
+                <i class="fa-solid fa-palette text-amber-500"></i> Opciones por platillo
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">Administra las opciones de los platillos del menú.</p>
+        </div>
+        <div>
+            <a href="/orders/flavors/new" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors text-sm">
+                <i class="fa-solid fa-plus text-sm"></i>
+                Agregar Nueva Opción
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    <tr>
+                        <th scope="col" class="px-6 py-4">ID</th>
+                        <th scope="col" class="px-6 py-4">Producto ID</th>
+                        <th scope="col" class="px-6 py-4">Platillo</th>
+                        <th scope="col" class="px-6 py-4">Opción</th>
+                        <th scope="col" class="px-6 py-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    {% if flavors %}
+                        {% for flavor in flavors %}
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="px-6 py-4 font-mono text-gray-400 font-medium">
+                                #{{ flavor.id }}
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 font-mono">
+                                    <i class="fa-solid fa-hashtag text-[10px] text-slate-400"></i>{{ flavor.product_id }}
+                                </span>
+                            </td>
+                            
+                            <td class="px-6 py-4 font-semibold text-gray-900">
+                                {{ flavor.product.main_dish if flavor.product else "⚠️ No asignado" }}
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-0.5 rounded-full text-xs font-medium">
+                                    {{ flavor.description }}
+                                </span>
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-center gap-3">
+                                    <a href="/orders/flavors/edit/{{ flavor.id }}" 
+                                       class="inline-flex items-center gap-1.5 text-slate-700 hover:text-amber-600 font-medium transition-colors text-xs bg-gray-100 hover:bg-amber-50 px-3 py-1.5 rounded-md border border-gray-200 hover:border-amber-200">
+                                        <i class="fa-solid fa-pen-to-square"></i> Editar
+                                    </a>
+                                    
+                                    <button onclick="deleteFlavor('{{ flavor.id }}')"
+                                            class="inline-flex items-center gap-1.5 text-gray-500 hover:text-red-600 font-medium transition-colors text-xs bg-gray-50 hover:bg-red-50 px-3 py-1.5 rounded-md border border-gray-200 hover:border-red-200">
+                                        <i class="fa-solid fa-trash-can"></i> Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-16 text-center bg-gray-50/50">
+                                <div class="max-w-sm mx-auto flex flex-col items-center">
+                                    <div class="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 border border-gray-200">
+                                        <i class="fa-solid fa-folder-open text-gray-400 text-lg"></i>
+                                    </div>
+                                    <h3 class="text-sm font-semibold text-gray-900">No hay opciones registradas</h3>
+                                    <p class="text-xs text-gray-500 mt-1 mb-4">El catálogo está vacío. Comienza agregando opciones para tus platillos.</p>
+                                    <a href="/orders/flavors/new" class="inline-flex items-center gap-1.5 text-xs font-medium bg-white border border-gray-300 hover:border-amber-500 hover:text-amber-600 px-3 py-2 rounded-lg shadow-sm transition-all">
+                                        <i class="fa-solid fa-plus"></i> Registrar primera opción
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function deleteFlavor(flavorId) {
+    if (!confirm("¿Estás seguro de que deseas eliminar permanentemente esta opción del catálogo?")) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/orders/flavors/${flavorId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const data = await response.json();
+            alert(`Error: ${data.detail || "No se pudo eliminar el sabor."}`);
+        }
+    } catch (error) {
+        console.error("Error en la solicitud de eliminación:", error);
+        alert("Ocurrió un problema de red al intentar conectarse con el servidor.");
+    }
+}
+</script>
+{% endblock %}

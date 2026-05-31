@@ -126,6 +126,23 @@ async def get_product_by_id(
 #
 ##########################################
 
+# ui template endpoint for flavors management
+@router.get("/flavors", response_class=HTMLResponse)
+async def get_flavors_management_page(request: Request,
+                        current_user: dict = Depends(get_current_user_from_cookie),
+                        session: Session = Depends(get_session)
+                        ) -> Response:
+    flavor_service = FlavorService(session)
+    flavor_list = flavor_service.get_flavors()
+    return templates.TemplateResponse(
+        request=request,
+        name="flavors/list.html",
+        context={
+            "config": settings,
+            "flavors": flavor_list
+        }
+    )
+
 @router.post("/flavors", response_model=FlavorCatalogueRead, status_code=status.HTTP_201_CREATED)
 def create_new_flavor(flavor_in: FlavorCatalogueCreate, 
                       current_user: dict = Depends(get_current_user_from_cookie),
