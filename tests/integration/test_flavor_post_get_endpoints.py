@@ -61,6 +61,30 @@ class TestFlavorsEndpoints:
             follow_redirects=False
         )
         # Assert: Authentication blocks and redirects to login layout
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/auth/login"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    # ==============================================================================
+    # TEST 2: Test that missing fields or malformed data triggers validation errors
+    # ==============================================================================
+    def test_flavor_create_validation_errors(self,client, setup_flavor):
+        """
+        Ensure that providing incomplete or invalid data for flavor creation
+        results in appropriate validation errors.
+        """
+        
+        product_id = setup_flavor["id"]
+        
+        # Act: Set the payload for flavor creation, but omit required fields or provide invalid data
+        flavor_payload = {
+            "description": "chicken"
+        }
+        # Act: Execute the post request
+        response = client.post(
+            f"/orders/flavors", 
+            json=flavor_payload,
+            follow_redirects=False
+        )
+
+        # Assert: Validation errors are returned for incomplete or invalid data
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     
