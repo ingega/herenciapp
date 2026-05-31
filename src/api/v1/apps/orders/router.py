@@ -127,7 +127,7 @@ async def get_product_by_id(
 ##########################################
 
 # ui template endpoint for flavors management
-@router.get("/flavors", response_class=HTMLResponse)
+@router.get("/flavors/list", response_class=HTMLResponse)
 async def get_flavors_management_page(request: Request,
                         current_user: dict = Depends(get_current_user_from_cookie),
                         session: Session = Depends(get_session)
@@ -140,6 +140,24 @@ async def get_flavors_management_page(request: Request,
         context={
             "config": settings,
             "flavors": flavor_list
+        }
+    )
+
+# ui template endpoint for flavors additon
+@router.get("/flavors/add", response_class=HTMLResponse)
+async def add_flavors_page(request: Request,
+                        current_user: dict = Depends(get_current_user_from_cookie),
+                        session: Session = Depends(get_session)
+                        ) -> Response:
+    # add the context for products
+    products_list = ProductService(session).get_products()
+    return templates.TemplateResponse(
+        request=request,
+        name="flavors/create.html",
+        context={
+            "config": settings,
+            "user": current_user,
+            "products": products_list
         }
     )
 
