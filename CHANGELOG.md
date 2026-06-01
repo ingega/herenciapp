@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Model for meat catalogue
 
 ### Changed
-- N/A
+- Ran database migrations with alembic
 
 ### Fixed
 - N/A
