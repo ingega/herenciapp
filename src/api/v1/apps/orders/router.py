@@ -139,7 +139,8 @@ async def get_flavors_management_page(request: Request,
         name="flavors/list.html",
         context={
             "config": settings,
-            "flavors": flavor_list
+            "flavors": flavor_list,
+            "user": current_user # for nav_bar
         }
     )
 
