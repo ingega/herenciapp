@@ -1,0 +1,209 @@
+{% extends "base_nav.html" %}
+
+{% block title %}Sabores - Herenciapp Restaurant{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-gray-200">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
+                <i class="fa-solid fa-palette text-amber-500"></i> Catálogo de Sabores
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">Administra las variaciones de sabor asignadas a los platillos del menú.</p>
+        </div>
+        <div>
+            <a href="/orders/flavors/add" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors text-sm">
+                <i class="fa-solid fa-plus text-sm"></i>
+                Agregar Nuevo Sabor
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    <tr>
+                        <th scope="col" class="px-6 py-4">ID</th>
+                        <th scope="col" class="px-6 py-4">Product ID</th>
+                        <th scope="col" class="px-6 py-4">Product Dish</th>
+                        <th scope="col" class="px-6 py-4">Description</th>
+                        <th scope="col" class="px-6 py-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    {% if flavors %}
+                        {% for flavor in flavors %}
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="px-6 py-4 font-mono text-gray-400 font-medium">
+                                #{{ flavor.id }}
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 font-mono">
+                                    <i class="fa-solid fa-hashtag text-[10px] text-slate-400"></i>{{ flavor.product_id }}
+                                </span>
+                            </td>
+                            
+                            <td class="px-6 py-4 font-semibold text-gray-900">
+                                {{ flavor.product.main_dish if flavor.product else "⚠️ No asignado" }}
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <span id="desc-text-{{ flavor.id }}" class="inline-flex items-center bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-0.5 rounded-full text-xs font-medium">
+                                    {{ flavor.description }}
+                                </span>
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-center gap-3">
+                                    <button onclick="openEditModal('{{ flavor.id }}', '{{ flavor.description }}')"
+                                       class="inline-flex items-center gap-1.5 text-slate-700 hover:text-amber-600 font-medium transition-colors text-xs bg-gray-100 hover:bg-amber-50 px-3 py-1.5 rounded-md border border-gray-200 hover:border-amber-200">
+                                        <i class="fa-solid fa-pen-to-square"></i> Editar
+                                    </button>
+                                    
+                                    <button onclick="deleteFlavor('{{ flavor.id }}')"
+                                            class="inline-flex items-center gap-1.5 text-gray-500 hover:text-red-600 font-medium transition-colors text-xs bg-gray-50 hover:bg-red-50 px-3 py-1.5 rounded-md border border-gray-200 hover:border-red-200">
+                                        <i class="fa-solid fa-trash-can"></i> Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-16 text-center bg-gray-50/50">
+                                <div class="max-w-sm mx-auto flex flex-col items-center">
+                                    <div class="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 border border-gray-200">
+                                        <i class="fa-solid fa-folder-open text-gray-400 text-lg"></i>
+                                    </div>
+                                    <h3 class="text-sm font-semibold text-gray-900">No hay sabores registrados</h3>
+                                    <p class="text-xs text-gray-500 mt-1 mb-4">El catálogo está vacío.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="editFlavorModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-xl max-w-md w-full overflow-hidden transform scale-95 transition-transform duration-200">
+        <div class="bg-slate-800 text-white px-5 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square text-amber-500"></i>
+                <h3 class="font-bold text-sm tracking-tight">Modificar Opción de Platillo</h3>
+            </div>
+            <button onclick="closeEditModal()" class="text-slate-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-md"></i>
+            </button>
+        </div>
+        
+        <form id="flavorEditForm" class="p-5 space-y-4">
+            <input type="hidden" id="edit_flavor_id">
+            
+            <div class="space-y-1.5">
+                <label for="edit_description" class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Nueva Descripción / Sabor
+                </label>
+                <input type="text" id="edit_description" required maxlength="50"
+                       class="block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all">
+                <p class="text-[11px] text-gray-400">Edita la variante asociada. Ej: "Sin Cebolla", "Doble Queso".</p>
+            </div>
+            
+            <div class="flex justify-end gap-2.5 pt-3 border-t border-gray-100">
+                <button type="button" onclick="closeEditModal()"
+                        class="px-3.5 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold text-slate-950 bg-amber-500 rounded-md hover:bg-amber-600 transition-colors shadow-sm">
+                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Actualizar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// --- CONTROLADORES DEL MODAL ---
+function openEditModal(id, currentDescription) {
+    document.getElementById('edit_flavor_id').value = id;
+    document.getElementById('edit_description').value = currentDescription;
+    
+    const modal = document.getElementById('editFlavorModal');
+    modal.classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('editFlavorModal').classList.add('hidden');
+}
+
+// --- PETICIÓN AJAX DE ACTUALIZACIÓN (PUT o PATCH) ---
+document.getElementById('flavorEditForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const flavorId = document.getElementById('edit_flavor_id').value;
+    const newDescription = document.getElementById('edit_description').value.trim();
+    
+    // Armamos el payload con el campo que nos interesa actualizar
+    const payload = {
+        description: newDescription
+    };
+    
+    try {
+        // Apuntamos a tu endpoint PUT /orders/flavors/{id}
+        const response = await fetch(`/orders/flavors/${flavorId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+            // En vez de recargar todo el servidor, redireccionamos a tu lista limpia
+            window.location.href = '/orders/flavors/list';
+        } else {
+            const data = await response.json();
+            alert(`Error al actualizar: ${data.detail || "Verifica los parámetros."}`);
+        }
+    } catch (error) {
+        console.error("Error en PUT:", error);
+        alert("Ocurrió un error de comunicación con el backend.");
+    }
+});
+
+// --- ELIMINAR ---
+async function deleteFlavor(flavorId) {
+    if (!confirm("¿Estás seguro de que deseas eliminar permanentemente este sabor del catálogo?")) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/orders/flavors/${flavorId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            window.location.href = '/orders/flavors/list';
+        } else {
+            const data = await response.json();
+            alert(`Error: ${data.detail || "No se pudo eliminar el sabor."}`);
+        }
+    } catch (error) {
+        console.error("Error en DELETE:", error);
+        alert("Ocurrió un problema de red.");
+    }
+}
+</script>
+{% endblock %}
