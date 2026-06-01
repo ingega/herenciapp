@@ -8,7 +8,7 @@ from alembic import context
 from sqlmodel import SQLModel
 from src.config import settings
 from src.api.v1.apps.users.models import User, VerificationToken
-from src.api.v1.apps.orders.models import Order, Product, OrderDetail, FlavorCatalogue
+from src.api.v1.apps.orders.models import Order, Product, OrderDetail, FlavorCatalogue, MeatCatalogue
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

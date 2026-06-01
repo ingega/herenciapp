@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ran database migrations with alembic
 
 ### Fixed
-- N/A
+- Alembic migrations to add the new table
 
 ## [1.9.1]
 
