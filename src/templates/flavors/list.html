@@ -1,20 +1,20 @@
 {% extends "base_nav.html" %}
 
-{% block title %}Sabores - Herenciapp Restaurant{% endblock %}
+{% block title %}Opciones - Herenciapp Restaurant{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-gray-200">
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
-                <i class="fa-solid fa-palette text-amber-500"></i> Catálogo de Sabores
+                <i class="fa-solid fa-palette text-amber-500"></i> Catálogo de Opciones
             </h1>
-            <p class="text-sm text-gray-500 mt-1">Administra las variaciones de sabor asignadas a los platillos del menú.</p>
+            <p class="text-sm text-gray-500 mt-1">Administra las opciones asignadas a los platillos del menú.</p>
         </div>
         <div>
             <a href="/orders/flavors/add" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors text-sm">
                 <i class="fa-solid fa-plus text-sm"></i>
-                Agregar Nuevo Sabor
+                Agregar Nueva Opción
             </a>
         </div>
     </div>
@@ -25,9 +25,9 @@
                 <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wider">
                     <tr>
                         <th scope="col" class="px-6 py-4">ID</th>
-                        <th scope="col" class="px-6 py-4">Product ID</th>
-                        <th scope="col" class="px-6 py-4">Product Dish</th>
-                        <th scope="col" class="px-6 py-4">Description</th>
+                        <th scope="col" class="px-6 py-4">Id producto</th>
+                        <th scope="col" class="px-6 py-4">Platillo</th>
+                        <th scope="col" class="px-6 py-4">Descripción</th>
                         <th scope="col" class="px-6 py-4 text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -78,7 +78,7 @@
                                     <div class="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 border border-gray-200">
                                         <i class="fa-solid fa-folder-open text-gray-400 text-lg"></i>
                                     </div>
-                                    <h3 class="text-sm font-semibold text-gray-900">No hay sabores registrados</h3>
+                                    <h3 class="text-sm font-semibold text-gray-900">No hay opciones registradas</h3>
                                     <p class="text-xs text-gray-500 mt-1 mb-4">El catálogo está vacío.</p>
                                 </div>
                             </td>
@@ -107,11 +107,11 @@
             
             <div class="space-y-1.5">
                 <label for="edit_description" class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Nueva Descripción / Sabor
+                    Nueva opcion
                 </label>
                 <input type="text" id="edit_description" required maxlength="50"
                        class="block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all">
-                <p class="text-[11px] text-gray-400">Edita la variante asociada. Ej: "Sin Cebolla", "Doble Queso".</p>
+                <p class="text-[11px] text-gray-400">Edita la variante asociada. Ej: "carne", "coca".</p>
             </div>
             
             <div class="flex justify-end gap-2.5 pt-3 border-t border-gray-100">
