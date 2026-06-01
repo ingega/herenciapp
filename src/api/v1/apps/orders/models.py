@@ -97,3 +97,9 @@ class OrderDetail(SQLModel, table=True):
     order: Order = Relationship(back_populates="items")
     product: Product = Relationship(back_populates="order_details")
     flavor: FlavorCatalogue = Relationship(back_populates="order_details")
+
+class MeatCatalogue(SQLModel, table=True):
+    __tablename__ = "meat_catalogue"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    description: str = Field(max_length=50, unique=True)  # Chicken, Beef, Pork, Veggie

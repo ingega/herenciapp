@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.9.2]
+
+### Added
+- Model for meat catalogue
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.9.1]
 
 ### Added
