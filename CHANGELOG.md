@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.9.3] 2026-06-01
+
+### Added
+- N/A
+
+### Changed
+- constraint in flavor catalogue in `src/api/v1/apps/orders/models.py` the change was made in commit `7642dc365f09e59db5207771ff41cb26f2797286`
+
+### Fixed
+- Alembic sequence to fix the pipeline, the change was made in commit `7642dc365f09e59db5207771ff41cb26f2797286`
+
 ## [1.9.2]
 
 ### Added
