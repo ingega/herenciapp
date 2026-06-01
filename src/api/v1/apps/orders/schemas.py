@@ -150,3 +150,22 @@ class OrderDetailResponse(OrderRead):
     Returns the complete layout structure with nested structural calculations.
     """
     items: List[OrderDetailReadNested] = []
+
+
+# ==========================================
+# 1. MEAT CATALOGUE SCHEMAS
+# ==========================================
+class MeatCatalogueBase(SQLModel):
+    description: str = Field(max_length=50, description="e.g., maciza, lengua, cachete")
+
+
+class MeatCatalogueCreate(MeatCatalogueBase):
+    pass
+
+
+class MeatCatalogueRead(MeatCatalogueBase):
+    id: int
+
+
+class MeatCatalogueUpdate(SQLModel):
+    description: Optional[str] = Field(default=None, max_length=50)

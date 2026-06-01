@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.9.4] 2026-06-01
+This version is for address the addition of new meat catalogue function
+
+### Added
+- Meat catalogue schemas in `src/api/v1/apps/orders/schemas.py`
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.9.3] 2026-06-01
 
 ### Added
