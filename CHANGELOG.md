@@ -24,6 +24,7 @@ This version added the templates for flavors handling
 - endpoint for ui in `src/api/v1/apps/orders/routes.py`
 - template for flavors adding record in `src/templates/flavors/create.html`
 - added all the logic for update and delete flavors in `src/templates/flavors/list.html`
+- added test suite for flavors templates in `tests/integration/test_flavors_template.py`
 
 ### Changed
 - Added flavors option to main nav bar in `src/templates/base_nav.html`
