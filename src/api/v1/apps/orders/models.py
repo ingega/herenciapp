@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 from pydantic import condecimal
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
 from sqlalchemy import SmallInteger, Text
 
 
@@ -70,6 +70,10 @@ class FlavorCatalogue(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     product_id: int = Field(foreign_key="products.id", index=True)
     description: str = Field(max_length=50)  # Chicken, Pepperoni, Veggie, Diet Coke
+
+    __table_args__ = (
+        UniqueConstraint("product_id", "description", name="uq_product_flavor_description"),
+    )
 
     # Relationships
     product: Product = Relationship(back_populates="flavors")
