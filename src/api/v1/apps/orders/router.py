@@ -3,6 +3,7 @@ from fastapi import APIRouter, status, Request, Depends, HTTPException
 from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
+from typing import List
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUpdate
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
@@ -230,3 +231,72 @@ def create_new_meat(meat_in: MeatCatalogueCreate,
     
     meat_service = MeatService(session)
     return meat_service.create_meat(meat_in=meat_in)
+
+
+# general endpoint go first, then the specifics
+@router.get("/flavors/meat/all", response_model=List[MeatCatalogueRead], status_code=status.HTTP_200_OK)
+async def get_meat_all(
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session)
+) -> List[MeatCatalogueRead]:
+    """
+    Returns all meat in the catalogue as JSON
+    """
+    meat_service = MeatService(session)
+    meat_list = meat_service.get_meat_catalogue()
+
+    # If the service returns None or an empty list, raise the 404
+    if not meat_list:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Meat catalogue is empty."
+        ) 
+
+    return meat_list
+
+
+@router.get("/flavors/meat/{id}", 
+            response_model=MeatCatalogueRead, 
+            status_code=status.HTTP_200_OK)
+async def get_meat_by_id(
+    id: int,
+    request: Request,
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session)
+    ) -> MeatCatalogueRead | None:
+    """
+    Returns an individual meat information
+    """
+
+    meat_service = MeatService(session)
+    meat = meat_service.get_meat_by_id(meat_id=id)
+
+    if not meat:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Meat with ID index {id} could not be located."
+        ) 
+
+    return meat
+
+@router.patch("/flavors/meat/{meat_id}", 
+              response_model=MeatCatalogueRead, status_code=status.HTTP_200_OK)
+async def update_meat(meat_update: MeatCatalogueUpdate,
+                      meat_id: int, 
+                      current_user: dict = Depends(get_current_user_from_cookie),
+                      session: Session = Depends(get_session)
+                         ):
+    
+    meat_service = MeatService(session)
+    
+    return meat_service.update_meat(meat_id=meat_id, meat_in=meat_update)
+
+@router.delete("/flavors/meat/{meat_id}")
+async def delete_meat(meat_id: int, 
+                       current_user: dict = Depends(get_current_user_from_cookie),
+                       session: Session = Depends(get_session)
+                         ):
+    
+    meat_service = MeatService(session)
+    
+    return meat_service.delete_meat(meat_id=meat_id)

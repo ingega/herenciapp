@@ -4,7 +4,7 @@ from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product
-from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate, 
+from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate 
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate 
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductBase, ProductUpdate
 
@@ -161,9 +161,14 @@ class MeatService:
         """
         Retrieve all catalogued meats with safe pagination parameters.
         """
-        statement = select(MeatCatalogue).offset(skip).limit(limit)
-        results = self.session.exec(statement)
-        return results.all()
+        try:
+            statement = select(MeatCatalogue).offset(skip).limit(limit)
+            results = self.session.exec(statement)
+            db_meat_list = results.all()
+        except Exception as e:
+            print(f"CRITICAL DATABASE CRASH: {str(e)}")
+            raise e
+        return [MeatCatalogueRead.model_validate(meat) for meat in db_meat_list]
 
     def get_meat_by_id(self, meat_id: int) -> MeatCatalogue:
         """

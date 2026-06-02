@@ -156,7 +156,7 @@ class OrderDetailResponse(OrderRead):
 # 1. MEAT CATALOGUE SCHEMAS
 # ==========================================
 class MeatCatalogueBase(SQLModel):
-    description: str = Field(max_length=50, description="e.g., maciza, lengua, cachete")
+    description: str = Field(max_length=50)
 
 
 class MeatCatalogueCreate(MeatCatalogueBase):
