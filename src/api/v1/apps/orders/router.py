@@ -4,8 +4,9 @@ from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUpdate
-from src.api.v1.apps.orders.services import FlavorService, ProductService
+from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
+from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
 from src.api.v1.apps.orders.models import Product
 from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
@@ -217,3 +218,15 @@ async def get_flavor_by_id(
     return flavor
 
 ######### --- Flavors endpoints end --- ##############
+
+
+
+##########  --- Meat catalogue endpoints init --- ##############
+
+@router.post("/flavors/meat", response_model=MeatCatalogueRead, status_code=status.HTTP_201_CREATED)
+def create_new_meat(meat_in: MeatCatalogueCreate, 
+                    current_user: dict = Depends(get_current_user_from_cookie),
+                    session: Session = Depends(get_session)):
+    
+    meat_service = MeatService(session)
+    return meat_service.create_meat(meat_in=meat_in)

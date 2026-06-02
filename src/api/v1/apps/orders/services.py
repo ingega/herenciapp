@@ -4,7 +4,9 @@ from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product
-from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate, MeatCatalogueCreate, MeatCatalogueRead, ProductCreate, ProductBase, ProductUpdate
+from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate, 
+from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate 
+from src.api.v1.apps.orders.schemas import ProductCreate, ProductBase, ProductUpdate
 
 
 class ProductService:
