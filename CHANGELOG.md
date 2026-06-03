@@ -16,6 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.9.4] 2026-06-01
+This version is for address the addition of new meat catalogue function
+
+### Added
+- Meat catalogue schemas in `src/api/v1/apps/orders/schemas.py`
+- Meat services in `src/api/v1/apps/orders/services.py`
+- Meat endpoints in `src/api/v1/apps/orders/services.py`
+- Meat list template in `src/templates/meat/list.html`
+- Test for post and get endpoints in `tests/intergation/test_meat_post_and_get_endpoints.py`
+- Test for patch and delete endpoints in `tests/intergation/test_meat_patch_and_delete_endpoints.py`
+- Added a test for meat list endpoint in `tests/intergation/test_meat_post_and_get_endpoints.py`
+- Template for add a meat option to meat catalogue in `src/templates/meat/create.html`
+- Added a test for meat templates endpoints in `tests/integration/test_meat_templates.py` 
+
+### Changed
+- Added item to nav_bar for meat catalogue in `src/templates/base_nav.html`
+
+### Fixed
+- N/A
+
 ## [1.9.3] 2026-06-01
 
 ### Added

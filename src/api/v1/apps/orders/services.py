@@ -3,8 +3,10 @@
 from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
-from src.api.v1.apps.orders.models import FlavorCatalogue, Product
-from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate, ProductCreate, ProductBase, ProductUpdate
+from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product
+from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate 
+from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate 
+from src.api.v1.apps.orders.schemas import ProductCreate, ProductBase, ProductUpdate
 
 
 class ProductService:
@@ -144,5 +146,79 @@ class FlavorService:
         db_flavor = self.get_flavor_by_id(flavor_id)
         
         self.session.delete(db_flavor)
+        self.session.commit()
+        return None
+
+
+class MeatService:
+    def __init__(self, session: Session):
+        """
+        Inject the database session so every method operates on the same unit of work.
+        """
+        self.session = session
+
+    def get_meat_catalogue(self, skip: int = 0, limit: int = 100) -> List[MeatCatalogueRead]:
+        """
+        Retrieve all catalogued meats with safe pagination parameters.
+        """
+        try:
+            statement = select(MeatCatalogue).offset(skip).limit(limit)
+            results = self.session.exec(statement)
+            db_meat_list = results.all()
+        except Exception as e:
+            raise e
+        return [MeatCatalogueRead.model_validate(meat) for meat in db_meat_list]
+
+    def get_meat_by_id(self, meat_id: int) -> MeatCatalogue:
+        """
+        Retrieve a specific meat. Throws an explicit 404 if missing,
+        which gracefully shortcuts to your error middleware.
+        """
+        meat = self.session.get(MeatCatalogue, meat_id)
+        if not meat:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Meat with ID {meat_id} not found."
+            )
+        return meat
+
+    def create_meat(self, meat_in: MeatCatalogueCreate) -> MeatCatalogue:
+        """
+        Maps the inbound validation schema seamlessly into a database record,
+        persists it safely, and returns the tracking instance.
+        """
+        # Convert schema payload to database model entity
+        db_meat = MeatCatalogue.model_validate(meat_in)
+        
+        self.session.add(db_meat)
+        self.session.commit()
+        self.session.refresh(db_meat)
+        return db_meat
+
+    def update_meat(self, meat_id: int, meat_in: MeatCatalogueUpdate) -> MeatCatalogue:
+        """
+        Fetches the target model, maps the payload updates dynamically using 
+        Pydantic's update rules, and persists changes.
+        """
+        db_meat = self.get_meat_by_id(meat_id)
+        
+        # Extract the fields sent in the request update data payload
+        update_data = meat_in.model_dump(exclude_unset=True)
+        
+        for key, value in update_data.items():
+            setattr(db_meat, key, value)
+            
+        self.session.add(db_meat)
+        self.session.commit()
+        self.session.refresh(db_meat)
+        return db_meat
+
+    def delete_meat(self, meat_id: int) -> None:
+        """
+        Locates the targeted item record and deletes it entirely.
+        """
+        db_meat = self.get_meat_by_id(meat_id)
+        
+        self.session.delete(db_meat)
         self.session.commit()
         return None
