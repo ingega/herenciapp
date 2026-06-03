@@ -12,7 +12,7 @@
             <p class="text-sm text-gray-500 mt-1">Administra las opciones de carne asignadas a los platillos del menú.</p>
         </div>
         <div>
-            <a href="/orders/flavors/meat/add" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors text-sm">
+            <a href="/orders/flavors/meat/add/ui" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors text-sm">
                 <i class="fa-solid fa-plus text-sm"></i>
                 Agregar Nueva Opción de carne
             </a>
@@ -76,20 +76,20 @@
     </div>
 </div>
 
-<div id="editFlavorModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+<div id="editMeatModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-xl max-w-md w-full overflow-hidden transform scale-95 transition-transform duration-200">
         <div class="bg-slate-800 text-white px-5 py-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-pen-to-square text-amber-500"></i>
-                <h3 class="font-bold text-sm tracking-tight">Modificar Opción de Platillo</h3>
+                <h3 class="font-bold text-sm tracking-tight">Modificar Opción de Carne</h3>
             </div>
             <button onclick="closeEditModal()" class="text-slate-400 hover:text-white transition-colors">
                 <i class="fa-solid fa-xmark text-md"></i>
             </button>
         </div>
         
-        <form id="flavorEditForm" class="p-5 space-y-4">
-            <input type="hidden" id="edit_flavor_id">
+        <form id="meatEditForm" class="p-5 space-y-4">
+            <input type="hidden" id="edit_meat_id">
             
             <div class="space-y-1.5">
                 <label for="edit_description" class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -117,12 +117,12 @@
 
 {% block scripts %}
 <script>
-// --- CONTROLADORES DEL MODAL ---
+
 function openEditModal(id, currentDescription) {
     document.getElementById('edit_meat_id').value = id;
     document.getElementById('edit_description').value = currentDescription;
     
-    const modal = document.getElementById('editMMeatModal');
+    const modal = document.getElementById('editMeatModal');
     modal.classList.remove('hidden');
 }
 
@@ -130,20 +130,17 @@ function closeEditModal() {
     document.getElementById('editMeatModal').classList.add('hidden');
 }
 
-// --- PETICIÓN AJAX DE ACTUALIZACIÓN (PUT o PATCH) ---
 document.getElementById('meatEditForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const meatId = document.getElementById('edit_meat_id').value;
     const newDescription = document.getElementById('edit_description').value.trim();
     
-    // Armamos el payload con el campo que nos interesa actualizar
     const payload = {
         description: newDescription
     };
     
     try {
-        // Apuntamos a tu endpoint PUT /orders/flavors/{id}
         const response = await fetch(`/orders/flavors/meat/${meatId}`, {
             method: 'PATCH',
             headers: {
@@ -154,21 +151,19 @@ document.getElementById('meatEditForm').addEventListener('submit', async (e) => 
         });
         
         if (response.ok) {
-            // En vez de recargar todo el servidor, redireccionamos a tu lista limpia
-            window.location.href = '/orders/flavors/meat/all';
+            window.location.href = '/orders/flavors/meat/list';
         } else {
             const data = await response.json();
             alert(`Error al actualizar: ${data.detail || "Verifica los parámetros."}`);
         }
     } catch (error) {
-        console.error("Error en PUT:", error);
+        console.error("Error en PATCH:", error);
         alert("Ocurrió un error de comunicación con el backend.");
     }
 });
 
-// --- ELIMINAR ---
 async function deleteMeat(meatId) {
-    if (!confirm("¿Estás seguro de que deseas eliminar permanentemente este sabor del catálogo?")) {
+    if (!confirm("¿Estás seguro de que deseas eliminar permanentemente esta opción del catálogo?")) {
         return;
     }
     

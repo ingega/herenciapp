@@ -224,6 +224,21 @@ async def get_flavor_by_id(
 
 ##########  --- Meat catalogue endpoints init --- ##############
 
+# ui template endpoint for meat catalogue management
+@router.get("/flavors/meat/add/ui", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
+async def get_meat_add_page(request: Request,
+                           current_user: dict = Depends(get_current_user_from_cookie),
+                           session: Session = Depends(get_session)
+                           ) -> Response:
+    return templates.TemplateResponse(
+        request=request,
+        name="meat/create.html",
+        context={
+            "config": settings,
+            "user": current_user
+        }
+    )
+
 @router.post("/flavors/meat/add", response_model=MeatCatalogueRead, status_code=status.HTTP_201_CREATED)
 def create_new_meat(meat_in: MeatCatalogueCreate, 
                     current_user: dict = Depends(get_current_user_from_cookie),

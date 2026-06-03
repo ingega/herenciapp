@@ -1,0 +1,90 @@
+{% extends "base_nav.html" %}
+
+{% block title %}Agregar opción de carne - Herenciapp Restaurant{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-8">
+    <div class="mb-6">
+        <a href="/orders/flavors/meat/list" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-amber-600 transition-colors group">
+            <i class="fa-solid fa-arrow-left transition-transform group-hover:-translate-x-1"></i>
+            Volver al catálogo maestro
+        </a>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="bg-slate-800 text-white px-6 py-5 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                <i class="fa-solid fa-square-plus text-amber-500 text-xl"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold tracking-tight text-white">Asignar opción de carne</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Agrega una nueva opción de carne (lengua, buche, cuerito, etc).</p>
+            </div>
+        </div>
+
+        <form id="meatCreateForm" class="p-6 space-y-6">
+            <div class="space-y-2">
+                <label for="description" class="block text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-quote-left text-gray-400 text-xs"></i> Opción de Carne (Lengua, Buche, Cuerito, etc.)
+                </label>
+                <input type="text"  
+                       id="description" 
+                       maxlength="50" 
+                       placeholder="Ej: maciza, buche, costilla, cuerito" 
+                       required
+                       class="block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all">
+                <p class="text-xs text-gray-400">Máximo 50 caracteres. Ejemplos claros de nombres que el mesero o cliente seleccionarán.</p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                <a href="/orders/flavors/meat/list" 
+                   class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    Cancelar
+                </a>
+                
+                <button type="submit" 
+                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-sm hover:bg-amber-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 transition-colors">
+                    <i class="fa-solid fa-floppy-disk text-xs"></i>
+                    Guardar Opción
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('meatCreateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const descriptionRaw = document.getElementById('description').value;
+
+    // Construimos el Payload JSON
+    const payload = {
+        description: descriptionRaw.trim()
+    };
+    
+    try {
+        const response = await fetch('/orders/flavors/meat/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+            window.location.href = '/orders/flavors/meat/list';
+        } else {
+            const data = await response.json();
+            
+            alert(`Error de Validación: ${data.detail || "No se pudo registrar la opción de carne."}`);
+        }
+    } catch (error) {
+        alert("Ocurrió un error de red al intentar agregar los datos.");
+    }
+});
+</script>
+{% endblock %}
