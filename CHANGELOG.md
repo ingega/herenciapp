@@ -26,8 +26,9 @@ This version is for address the addition of new meat catalogue function
 - Meat list template in `src/templates/meat/list.html`
 - Test for post and get endpoints in `tests/intergation/test_meat_post_and_get_endpoints.py`
 - Test for patch and delete endpoints in `tests/intergation/test_meat_patch_and_delete_endpoints.py`
-- Add a test for meat list endpoint in `tests/intergation/test_meat_post_and_get_endpoints.py`
+- Added a test for meat list endpoint in `tests/intergation/test_meat_post_and_get_endpoints.py`
 - Template for add a meat option to meat catalogue in `src/templates/meat/create.html`
+- Added a test for meat templates endpoints in `tests/integration/test_meat_templates.py` 
 
 ### Changed
 - Added item to nav_bar for meat catalogue in `src/templates/base_nav.html`
