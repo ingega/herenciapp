@@ -29,7 +29,7 @@ This version is for address the addition of new meat catalogue function
 - Template for add a meat option to meat catalogue in `src/templates/meat/create.html`
 
 ### Changed
-- N/A
+- Added item to nav_bar for meat catalogue in `src/templates/base_nav.html`
 
 ### Fixed
 - N/A
