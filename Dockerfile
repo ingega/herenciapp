@@ -28,7 +28,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app \
     PATH="/app/.venv/bin:$PATH"
 
-# 1. Copiar ÚNICAMENTE el entorno virtual compilado y limpio de la etapa anterior
+# 1. ONLY copy the compiled venv
 COPY --from=builder /app/.venv /app/.venv
 
 # 2. Copy src code to the final image
@@ -41,12 +41,19 @@ COPY src/static/ /app/static/
 COPY alembic.ini /app/
 COPY alembic/ /app/alembic/
 
-RUN echo "=== BLUEPRINT ARCHITECTURAL DE HERENCIAPP ===" \
+RUN echo "=== BLUEPRINT ARCHITECTURAL OF HERENCIAPP ===" \
     && ls -R src/
 
-RUN apt-get update && apt-get install -y curl
+# avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 
-# 3. Exponer el puerto de la app
+# Update package index, install minimal core utilities, and purge cache lists
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    git && \
+    rm -rf /var/lib/apt/lists/*
+
 EXPOSE 8001
 
 CMD sh -c 'uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload'
