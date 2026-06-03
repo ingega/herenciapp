@@ -161,3 +161,21 @@ class TestMeatsEndpoints:
         assert get_meat_response.status_code == status.HTTP_200_OK
         assert "id" in get_meat_response.json()
         assert get_meat_response.json()["description"] == "lengua"
+
+    # ==============================================================================
+    # TEST 6: Test the get list of meat endpoint
+    # ==============================================================================
+    def test_meat_get_list(self,client, setup_meat):
+        """
+        Verify that the get list meat endpoint returns the correct data for an existing meat.
+        """
+        
+        # Act: Execute the get request for the created meat
+        get_meat_response = client.get(
+            f"/orders/flavors/meat/all",
+            follow_redirects=False
+        )
+        # Assert: Successful retrieval and correct response structure
+        assert get_meat_response.status_code == status.HTTP_200_OK
+        assert isinstance(get_meat_response.json(), list)
+        assert get_meat_response.json()[0]["description"] == "lengua"

@@ -25,6 +25,7 @@ This version is for address the addition of new meat catalogue function
 - Meat endpoints in `src/api/v1/apps/orders/services.py`
 - Meat list template in `src/templates/meat/list.html`
 - Test for post and get endpoints in `tests/intergation/test_meat_post_and_get_endpoints.py`
+- Add a test for meat list endpoint in `tests/intergation/test_meat_post_and_get_endpoints.py`
 
 ### Changed
 - N/A
