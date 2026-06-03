@@ -12,7 +12,7 @@
             <p class="text-sm text-gray-500 mt-1">Administra las opciones de carne asignadas a los platillos del menú.</p>
         </div>
         <div>
-            <a href="/orders/flavors/add" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors text-sm">
+            <a href="/orders/flavors/meat/add" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors text-sm">
                 <i class="fa-solid fa-plus text-sm"></i>
                 Agregar Nueva Opción de carne
             </a>
@@ -31,27 +31,15 @@
                 </thead>
                 
                 <tbody class="divide-y divide-gray-100 text-sm">
-                    {% if meat_catalog %}
-                        {% for meat in meat_catalog %}
+                    {% if meat_list %}
+                        {% for meat in meat_list %}
                         <tr class="hover:bg-slate-50/70 transition-colors">
                             <td class="px-6 py-4 font-mono text-gray-400 font-medium">
                                 #{{ meat.id }}
                             </td>
                             
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 font-mono">
-                                    <i class="fa-solid fa-hashtag text-[10px] text-slate-400"></i>{{ meat.description }}
-                                </span>
-                            </td>
-                            
                             <td class="px-6 py-4 font-semibold text-gray-900">
-                                {{ meat.product.main_dish if meat.product else "⚠️ No asignado" }}
-                            </td>
-                            
-                            <td class="px-6 py-4">
-                                <span id="desc-text-{{ meat.id }}" class="inline-flex items-center bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-0.5 rounded-full text-xs font-medium">
-                                    {{ meat.description }}
-                                </span>
+                                {{ meat.description if meat.description else "⚠️ No asignado" }}
                             </td>
                             
                             <td class="px-6 py-4">
@@ -167,7 +155,7 @@ document.getElementById('meatEditForm').addEventListener('submit', async (e) => 
         
         if (response.ok) {
             // En vez de recargar todo el servidor, redireccionamos a tu lista limpia
-            window.location.href = '/orders/flavors/meat/list';
+            window.location.href = '/orders/flavors/meat/all';
         } else {
             const data = await response.json();
             alert(`Error al actualizar: ${data.detail || "Verifica los parámetros."}`);

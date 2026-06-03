@@ -23,6 +23,7 @@ This version is for address the addition of new meat catalogue function
 - Meat catalogue schemas in `src/api/v1/apps/orders/schemas.py`
 - Meat services in `src/api/v1/apps/orders/services.py`
 - Meat endpoints in `src/api/v1/apps/orders/services.py`
+- Meat list template in `src/templates/meat/list.html`
 
 ### Changed
 - N/A

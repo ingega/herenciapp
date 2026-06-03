@@ -166,7 +166,6 @@ class MeatService:
             results = self.session.exec(statement)
             db_meat_list = results.all()
         except Exception as e:
-            print(f"CRITICAL DATABASE CRASH: {str(e)}")
             raise e
         return [MeatCatalogueRead.model_validate(meat) for meat in db_meat_list]
 

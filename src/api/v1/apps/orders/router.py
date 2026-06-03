@@ -224,7 +224,7 @@ async def get_flavor_by_id(
 
 ##########  --- Meat catalogue endpoints init --- ##############
 
-@router.post("/flavors/meat", response_model=MeatCatalogueRead, status_code=status.HTTP_201_CREATED)
+@router.post("/flavors/meat/add", response_model=MeatCatalogueRead, status_code=status.HTTP_201_CREATED)
 def create_new_meat(meat_in: MeatCatalogueCreate, 
                     current_user: dict = Depends(get_current_user_from_cookie),
                     session: Session = Depends(get_session)):
@@ -232,6 +232,24 @@ def create_new_meat(meat_in: MeatCatalogueCreate,
     meat_service = MeatService(session)
     return meat_service.create_meat(meat_in=meat_in)
 
+# ui template endpoint for meat catalogue management
+@router.get("/flavors/meat/list", response_class=HTMLResponse)
+async def get_meat_management_page(request: Request,
+                        current_user: dict = Depends(get_current_user_from_cookie),
+                        session: Session = Depends(get_session)
+                        ) -> Response:
+    meat_service = MeatService(session)
+    meat_list = meat_service.get_meat_catalogue()
+    print(meat_list)
+    return templates.TemplateResponse(
+        request=request,
+        name="meat/list.html",
+        context={
+            "config": settings,
+            "meat_list": meat_list,
+            "user": current_user # for nav_bar
+        }
+    )
 
 # general endpoint go first, then the specifics
 @router.get("/flavors/meat/all", response_model=List[MeatCatalogueRead], status_code=status.HTTP_200_OK)
