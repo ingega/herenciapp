@@ -28,7 +28,7 @@ This version add some improvements to herenciapp
 - N/A
 
 ### Fixed
-- N/A
+- Information of current user in `src/templates/base_nav.html
 
 ## [1.9.4] 2026-06-01
 This version is for address the addition of new meat catalogue function

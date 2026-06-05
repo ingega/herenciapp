@@ -98,6 +98,8 @@ async def read_root(request: Request):
 @app.get("/main")
 async def main(request: Request, 
                current_user: dict = Depends(get_current_user_from_cookie)):
+    # debug user infromation from the JWT payload
+    print(f"[MAIN PAGE] Current user data from JWT payload: {current_user}")
     return templates.TemplateResponse(
         request=request,
         name="main.html",
