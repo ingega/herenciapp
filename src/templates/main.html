@@ -9,9 +9,9 @@
         <div>
             <span class="text-xs font-bold uppercase tracking-widest text-amber-500">System Connected</span>
             <h1 class="text-2xl font-black text-white tracking-tight mt-1">
-                ¡Hola, <span class="text-amber-400">{{ current_user.sub if current_user else 'Staff' }}</span>! 👋
+                ¡Hola, <span class="text-amber-400">{{ current_user['sub'] if current_user else 'Staff' }}</span>! 👋
             </h1>
-            <p class="text-xs text-slate-400 mt-1">Welcome back to your operational station control hub.</p>
+            <p class="text-xs text-slate-400 mt-1">Bienvenido de vuelta a tu centro de control operativo.</p>
         </div>
         
         <div class="bg-slate-950/50 border border-slate-700/50 rounded-xl px-5 py-3 text-right flex items-center gap-4 min-w-[220px] justify-between shadow-inner">
@@ -52,7 +52,7 @@
 
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-center justify-between border-l-8 border-blue-500 hover:shadow-md transition-shadow duration-200 sm:col-span-2 lg:col-span-1">
             <div>
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Active Tables</span>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Mesas Activas</span>
                 <span class="text-4xl font-black text-slate-800 tracking-tight mt-1 block">8 / 20</span>
             </div>
             <div class="h-12 w-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 text-xl shadow-inner">
@@ -67,7 +67,7 @@
                 <i class="fa-solid fa-bolt"></i> Acceso Rápido Operativo
             </h3>
             <span class="text-[10px] font-mono text-slate-400 bg-slate-900/50 border border-slate-700 px-2 py-0.5 rounded">
-                Interactive Modules
+                Módulos Interactivos
             </span>
         </div>
         

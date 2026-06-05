@@ -30,11 +30,11 @@
                 <div class="hidden md:flex items-center space-x-4">
                     <div class="flex flex-col text-right">
                         <span class="text-xs text-slate-400">usuario:</span>
-                        <span class="text-sm font-medium text-slate-200">{{ user['sub'] if user else 'Staff' }}</span>
+                        <span class="text-sm font-medium text-slate-200">{{ current_user['sub'] if current_user else 'Staff' }}</span>
                     </div>
                     <div class="h-8 w-8 rounded-full bg-amber-500 flex items-center justify-between justify-center font-bold text-slate-950 uppercase shadow">
                         <!-- User Initials -->
-                        {{ user['sub'][:2].upper() if user else 'S' }}
+                        {{ current_user['sub'][:2].upper() if current_user else 'S' }}
                     </div>
                 </div>
 
@@ -55,10 +55,10 @@
             </div>
             <div class="pt-4 pb-3 border-t border-slate-600 px-5 flex items-center space-x-3">
                 <div class="h-8 w-8 rounded-full bg-amber-500 flex items-center justify-between justify-center font-bold text-slate-950 uppercase">
-                    {{ user['sub'] if user else 'S' }}
+                    {{ current_user['sub'][:2].upper() if current_user else 'S' }}
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-white">{{ user['sub'] if user else 'Staff' }}</span>
+                    <span class="text-sm font-medium text-white">{{ current_user['sub'] if current_user else 'Staff' }}</span>
                 </div>
             </div>
         </div>

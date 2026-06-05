@@ -16,6 +16,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.9.5] 2026-06-04
+This version add some improvements to herenciapp
+- Main logo redirects to main
+- If an user is authenticated, then redirects to main instead home
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- Information of current user in `src/templates/base_nav.html
+- redirect to main if user are autheticated in `src/main.py`
+
 ## [1.9.4] 2026-06-01
 This version is for address the addition of new meat catalogue function
 
