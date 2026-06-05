@@ -28,7 +28,6 @@ def setup_flavor(client, authorized_client_cookies):
     
     # Act: Create the product
     product_response = client.post("/orders/products", json=product_payload)
-    product_id = product_response.json()["id"]
     
     # Return the created product for use in other tests
     return product_response.json()

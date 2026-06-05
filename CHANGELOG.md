@@ -26,7 +26,8 @@ This version add the orders module
 - N/A
 
 ### Fixed
-- N/A
+- Added menu items to mobile-menu in `src/templates/base_nav.html`
+- refactor orders routes to add tags
 
 ## [1.9.5] 2026-06-04
 This version add some improvements to herenciapp
