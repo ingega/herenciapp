@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This version add some improvements to herenciapp
 - Main logo redirects to main
 - If an user is authenticated, then redirects to main instead home
+- Added an hyperlink to main in nav_bar
 
 ### Added
 - N/A

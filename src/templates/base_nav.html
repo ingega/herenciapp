@@ -15,8 +15,10 @@
                 
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center space-x-2">
-                        <i class="fa-solid fa-utensils text-amber-500 text-2xl"></i>
-                        <span class="font-bold text-xl tracking-tight text-white">Herenciapp<span class="text-amber-500">Restaurant</span></span>
+                        <a href="{{ url_for('read_root') }}" class="flex items-center space-x-2 hover:opacity-90 transition-opacity">
+                            <i class="fa-solid fa-utensils text-amber-500 text-2xl"></i>
+                            <span class="font-bold text-xl tracking-tight text-white">Herenciapp<span class="text-amber-500">Restaurant</span></span>
+                        </a>
                     </div>
                     <div class="hidden md:block ml-10 flex items-baseline space-x-4">
                         <a href="/main" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition">Principal</a>
