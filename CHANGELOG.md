@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.10.0] 2026-06-05
+This version add the orders module
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.9.5] 2026-06-04
 This version add some improvements to herenciapp
 - Main logo redirects to main
