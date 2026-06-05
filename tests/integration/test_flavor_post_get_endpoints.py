@@ -55,7 +55,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )
@@ -79,7 +79,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )
@@ -103,7 +103,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )
@@ -127,7 +127,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )
@@ -168,7 +168,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )

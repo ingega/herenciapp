@@ -10,7 +10,7 @@ def test_products_page_unauthenticated_redirects(client):
     or auth cookie results in a clean redirect or unauthorized handling.
     """
     # Act: Explicitly prevent following redirects to capture the raw 303 response
-    response = client.get("/orders/products", follow_redirects=False)
+    response = client.get("/orders/products/", follow_redirects=False)
     
     # Assert: Verify authentication blocks the user and pushes them to login
     assert response.status_code == status.HTTP_303_SEE_OTHER
@@ -31,7 +31,7 @@ def test_products_page_authenticated_success(client, authorized_client_cookies):
     
     # 2. Act: Set follow_redirects=False. If authentication fails now, 
     # the test will immediately fail with a 303 status code instead of masking it with a 200!
-    response = client.get("/orders/products", follow_redirects=False)
+    response = client.get("/orders/products/", follow_redirects=False)
     
     # Assert 1: Verify it stayed on the products page (No redirection triggered!)
     assert response.status_code == status.HTTP_200_OK

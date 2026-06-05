@@ -15,10 +15,10 @@ from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
 from src.database import get_session
 
-router = APIRouter(tags=["orders"])
-router_products = APIRouter(prefix="/orders/products", tags=["products"])
-router_flavors = APIRouter(prefix="/orders/flavors", tags=["flavors"])
-router_meat = APIRouter(prefix="/orders/flavors/meat", tags=["meat"])
+router = APIRouter(prefix="/orders", tags=["orders"], redirect_slashes=False)
+router_products = APIRouter(prefix="/orders/products", tags=["products"], redirect_slashes=False)
+router_flavors = APIRouter(prefix="/orders/flavors", tags=["flavors"], redirect_slashes=False)
+router_meat = APIRouter(prefix="/orders/flavors/meat", tags=["meat"], redirect_slashes=False)
 
 templates = Jinja2Templates(directory="src/templates")
 
