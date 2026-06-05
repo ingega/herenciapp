@@ -2,7 +2,7 @@
 import logging
 from contextlib import asynccontextmanager
 import pathlib
-from fastapi import FastAPI, Request, status, HTTPException, Depends
+from fastapi import FastAPI, Request, status, HTTPException, Depends, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
@@ -113,3 +113,20 @@ async def main(request: Request,
             "current_user": current_user  # current user data from the JWT payload
         }
     )
+
+# logout endpoint to clear the auth cookie and redirect to root
+@app.get("/logout")
+async def logout(response: Response):
+    # Create a redirection response pointing back to root
+    redirect_response = RedirectResponse(url="/", status_code=303)
+    
+    # Explicitly delete the cookie matching your auth cookie name (e.g., 'access_token')
+    redirect_response.delete_cookie(
+        key="access_token", 
+        path="/",
+        httponly=True,
+        samesite="lax"
+    )
+    
+    print("[AUTH] User logged out. Cookie deleted. Redirecting to root.")
+    return redirect_response

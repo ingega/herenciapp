@@ -21,6 +21,7 @@ This version add some improvements to herenciapp
 - Main logo redirects to main
 - If an user is authenticated, then redirects to main instead home
 - Added an hyperlink to main in nav_bar
+- Added a loguot endpoint.
 
 ### Added
 - N/A
