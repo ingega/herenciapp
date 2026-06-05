@@ -62,7 +62,7 @@ def api_open_new_table_ticket(
     REST API: Initializes an order entity, stamps the waiter's user_id, 
     processes any initial payload items, and commits with local system timestamps.
     """
-    return service.create_order(user_id=current_user['sub'], order_in=payload)
+    return service.create_order(user_id=current_user['user_id'], order_in=payload)
 
 ### --- products endpoints --- ###
 

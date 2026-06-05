@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import List
+from decimal import Decimal
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product, Order, OrderDetail
