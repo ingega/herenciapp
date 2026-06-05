@@ -120,7 +120,7 @@ async def logout(response: Response):
     # Create a redirection response pointing back to root
     redirect_response = RedirectResponse(url="/", status_code=303)
     
-    # Explicitly delete the cookie matching your auth cookie name (e.g., 'access_token')
+    # Explicitly delete the cookie
     redirect_response.delete_cookie(
         key="access_token", 
         path="/",
@@ -128,5 +128,4 @@ async def logout(response: Response):
         samesite="lax"
     )
     
-    print("[AUTH] User logged out. Cookie deleted. Redirecting to root.")
     return redirect_response
