@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This version add the orders module
 
 ### Added
-- N/A
+- All services operations in `src/api/v1/apps/orders/services.py`
 
 ### Changed
 - N/A

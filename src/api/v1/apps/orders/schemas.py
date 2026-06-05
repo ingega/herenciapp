@@ -2,7 +2,7 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
-from pydantic import BaseModel, Field, condecimal
+from pydantic import Field, condecimal
 from sqlmodel import SQLModel
 
 from src.api.v1.apps.orders.models import PayMethod, ItemPrepStatus
