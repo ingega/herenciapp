@@ -86,6 +86,13 @@ templates.env.globals.update(config=settings)
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
+    """When the root URL is reached, we need to check if
+    the user is authenticated. If they are, we redirect them to the main dashboard.
+    """
+    current_user = request.cookies.get("access_token")
+    if current_user:
+        return RedirectResponse(url="/main", status_code=status.HTTP_303_SEE_OTHER)
+    
     return templates.TemplateResponse(
         request=request,
         name="index.html",
@@ -98,8 +105,6 @@ async def read_root(request: Request):
 @app.get("/main")
 async def main(request: Request, 
                current_user: dict = Depends(get_current_user_from_cookie)):
-    # debug user infromation from the JWT payload
-    print(f"[MAIN PAGE] Current user data from JWT payload: {current_user}")
     return templates.TemplateResponse(
         request=request,
         name="main.html",

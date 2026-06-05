@@ -29,6 +29,7 @@ This version add some improvements to herenciapp
 
 ### Fixed
 - Information of current user in `src/templates/base_nav.html
+- redirect to main if user are autheticated in `src/main.py`
 
 ## [1.9.4] 2026-06-01
 This version is for address the addition of new meat catalogue function
