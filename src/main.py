@@ -17,6 +17,7 @@ from .database import init_db
 from .api.v1.apps.users.router import router as users_router
 from .api.v1.auth.router import router as auth_router
 from .api.v1.apps.orders.router import router as orders_router
+from .api.v1.apps.orders.router import router_flavors, router_meat, router_products
 
 # logger config
 logger = logging.getLogger("uvicorn.error")
@@ -73,7 +74,10 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
 app.include_router(api_router)  # main or system router
 app.include_router(users_router) # users router
 app.include_router(auth_router) # auth router
-app.include_router(orders_router, prefix="/orders") # orders router
+app.include_router(orders_router) # orders router
+app.include_router(router_flavors) # flavors router
+app.include_router(router_meat) # meat router
+app.include_router(router_products) # products router
 
 # Static Files
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()

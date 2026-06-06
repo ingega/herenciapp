@@ -1,0 +1,13 @@
+{% extends "base_nav.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Active Orders Dashboard</h1>
+    <p>Welcome, {{ current_user['sub'] if current_user else 'Guest' }}!</p>
+    <ul>
+        {% for order in orders %}
+            <li>order id: {{ order.id }} - table: {{ order.table_no }} persons: {{ order.number_of_persons }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

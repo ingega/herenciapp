@@ -16,6 +16,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.10.0] 2026-06-05
+This version add the orders module
+
+### Added
+- Added all services operations in `src/api/v1/apps/orders/services.py`
+- Added endpoints for CRUD orders and list templates in `src/api/v1/apps/orders/router.py`
+- Added endpoint for products list in `src/api/v1/apps/orders/router.py`
+- Added endpoint for flavors list in `src/api/v1/apps/orders/router.py`
+- Added delete items from orders endpoint in `src/api/v1/apps/orders/router.py`
+- Added nested items in orders schema in `src/api/v1/apps/orders/schemas.py`
+- Added nested items endpoint in `src/api/v1/apps/orders/router.py`
+
+### Changed
+- Added current_user at context in patch.products endpoint in `src/api/v1/apps/orders/router.py`
+
+### Fixed
+- Added menu items to mobile-menu in `src/templates/base_nav.html`
+- refactor orders routes to add tags
+- changing 'user' for 'current_user' in context in `src/templates/base_nav.html`
+- Added a missing slash to the item/list endpoint in `src/api/v1/apps/orders/router.py`
+
 ## [1.9.5] 2026-06-04
 This version add some improvements to herenciapp
 - Main logo redirects to main

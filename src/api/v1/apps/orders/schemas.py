@@ -1,8 +1,7 @@
 # src/api/v1/apps/orders/schemas.py
 from datetime import datetime
-from decimal import Decimal
 from typing import List, Optional
-from pydantic import BaseModel, Field, condecimal
+from pydantic import Field, condecimal
 from sqlmodel import SQLModel
 
 from src.api.v1.apps.orders.models import PayMethod, ItemPrepStatus
@@ -34,7 +33,7 @@ class FlavorCatalogueUpdate(SQLModel):
 class ProductBase(SQLModel):
     main_dish: str = Field(max_length=50)
     category: str = Field(max_length=30, description="e.g., food, dessert, beverage")
-    price: Decimal = Field(default=0.00, max_digits=6, decimal_places=2)
+    price: condecimal(max_digits=6, decimal_places=2) = Field(default=0.00)
 
 
 class ProductCreate(ProductBase):
@@ -63,7 +62,7 @@ class OrderDetailBase(SQLModel):
     flavor_id: int
     quantity: int = Field(default=1)
     notes: Optional[str] = None
-    extra_charge: Decimal = Field(default=0.00, max_digits=5, decimal_places=2)
+    extra_charge: condecimal(max_digits=5, decimal_places=2) = Field(default=0.00)
 
 
 class OrderDetailCreate(OrderDetailBase):
@@ -94,9 +93,9 @@ class OrderDetailReadNested(OrderDetailRead):
 class OrderBase(SQLModel):
     table_no: int = Field(default=0)
     number_of_persons: int = Field(default=1)
-    discount: Decimal = Field(default=0.00, max_digits=6, decimal_places=2)
+    discount: condecimal(max_digits=6, decimal_places=2) = Field(default=0.00)
     discount_motive: Optional[str] = None
-    tip: Decimal = Field(default=0.00, max_digits=6, decimal_places=2)
+    tip: condecimal(max_digits=6, decimal_places=2) = Field(default=0.00)
     pay_method: Optional[PayMethod] = None
 
 
@@ -114,9 +113,9 @@ class OrderUpdate(SQLModel):
     """Used for patches, applying discounts, updating waitstaff fields, or adding tips."""
     table_no: Optional[int] = None
     number_of_persons: Optional[int] = None
-    discount: Optional[Decimal] = None
+    discount: Optional[condecimal(max_digits=6, decimal_places=2)] = None
     discount_motive: Optional[str] = None
-    tip: Optional[Decimal] = None
+    tip: Optional[condecimal(max_digits=6, decimal_places=2)] = None
     pay_method: Optional[PayMethod] = None
 
 
@@ -128,9 +127,9 @@ class OrderSend(SQLModel):
 class OrderClose(SQLModel):
     """Final step to close table out and process final billing math safely."""
     pay_method: PayMethod
-    discount: Decimal = Field(default=0.00, max_digits=6, decimal_places=2)
+    discount: condecimal(max_digits=6, decimal_places=2) = Field(default=0.00)
     discount_motive: Optional[str] = None
-    tip: Decimal = Field(default=0.00, max_digits=6, decimal_places=2)
+    tip: condecimal(max_digits=6, decimal_places=2) = Field(default=0.00)
 
 
 class OrderRead(OrderBase):
@@ -141,7 +140,7 @@ class OrderRead(OrderBase):
     closed_at: Optional[datetime] = None
     sended: bool
     closed: bool
-    total: Decimal
+    total: condecimal(max_digits=10, decimal_places=2)
 
 
 class OrderDetailResponse(OrderRead):

@@ -4,37 +4,138 @@ from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from typing import List
-from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUpdate
+from src.api.v1.apps.orders.schemas import OrderDetailReadNested, ProductCreate, ProductRead, ProductUpdate
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
+from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
 from src.api.v1.apps.orders.models import Product
+from src.api.v1.apps.orders.services import OrderService
 from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
 from src.database import get_session
 
-router = APIRouter(tags=["orders"])
+router = APIRouter(prefix="/orders", tags=["orders"], redirect_slashes=False)
+router_products = APIRouter(prefix="/orders/products", tags=["products"], redirect_slashes=False)
+router_flavors = APIRouter(prefix="/orders/flavors", tags=["flavors"], redirect_slashes=False)
+router_meat = APIRouter(prefix="/orders/flavors/meat", tags=["meat"], redirect_slashes=False)
 
 templates = Jinja2Templates(directory="src/templates")
 
-@router.get("")
-async def get_orders(request: Request, 
-                     current_user: dict = Depends(get_current_user_from_cookie)
-                     ) -> Response:
+#### --- orders endpoints --- ###
+
+# first, add the dependency for service injection
+def get_order_service(session: Session = Depends(get_session)) -> OrderService:
+    return OrderService(session)
+
+# templates endpoints first
+
+# list of active orders
+@router.get("/", response_class=HTMLResponse)
+def view_active_orders_dashboard(
+    request: Request,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    Renders the active operational POS screen tracking all unclosed (open) tables,
+    showing their live balances and running times using Local OS times.
+    """
+    active_orders = service.get_active_orders()
+
     return templates.TemplateResponse(
         request=request,
-        name="orders.html",
-        status_code=status.HTTP_200_OK,
+        name="orders/dashboard.html",
         context={
             "config": settings,
-            "user": current_user, 
-            "details": "This is the orders page."
-            }
+            "orders": active_orders,
+            "current_user": current_user # for nav_bar
+        }
     )
 
-# products endpoints
+# add an order (API)
+@router.post("/create", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
+def api_open_new_table_ticket(
+    payload: OrderCreate,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Initializes an order entity, stamps the waiter's user_id, 
+    processes any initial payload items, and commits with local system timestamps.
+    """
+    return service.create_order(user_id=current_user['user_id'], order_in=payload)
 
-@router.get("/products", response_class=HTMLResponse)
+@router.patch("/update/{order_id}", response_model=OrderRead)
+def api_patch_order_attributes(
+    order_id: int,
+    payload: OrderUpdate,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Modifies top-level order properties (discounts, seat expansion, tips) 
+    and applies math recalculated ledgers dynamically.
+    """
+    return service.update_order(order_id=order_id, order_in=payload)
+
+@router.delete("/delete/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+def api_void_entire_order(
+    order_id: int,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Voids out an open ticket from the active ledger permanently.
+    """
+    service.delete_order(order_id)
+    return None
+
+# -- nested items in order endpoints ---
+
+@router.get("/items/all/", response_model=List[OrderDetailReadNested], tags=["Items"])
+def api_get_all_items_for_order(
+    order_id: int,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Retrieves all items for a given order, including nested product and flavor details.
+    """
+    return service.get_all_items_for_order(order_id=order_id)
+
+# this endpoint add or updated an itme if already exists
+@router.post("/{order_id}/items", response_model=OrderRead, tags=["Items"])
+def api_append_item_to_ticket(
+    order_id: int,
+    item_payload: OrderDetailCreate,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Pushes a new item onto a ticket. If matching combinations (product, flavor, seat)
+    exist on an unsent ticket, it sums quantities dynamically in memory to prevent table pollution.
+    """
+    return service.add_or_update_item(order_id=order_id, item_in=item_payload)
+
+@router.delete("/delete/{order_id}/items/{item_id}", response_model=OrderRead, tags=["Items"])
+def api_remove_item_from_ticket(
+    order_id: int,
+    item_id: int,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Voids a row out of an open ticket. Blocked if the kitchen has already flag-locked 
+    the preparation process.
+    """
+    return service.delete_item(order_id=order_id, item_id=item_id)
+
+########## --- products endpoints --- ###########################
+
+#################################################################
+
+@router_products.get("/", response_class=HTMLResponse)
 async def get_add_product_page(
     request: Request,
     current_user: dict = Depends(get_current_user_from_cookie)
@@ -48,11 +149,11 @@ async def get_add_product_page(
         name="products.html",
         context={
             "config": settings,
-            "user": current_user # for nav_bar
+            "current_user": current_user # for nav_bar
         }
     )
 
-@router.post("/products", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
+@router_products.post("/", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
 def create_new_product(product_in: ProductCreate, 
                        current_user: dict = Depends(get_current_user_from_cookie),
                        session: Session = Depends(get_session)):
@@ -60,7 +161,7 @@ def create_new_product(product_in: ProductCreate,
     product_service = ProductService(session)
     return product_service.create_product(product_in)
 
-@router.patch("/products/{product_id}", 
+@router_products.patch("/{product_id}", 
               response_model=ProductRead, status_code=status.HTTP_200_OK)
 async def update_product(product_update: ProductUpdate,
                          product_id: int, 
@@ -72,7 +173,7 @@ async def update_product(product_update: ProductUpdate,
     
     return product_service.update_product(product_id=product_id, product_in=product_update)
 
-@router.delete("/products/{product_id}")
+@router_products.delete("/{product_id}")
 async def delete_product(product_id: int, 
                          current_user: dict = Depends(get_current_user_from_cookie),
                          session: Session = Depends(get_session)
@@ -83,11 +184,11 @@ async def delete_product(product_id: int,
     return product_service.delete_product(product_id=product_id)
 
 # endpoint to acces the update product template
-@router.get("/products/update", response_class=HTMLResponse)
+@router_products.get("/update", response_class=HTMLResponse)
 async def get_update_product_template(request: Request,
-                        current_user: dict = Depends(get_current_user_from_cookie),
-                        session: Session = Depends(get_session)
-                        ) -> Response:
+                current_user: dict = Depends(get_current_user_from_cookie),
+                session: Session = Depends(get_session)
+                ) -> Response:
     product_service = ProductService(session)
     product_list = product_service.get_products()
     return templates.TemplateResponse(
@@ -95,11 +196,12 @@ async def get_update_product_template(request: Request,
         name="products_update.html",
         context={
             "config": settings,
-            "products": product_list
+            "products": product_list,
+            "current_user": current_user # for nav_bar
         }
     )
 
-@router.get("/products/{product_id}",
+@router_products.get("/{product_id}",
             response_model=ProductRead, 
             status_code=status.HTTP_200_OK)
 async def get_product_by_id(
@@ -123,13 +225,35 @@ async def get_product_by_id(
 
     return product
 
+@router_products.get("/all/", response_model=List[ProductRead], status_code=status.HTTP_200_OK)
+async def get_all_products(
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session)
+): 
+    """
+    Returns all products in the catalogue as JSON
+    """
+    product_service = ProductService(session)
+    product_list = product_service.get_products()
+    # debug propouse, delete on production.
+    print(f"Debug: Retrieved product list: {product_list}")  # Debug statement
+
+    # If the service returns None or an empty list, raise the 404
+    if not product_list:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product catalogue is empty."
+        ) 
+
+    return product_list
+
 # --- Flavors endpoints init ---
 # Flavors is for selection or pick of the main_dish selection.
 #
 ##########################################
 
 # ui template endpoint for flavors management
-@router.get("/flavors/list", response_class=HTMLResponse)
+@router_flavors.get("/list", response_class=HTMLResponse)
 async def get_flavors_management_page(request: Request,
                         current_user: dict = Depends(get_current_user_from_cookie),
                         session: Session = Depends(get_session)
@@ -142,12 +266,12 @@ async def get_flavors_management_page(request: Request,
         context={
             "config": settings,
             "flavors": flavor_list,
-            "user": current_user # for nav_bar
+            "current_user": current_user # for nav_bar
         }
     )
 
 # ui template endpoint for flavors additon
-@router.get("/flavors/add", response_class=HTMLResponse)
+@router_flavors.get("/add", response_class=HTMLResponse)
 async def add_flavors_page(request: Request,
                         current_user: dict = Depends(get_current_user_from_cookie),
                         session: Session = Depends(get_session)
@@ -159,12 +283,12 @@ async def add_flavors_page(request: Request,
         name="flavors/create.html",
         context={
             "config": settings,
-            "user": current_user,
+            "current_user": current_user,
             "products": products_list
         }
     )
 
-@router.post("/flavors", response_model=FlavorCatalogueRead, status_code=status.HTTP_201_CREATED)
+@router_flavors.post("/", response_model=FlavorCatalogueRead, status_code=status.HTTP_201_CREATED)
 def create_new_flavor(flavor_in: FlavorCatalogueCreate, 
                       current_user: dict = Depends(get_current_user_from_cookie),
                       session: Session = Depends(get_session)):
@@ -172,7 +296,7 @@ def create_new_flavor(flavor_in: FlavorCatalogueCreate,
     flavor_service = FlavorService(session)
     return flavor_service.create_flavor(flavor_in=flavor_in)
 
-@router.patch("/flavors/{flavor_id}", 
+@router_flavors.patch("/{flavor_id}", 
               response_model=FlavorCatalogueRead, status_code=status.HTTP_200_OK)
 async def update_flavor(flavor_update: FlavorCatalogueUpdate,
                          flavor_id: int, 
@@ -184,7 +308,7 @@ async def update_flavor(flavor_update: FlavorCatalogueUpdate,
     
     return flavor_service.update_flavor(flavor_id=flavor_id, flavor_in=flavor_update)
 
-@router.delete("/flavors/{flavor_id}")
+@router_flavors.delete("/{flavor_id}")
 async def delete_flavor(flavor_id: int, 
                          current_user: dict = Depends(get_current_user_from_cookie),
                          session: Session = Depends(get_session)
@@ -194,7 +318,7 @@ async def delete_flavor(flavor_id: int,
     
     return flavor_service.delete_flavor(flavor_id=flavor_id)
 
-@router.get("/flavors/{id}", 
+@router_flavors.get("/{id}", 
             response_model=FlavorCatalogueRead, 
             status_code=status.HTTP_200_OK)
 async def get_flavor_by_id(
@@ -218,6 +342,26 @@ async def get_flavor_by_id(
 
     return flavor
 
+@router_flavors.get("/all/", response_model=List[FlavorCatalogueRead], status_code=status.HTTP_200_OK)
+async def get_flavors_all(
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session)
+) -> List[FlavorCatalogueRead]:
+    """
+    Returns all flavors in the catalogue as JSON
+    """
+    flavor_service = FlavorService(session)
+    flavor_list = flavor_service.get_flavors()
+
+    # If the service returns None or an empty list, raise the 404
+    if not flavor_list:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Flavor catalogue is empty."
+        ) 
+
+    return flavor_list
+
 ######### --- Flavors endpoints end --- ##############
 
 
@@ -225,7 +369,7 @@ async def get_flavor_by_id(
 ##########  --- Meat catalogue endpoints init --- ##############
 
 # ui template endpoint for meat catalogue management
-@router.get("/flavors/meat/add/ui", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
+@router_meat.get("/add/ui", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
 async def get_meat_add_page(request: Request,
                            current_user: dict = Depends(get_current_user_from_cookie),
                            session: Session = Depends(get_session)
@@ -235,11 +379,11 @@ async def get_meat_add_page(request: Request,
         name="meat/create.html",
         context={
             "config": settings,
-            "user": current_user
+            "current_user": current_user
         }
     )
 
-@router.post("/flavors/meat/add", response_model=MeatCatalogueRead, status_code=status.HTTP_201_CREATED)
+@router_meat.post("/add", response_model=MeatCatalogueRead, status_code=status.HTTP_201_CREATED)
 def create_new_meat(meat_in: MeatCatalogueCreate, 
                     current_user: dict = Depends(get_current_user_from_cookie),
                     session: Session = Depends(get_session)):
@@ -248,7 +392,7 @@ def create_new_meat(meat_in: MeatCatalogueCreate,
     return meat_service.create_meat(meat_in=meat_in)
 
 # ui template endpoint for meat catalogue management
-@router.get("/flavors/meat/list", response_class=HTMLResponse)
+@router_meat.get("/list", response_class=HTMLResponse)
 async def get_meat_management_page(request: Request,
                         current_user: dict = Depends(get_current_user_from_cookie),
                         session: Session = Depends(get_session)
@@ -262,12 +406,12 @@ async def get_meat_management_page(request: Request,
         context={
             "config": settings,
             "meat_list": meat_list,
-            "user": current_user # for nav_bar
+            "current_user": current_user # for nav_bar
         }
     )
 
 # general endpoint go first, then the specifics
-@router.get("/flavors/meat/all", response_model=List[MeatCatalogueRead], status_code=status.HTTP_200_OK)
+@router_meat.get("/all", response_model=List[MeatCatalogueRead], status_code=status.HTTP_200_OK)
 async def get_meat_all(
     current_user: dict = Depends(get_current_user_from_cookie),
     session: Session = Depends(get_session)
@@ -287,8 +431,7 @@ async def get_meat_all(
 
     return meat_list
 
-
-@router.get("/flavors/meat/{id}", 
+@router_meat.get("/{id}", 
             response_model=MeatCatalogueRead, 
             status_code=status.HTTP_200_OK)
 async def get_meat_by_id(
@@ -312,7 +455,7 @@ async def get_meat_by_id(
 
     return meat
 
-@router.patch("/flavors/meat/{meat_id}", 
+@router_meat.patch("/{meat_id}", 
               response_model=MeatCatalogueRead, status_code=status.HTTP_200_OK)
 async def update_meat(meat_update: MeatCatalogueUpdate,
                       meat_id: int, 
@@ -324,7 +467,7 @@ async def update_meat(meat_update: MeatCatalogueUpdate,
     
     return meat_service.update_meat(meat_id=meat_id, meat_in=meat_update)
 
-@router.delete("/flavors/meat/{meat_id}")
+@router_meat.delete("/{meat_id}")
 async def delete_meat(meat_id: int, 
                        current_user: dict = Depends(get_current_user_from_cookie),
                        session: Session = Depends(get_session)

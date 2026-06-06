@@ -28,7 +28,6 @@ def setup_flavor(client, authorized_client_cookies):
     
     # Act: Create the product
     product_response = client.post("/orders/products", json=product_payload)
-    product_id = product_response.json()["id"]
     
     # Return the created product for use in other tests
     return product_response.json()
@@ -56,7 +55,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )
@@ -80,7 +79,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )
@@ -104,7 +103,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )
@@ -128,7 +127,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )
@@ -169,7 +168,7 @@ class TestFlavorsEndpoints:
         }
         # Act: Execute the post request
         response = client.post(
-            f"/orders/flavors", 
+            f"/orders/flavors/", 
             json=flavor_payload,
             follow_redirects=False
         )
