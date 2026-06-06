@@ -16,6 +16,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.10.1] 2026-06-06
+This version add the test for the next enspoints:
+- orders:
+  - /create/
+  - /update/{order_id}
+  - /delete/{order_id}
+- items:
+  - /all/
+  - /{order_id}/items
+  - /delete/{order_id}/items/{item_id}
+- products:
+  - /all/
+- flavors:
+  - /all/
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.10.0] 2026-06-05
 This version add the orders module
 
