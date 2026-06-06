@@ -315,6 +315,26 @@ async def get_flavor_by_id(
 
     return flavor
 
+@router_flavors.get("/all/", response_model=List[FlavorCatalogueRead], status_code=status.HTTP_200_OK)
+async def get_flavors_all(
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session)
+) -> List[FlavorCatalogueRead]:
+    """
+    Returns all flavors in the catalogue as JSON
+    """
+    flavor_service = FlavorService(session)
+    flavor_list = flavor_service.get_flavors()
+
+    # If the service returns None or an empty list, raise the 404
+    if not flavor_list:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Flavor catalogue is empty."
+        ) 
+
+    return flavor_list
+
 ######### --- Flavors endpoints end --- ##############
 
 

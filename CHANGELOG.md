@@ -23,6 +23,7 @@ This version add the orders module
 - Added all services operations in `src/api/v1/apps/orders/services.py`
 - Added endpoints for CRUD orders and list templates in `src/api/v1/apps/orders/router.py`
 - Added endpoint for products list in `src/api/v1/apps/orders/router.py`
+- Added endpoint for flavors list in `src/api/v1/apps/orders/router.py`
 
 ### Changed
 - Added current_user at context in patch.products endpoint in `src/api/v1/apps/orders/router.py`

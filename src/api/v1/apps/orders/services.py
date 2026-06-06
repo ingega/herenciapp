@@ -458,7 +458,6 @@ class FlavorService:
         self.session.commit()
         return None
 
-
 class MeatService:
     def __init__(self, session: Session):
         """
