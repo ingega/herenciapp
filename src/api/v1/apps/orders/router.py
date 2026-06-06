@@ -93,6 +93,7 @@ def api_void_entire_order(
 
 # -- nested items in order endpoints ---
 
+# this endpoint add or updated an itme if already exists
 @router.post("/{order_id}/items", response_model=OrderRead)
 def api_append_item_to_ticket(
     order_id: int,
@@ -106,7 +107,22 @@ def api_append_item_to_ticket(
     """
     return service.add_or_update_item(order_id=order_id, item_in=item_payload)
 
-### --- products endpoints --- ###
+@router.delete("/delete/{order_id}/items/{item_id}", response_model=OrderRead)
+def api_remove_item_from_ticket(
+    order_id: int,
+    item_id: int,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Voids a row out of an open ticket. Blocked if the kitchen has already flag-locked 
+    the preparation process.
+    """
+    return service.delete_item(order_id=order_id, item_id=item_id)
+
+########## --- products endpoints --- ###########################
+
+#################################################################
 
 @router_products.get("/", response_class=HTMLResponse)
 async def get_add_product_page(
