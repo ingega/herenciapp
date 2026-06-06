@@ -93,7 +93,7 @@ def api_void_entire_order(
 
 # -- nested items in order endpoints ---
 
-@router.get("items/all/", response_model=List[OrderDetailReadNested], tags=["Items"])
+@router.get("/items/all/", response_model=List[OrderDetailReadNested], tags=["Items"])
 def api_get_all_items_for_order(
     order_id: int,
     service: OrderService = Depends(get_order_service),
