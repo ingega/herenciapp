@@ -22,17 +22,17 @@
                     </div>
                     <div class="md:block ml-10 flex items-baseline space-x-4 hidden">
                         <a href="/main" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition">Principal</a>
-                        <a href="/orders" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition">Comandas</a>
-                        <a href="/orders/products" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-900 text-amber-400 font-semibold shadow-inner">Platillos</a>
-                        <a href="/orders/flavors/list" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-900 text-amber-400 font-semibold shadow-inner">opción por platillo</a>
-                        <a href="/orders/flavors/meat/list" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-900 text-amber-400 font-semibold shadow-inner">opciones de carne</a>
+                        <a href="/orders/" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition">Comandas</a>
+                        <a href="/orders/products/" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-900 text-amber-400 font-semibold shadow-inner">Platillos</a>
+                        <a href="/orders/flavors/list/" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-900 text-amber-400 font-semibold shadow-inner">opción por platillo</a>
+                        <a href="/orders/flavors/meat/list/" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-900 text-amber-400 font-semibold shadow-inner">opciones de carne</a>
                     </div>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-4">
                     <div class="flex flex-col text-right">
                         <span class="text-xs text-slate-400">usuario:</span>
-                        <span class="text-sm font-medium text-slate-200">{{ current_user['sub'] if current_user else 'Staff' }}</span>
+                        <span class="text-sm font-medium text-slate-200">{{ current_user['sub'] }}</span>
                     </div>
                     <div class="h-8 w-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 uppercase shadow">
                         {{ current_user['sub'][:2].upper() if current_user else 'S' }}

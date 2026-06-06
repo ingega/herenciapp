@@ -107,7 +107,7 @@ async def get_add_product_page(
         name="products.html",
         context={
             "config": settings,
-            "user": current_user # for nav_bar
+            "current_user": current_user # for nav_bar
         }
     )
 
@@ -144,9 +144,9 @@ async def delete_product(product_id: int,
 # endpoint to acces the update product template
 @router_products.get("/update", response_class=HTMLResponse)
 async def get_update_product_template(request: Request,
-                        current_user: dict = Depends(get_current_user_from_cookie),
-                        session: Session = Depends(get_session)
-                        ) -> Response:
+                current_user: dict = Depends(get_current_user_from_cookie),
+                session: Session = Depends(get_session)
+                ) -> Response:
     product_service = ProductService(session)
     product_list = product_service.get_products()
     return templates.TemplateResponse(
@@ -154,7 +154,8 @@ async def get_update_product_template(request: Request,
         name="products_update.html",
         context={
             "config": settings,
-            "products": product_list
+            "products": product_list,
+            "current_user": current_user # for nav_bar
         }
     )
 
@@ -201,7 +202,7 @@ async def get_flavors_management_page(request: Request,
         context={
             "config": settings,
             "flavors": flavor_list,
-            "user": current_user # for nav_bar
+            "current_user": current_user # for nav_bar
         }
     )
 
@@ -218,7 +219,7 @@ async def add_flavors_page(request: Request,
         name="flavors/create.html",
         context={
             "config": settings,
-            "user": current_user,
+            "current_user": current_user,
             "products": products_list
         }
     )
@@ -294,7 +295,7 @@ async def get_meat_add_page(request: Request,
         name="meat/create.html",
         context={
             "config": settings,
-            "user": current_user
+            "current_user": current_user
         }
     )
 
@@ -321,7 +322,7 @@ async def get_meat_management_page(request: Request,
         context={
             "config": settings,
             "meat_list": meat_list,
-            "user": current_user # for nav_bar
+            "current_user": current_user # for nav_bar
         }
     )
 

@@ -24,11 +24,12 @@ This version add the orders module
 - Added enpoints for CRUD orders and list templates in `src/api/v1/apps/orders/router.py`
 
 ### Changed
-- N/A
+- Added current_user at context in patch.products endpoint in `src/api/v1/apps/orders/router.py`
 
 ### Fixed
 - Added menu items to mobile-menu in `src/templates/base_nav.html`
 - refactor orders routes to add tags
+- changing 'user' for 'current_user' in context in `src/templates/base_nav.html`
 
 ## [1.9.5] 2026-06-04
 This version add some improvements to herenciapp
