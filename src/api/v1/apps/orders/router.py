@@ -108,7 +108,7 @@ def api_get_order_by_id(
         ) 
     return order
 
-router.get("/all/", response_model=List[OrderRead])
+@router.get("/all/", response_model=List[OrderRead])
 def api_get_all_orders(
     service: OrderService = Depends(get_order_service),
     current_user: dict = Depends(get_current_user_from_cookie)
