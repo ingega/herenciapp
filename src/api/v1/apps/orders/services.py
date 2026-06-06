@@ -6,7 +6,7 @@ from decimal import Decimal
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product, Order, OrderDetail
-from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate 
+from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate, OrderDetailReadNested 
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate 
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderUpdate, OrderClose, ItemPrepStatus
@@ -129,6 +129,13 @@ class OrderService:
     # ==========================================
     # ORDER ITEM SUB-FLOW WORKFLOWS
     # ==========================================
+
+    def get_all_items_for_order(self, order_id: int) -> List[OrderDetailReadNested]:
+        """
+        Retrieves all items for a given order, including nested product and flavor details.
+        """
+        db_order = self.get_order_by_id(order_id)
+        return [OrderDetailReadNested.model_validate(item) for item in db_order.items]
 
     def add_or_update_item(self, order_id: int, item_in: OrderDetailCreate) -> Order:
         """

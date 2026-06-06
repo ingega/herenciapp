@@ -4,7 +4,7 @@ from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from typing import List
-from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUpdate
+from src.api.v1.apps.orders.schemas import OrderDetailReadNested, ProductCreate, ProductRead, ProductUpdate
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
@@ -93,8 +93,19 @@ def api_void_entire_order(
 
 # -- nested items in order endpoints ---
 
+@router.get("items/all/", response_model=List[OrderDetailReadNested], tags=["Items"])
+def api_get_all_items_for_order(
+    order_id: int,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Retrieves all items for a given order, including nested product and flavor details.
+    """
+    return service.get_all_items_for_order(order_id=order_id)
+
 # this endpoint add or updated an itme if already exists
-@router.post("/{order_id}/items", response_model=OrderRead)
+@router.post("/{order_id}/items", response_model=OrderRead, tags=["Items"])
 def api_append_item_to_ticket(
     order_id: int,
     item_payload: OrderDetailCreate,
@@ -107,7 +118,7 @@ def api_append_item_to_ticket(
     """
     return service.add_or_update_item(order_id=order_id, item_in=item_payload)
 
-@router.delete("/delete/{order_id}/items/{item_id}", response_model=OrderRead)
+@router.delete("/delete/{order_id}/items/{item_id}", response_model=OrderRead, tags=["Items"])
 def api_remove_item_from_ticket(
     order_id: int,
     item_id: int,

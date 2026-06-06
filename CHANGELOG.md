@@ -25,6 +25,8 @@ This version add the orders module
 - Added endpoint for products list in `src/api/v1/apps/orders/router.py`
 - Added endpoint for flavors list in `src/api/v1/apps/orders/router.py`
 - Added delete items from orders endpoint in `src/api/v1/apps/orders/router.py`
+- Added nested items in orders schema in `src/api/v1/apps/orders/schemas.py`
+- Added nested items endpoint in `src/api/v1/apps/orders/router.py`
 
 ### Changed
 - Added current_user at context in patch.products endpoint in `src/api/v1/apps/orders/router.py`
