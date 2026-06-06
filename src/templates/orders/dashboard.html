@@ -7,7 +7,7 @@
     <p>Welcome, {{ current_user['sub'] if current_user else 'Guest' }}!</p>
     <ul>
         {% for order in orders %}
-            <li>{{ order.id }} - {{ order.table_no }}</li>
+            <li>order id: {{ order.id }} - table: {{ order.table_no }} persons: {{ order.number_of_persons }}</li>
         {% endfor %}
     </ul>
 {% endblock %}

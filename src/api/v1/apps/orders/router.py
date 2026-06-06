@@ -8,7 +8,7 @@ from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUp
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
-from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate
+from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
 from src.api.v1.apps.orders.models import Product
 from src.api.v1.apps.orders.services import OrderService
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -90,6 +90,21 @@ def api_void_entire_order(
     """
     service.delete_order(order_id)
     return None
+
+# -- nested items in order endpoints ---
+
+@router.post("/{order_id}/items", response_model=OrderRead)
+def api_append_item_to_ticket(
+    order_id: int,
+    item_payload: OrderDetailCreate,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Pushes a new item onto a ticket. If matching combinations (product, flavor, seat)
+    exist on an unsent ticket, it sums quantities dynamically in memory to prevent table pollution.
+    """
+    return service.add_or_update_item(order_id=order_id, item_in=item_payload)
 
 ### --- products endpoints --- ###
 
@@ -182,6 +197,28 @@ async def get_product_by_id(
         ) 
 
     return product
+
+@router_products.get("/all/", response_model=List[ProductRead], status_code=status.HTTP_200_OK)
+async def get_all_products(
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session)
+): 
+    """
+    Returns all products in the catalogue as JSON
+    """
+    product_service = ProductService(session)
+    product_list = product_service.get_products()
+    # debug propouse, delete on production.
+    print(f"Debug: Retrieved product list: {product_list}")  # Debug statement
+
+    # If the service returns None or an empty list, raise the 404
+    if not product_list:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product catalogue is empty."
+        ) 
+
+    return product_list
 
 # --- Flavors endpoints init ---
 # Flavors is for selection or pick of the main_dish selection.
