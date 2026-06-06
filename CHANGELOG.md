@@ -20,7 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This version add the orders module
 
 ### Added
-- All services operations in `src/api/v1/apps/orders/services.py`
+- Added all services operations in `src/api/v1/apps/orders/services.py`
+- Added enpoints for CRUD orders and list templates in `src/api/v1/apps/orders/router.py`
 
 ### Changed
 - N/A

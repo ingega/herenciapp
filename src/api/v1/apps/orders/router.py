@@ -8,7 +8,7 @@ from src.api.v1.apps.orders.schemas import ProductCreate, ProductRead, ProductUp
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
-from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead
+from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate
 from src.api.v1.apps.orders.models import Product
 from src.api.v1.apps.orders.services import OrderService
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -29,6 +29,8 @@ def get_order_service(session: Session = Depends(get_session)) -> OrderService:
     return OrderService(session)
 
 # templates endpoints first
+
+# list of active orders
 @router.get("/", response_class=HTMLResponse)
 def view_active_orders_dashboard(
     request: Request,
@@ -40,8 +42,7 @@ def view_active_orders_dashboard(
     showing their live balances and running times using Local OS times.
     """
     active_orders = service.get_active_orders()
-    # debug user
-    print(f"Current user from cookie: {current_user}")
+
     return templates.TemplateResponse(
         request=request,
         name="orders/dashboard.html",
@@ -52,6 +53,7 @@ def view_active_orders_dashboard(
         }
     )
 
+# add an order (API)
 @router.post("/create", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
 def api_open_new_table_ticket(
     payload: OrderCreate,
@@ -63,6 +65,31 @@ def api_open_new_table_ticket(
     processes any initial payload items, and commits with local system timestamps.
     """
     return service.create_order(user_id=current_user['user_id'], order_in=payload)
+
+@router.patch("/update/{order_id}", response_model=OrderRead)
+def api_patch_order_attributes(
+    order_id: int,
+    payload: OrderUpdate,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Modifies top-level order properties (discounts, seat expansion, tips) 
+    and applies math recalculated ledgers dynamically.
+    """
+    return service.update_order(order_id=order_id, order_in=payload)
+
+@router.delete("/delete/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+def api_void_entire_order(
+    order_id: int,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Voids out an open ticket from the active ledger permanently.
+    """
+    service.delete_order(order_id)
+    return None
 
 ### --- products endpoints --- ###
 
