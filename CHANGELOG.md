@@ -22,6 +22,8 @@ This version add the test for the next enspoints:
   - /create/
   - /update/{order_id}
   - /delete/{order_id}
+  - /get/{order_id} # created in this version.
+  - /get/all/ # created in this version
 - items:
   - /all/
   - /{order_id}/items
@@ -32,7 +34,8 @@ This version add the test for the next enspoints:
   - /all/
 
 ### Added
-- N/A
+- enpoint for get an order by id in `src/api/v1/apps/orders/router.py`
+- enpoint for get all orders in `src/api/v1/apps/orders/router.py`
 
 ### Changed
 - N/A

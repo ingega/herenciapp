@@ -91,6 +91,33 @@ def api_void_entire_order(
     service.delete_order(order_id)
     return None
 
+@router.get("/{order_id}", response_model=OrderRead)
+def api_get_order_by_id(
+    order_id: int,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Retrieves a single order by its unique identifier, including all nested items.
+    """
+    order = service.get_order_by_id(order_id=order_id)
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Order with ID {order_id} could not be located."
+        ) 
+    return order
+
+router.get("/all/", response_model=List[OrderRead])
+def api_get_all_orders(
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Retrieves all orders in the system, including nested items.
+    """
+    return service.get_orders()
+
 # -- nested items in order endpoints ---
 
 @router.get("/items/all/", response_model=List[OrderDetailReadNested], tags=["Items"])
