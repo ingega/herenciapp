@@ -16,6 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.10.2] 2026-06-07
+This branch is too add the first authorization stage: Add a role to the user, also
+an OrderDetail selection field will be added.
+
+### Added
+- A Role manager for dependency injection, in order to protect some routes from standar users
+
+### Changed
+- Added a 'role' field to the user's model
+- Updated the Alembic head
+
+### Fixed
+- Dependency inject for role verifycation in ui for products/flavors/meat
+
 ## [1.10.1] 2026-06-06
 This version add the test for the next enspoints:
 - orders:

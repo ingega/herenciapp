@@ -53,22 +53,31 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
     """
     Smart exception handler. 
     If the request comes from an AJAX fetch (JSON/POST), it passes the raw status code.
-    If it's a page navigation (GET), it redirects cleanly.
+    If it's a page navigation (GET), it redirects cleanly based on Auth status.
     """
     # 1. Check if the request is an asynchronous data submission
-    if request.method == "POST" or "application/json" in request.headers.get("accept", ""):
+    if request.method in ["POST", "PUT", "PATCH", "DELETE"] or "application/json" in request.headers.get("accept", "").lower():
         return JSONResponse(
             status_code=exc.status_code,
             content={"status": "error", "detail": exc.detail}
         )
     
     # 2. Fallback for standard UI browser tabs (GET requests)
+    
+    # Scenario A: User is NOT logged in or session expired (401) -> Go to Login
     if exc.status_code == status.HTTP_401_UNAUTHORIZED:
         response = RedirectResponse(url="/auth/login", status_code=status.HTTP_303_SEE_OTHER)
         response.delete_cookie("access_token")
         return response
 
-    return RedirectResponse(url="/auth/login")
+    # Scenario B: User IS logged in but lacks required Role Permissions (403) -> Redirect back to Main Dashboard
+    if exc.status_code == status.HTTP_403_FORBIDDEN:
+        logger.warning(f"Authorization failure: User tried accessing {request.url.path} without proper privileges.")
+        # Redirecting to /main avoids breaking their valid login session!
+        return RedirectResponse(url="/main", status_code=status.HTTP_303_SEE_OTHER)
+
+    # General catch-all fallback for other page routing issues (e.g., 404, 500)
+    return RedirectResponse(url="/main" if request.cookies.get("access_token") else "/auth/login", status_code=status.HTTP_303_SEE_OTHER)
 
 # routers
 app.include_router(api_router)  # main or system router

@@ -4,17 +4,28 @@ from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from typing import List
+
+# schemas
 from src.api.v1.apps.orders.schemas import OrderDetailReadNested, ProductCreate, ProductRead, ProductUpdate
-from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
 from src.api.v1.apps.orders.schemas import OrderDetailResponse
+
+# models
 from src.api.v1.apps.orders.models import Product
+
+# services
+from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
 from src.api.v1.apps.orders.services import OrderService
+
+# functions, database, auth
 from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
 from src.database import get_session
+
+# authz
+from src.api.v1.authz.authz import RoleChecker
 
 router = APIRouter(prefix="/orders", tags=["orders"], redirect_slashes=False)
 router_products = APIRouter(prefix="/orders/products", tags=["products"], redirect_slashes=False)
@@ -22,6 +33,9 @@ router_flavors = APIRouter(prefix="/orders/flavors", tags=["flavors"], redirect_
 router_meat = APIRouter(prefix="/orders/flavors/meat", tags=["meat"], redirect_slashes=False)
 
 templates = Jinja2Templates(directory="src/templates")
+
+# authz
+allow_admin = RoleChecker(["admin"])
 
 #### --- orders endpoints --- ###
 
@@ -171,8 +185,9 @@ def api_remove_item_from_ticket(
 ########## --- products endpoints --- ###########################
 
 #################################################################
-
-@router_products.get("/", response_class=HTMLResponse)
+# this endpoints need authz
+@router_products.get("/", response_class=HTMLResponse,
+                     dependencies=[Depends(allow_admin)])
 async def get_add_product_page(
     request: Request,
     current_user: dict = Depends(get_current_user_from_cookie)
@@ -308,7 +323,8 @@ async def get_flavors_management_page(request: Request,
     )
 
 # ui template endpoint for flavors additon
-@router_flavors.get("/add", response_class=HTMLResponse)
+@router_flavors.get("/add", response_class=HTMLResponse,
+                    dependencies=[Depends(allow_admin)])
 async def add_flavors_page(request: Request,
                         current_user: dict = Depends(get_current_user_from_cookie),
                         session: Session = Depends(get_session)
@@ -407,7 +423,9 @@ async def get_flavors_all(
 ##########  --- Meat catalogue endpoints init --- ##############
 
 # ui template endpoint for meat catalogue management
-@router_meat.get("/add/ui", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
+@router_meat.get("/add/ui", response_class=HTMLResponse, 
+                 dependencies=[Depends(allow_admin)],
+                 status_code=status.HTTP_200_OK)
 async def get_meat_add_page(request: Request,
                            current_user: dict = Depends(get_current_user_from_cookie),
                            session: Session = Depends(get_session)

@@ -62,7 +62,8 @@ async def login_process(
     # 6. Generate token payload utilizing real data from the user model
     token_payload = {
         "sub": user.email,
-        "user_id": user.id
+        "user_id": user.id,
+        "role": user.role
     }
     access_token = create_access_token(data=token_payload)
 
