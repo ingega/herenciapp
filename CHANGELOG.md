@@ -16,6 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.10.2] 2026-06-07
+This branch is too add the first authorization stage: Add a role to the user, also
+an OrderDetail selection field will be added.
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.10.1] 2026-06-06
 This version add the test for the next enspoints:
 - orders:
