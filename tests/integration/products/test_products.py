@@ -123,10 +123,10 @@ def test_create_product_success(client: TestClient,
     assert db_product is not None
     assert db_product.main_dish == "Gringa Especial"
 
-    # -------------------------------------------------------------------------
-    # 6. Test: Assert 200 OK, Validate Output Schema & DB Persistence
-    # usign get_product_by_id endpoint
-    # -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# 6. Test: Assert 200 OK, Validate Output Schema & DB Persistence
+# usign get_product_by_id endpoint
+# -------------------------------------------------------------------------
 def test_get_product_success(client: TestClient, 
                                 session: Session, mock_authenticated_user):
     """
@@ -156,3 +156,36 @@ def test_get_product_success(client: TestClient,
     assert data["main_dish"] == new_data["main_dish"]
     assert data["category"] == new_data["category"]
     assert data["price"] == new_data["price"]
+
+# -------------------------------------------------------------------------
+# 7: testing that products/all endpoint returns a list of products
+# -------------------------------------------------------------------------
+def test_get_product_list_success(client: TestClient, 
+                                session: Session, mock_authenticated_user):
+    """
+    Asserts a successful post returns 200, matches our List[ProductRead] serialization shape
+    """
+
+    # Act: create a new product
+    payload = {
+        "main_dish": "Taco Al Pastor",
+        "category": "taco",
+        "price": 25.50
+    }
+    response = client.post("orders/products/", json=payload)
+    
+    assert response.status_code == 201 # created
+    
+    # Act: retrieve in a list the product 
+    response = client.get("orders/products/all/")
+    
+    # 1. Assert Response status code is 200
+    assert response.status_code == 200
+    
+    # 2. Assert the len of the list (1)
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["main_dish"] == payload["main_dish"]
+    assert data[0]["category"] == payload["category"]
+    # Convert back to float or string matching validation serialization context
+    assert float(data[0]["price"]) == payload["price"]
