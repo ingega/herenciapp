@@ -24,7 +24,8 @@ an OrderDetail selection field will be added.
 - N/A
 
 ### Changed
-- N/A
+- Added a 'role' field to the user's model
+- Updated the Alembic head
 
 ### Fixed
 - N/A
