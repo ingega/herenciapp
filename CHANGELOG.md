@@ -37,13 +37,15 @@ This version add the test for the next enspoints:
 - enpoint for get an order by id in `src/api/v1/apps/orders/router.py`
 - enpoint for get all orders in `src/api/v1/apps/orders/router.py`
 - Tests:
-  - get and post orders endpoints in `tests/integration/test_order_post_get_endpoints.py`
+  - get and post orders endpoints in `tests/integration/orders/test_order_post_get_endpoints.py`
+  - patch and delete endpoints in `test/integration/orders/test_update_and_delete_endpoints.py`
 
 ### Changed
 - N/A
 
 ### Fixed
 - Added the user_id to the current_user payload for fixture auth user in `tests/conftest.py`
+- Fixed the missing "/" in tests in `tests/integration/test_update_and_delete_products_endpoints.py`
 
 ## [1.10.0] 2026-06-05
 This version add the orders module

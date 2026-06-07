@@ -27,7 +27,7 @@ def setup_flavor(client, authorized_client_cookies):
     }
     
     # Act: Create the product
-    product_response = client.post("/orders/products", json=product_payload)
+    product_response = client.post("/orders/products/", json=product_payload)
     
     # Return the created product for use in other tests
     return product_response.json()
@@ -70,8 +70,6 @@ class TestFlavorsEndpoints:
         Ensure that providing incomplete or invalid data for flavor creation
         results in appropriate validation errors.
         """
-        
-        product_id = setup_flavor["id"]
         
         # Act: Set the payload for flavor creation, but omit required fields or provide invalid data
         flavor_payload = {
