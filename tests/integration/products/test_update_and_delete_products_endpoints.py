@@ -25,7 +25,7 @@ def setup_product(client, authorized_client_cookies):
     }
     
     # Act: Create the product
-    response = client.post("/orders/products", json=payload)
+    response = client.post("/orders/products/", json=payload)
     # Assert: the endpoint must response with a 201 response code
     assert response.status_code == status.HTTP_201_CREATED
     # our product is ready to be updated/deleted

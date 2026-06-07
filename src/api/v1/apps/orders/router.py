@@ -1,5 +1,5 @@
 # src/api/v1/apps/orders/router.py
-from fastapi import APIRouter, status, Request, Depends, HTTPException
+from fastapi import APIRouter, status, Request, Depends, HTTPException, Response
 from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
@@ -9,6 +9,7 @@ from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductS
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
+from src.api.v1.apps.orders.schemas import OrderDetailResponse
 from src.api.v1.apps.orders.models import Product
 from src.api.v1.apps.orders.services import OrderService
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -91,6 +92,33 @@ def api_void_entire_order(
     service.delete_order(order_id)
     return None
 
+@router.get("/{order_id}", response_model=OrderRead)
+def api_get_order_by_id(
+    order_id: int,
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Retrieves a single order by its unique identifier, including all nested items.
+    """
+    order = service.get_order_by_id(order_id=order_id)
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Order with ID {order_id} could not be located."
+        ) 
+    return order
+
+@router.get("/all/", response_model=List[OrderRead])
+def api_get_all_orders(
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    REST API: Retrieves all orders in the system, including nested items.
+    """
+    return service.get_orders()
+
 # -- nested items in order endpoints ---
 
 @router.get("/items/all/", response_model=List[OrderDetailReadNested], tags=["Items"])
@@ -104,11 +132,15 @@ def api_get_all_items_for_order(
     """
     return service.get_all_items_for_order(order_id=order_id)
 
-# this endpoint add or updated an itme if already exists
-@router.post("/{order_id}/items", response_model=OrderRead, tags=["Items"])
+# this endpoint add or updated an item if already exists
+@router.post("/{order_id}/items", 
+             response_model=OrderDetailResponse,
+             status_code=status.HTTP_201_CREATED, 
+             tags=["Items"])
 def api_append_item_to_ticket(
     order_id: int,
     item_payload: OrderDetailCreate,
+    response: Response,
     service: OrderService = Depends(get_order_service),
     current_user: dict = Depends(get_current_user_from_cookie)
 ):
@@ -116,9 +148,14 @@ def api_append_item_to_ticket(
     REST API: Pushes a new item onto a ticket. If matching combinations (product, flavor, seat)
     exist on an unsent ticket, it sums quantities dynamically in memory to prevent table pollution.
     """
-    return service.add_or_update_item(order_id=order_id, item_in=item_payload)
+    # it is new item or updated item?
+    db_order, is_new_item = service.add_or_update_item(order_id=order_id, item_in=item_payload)
+    if not is_new_item:
+        response.status_code = status.HTTP_200_OK
+    return db_order
 
-@router.delete("/delete/{order_id}/items/{item_id}", response_model=OrderRead, tags=["Items"])
+@router.delete("/delete/{order_id}/items/{item_id}", 
+               response_model=OrderRead, tags=["Items"])
 def api_remove_item_from_ticket(
     order_id: int,
     item_id: int,
@@ -342,7 +379,8 @@ async def get_flavor_by_id(
 
     return flavor
 
-@router_flavors.get("/all/", response_model=List[FlavorCatalogueRead], status_code=status.HTTP_200_OK)
+@router_flavors.get("/all/", response_model=List[FlavorCatalogueRead], 
+                    status_code=status.HTTP_200_OK)
 async def get_flavors_all(
     current_user: dict = Depends(get_current_user_from_cookie),
     session: Session = Depends(get_session)

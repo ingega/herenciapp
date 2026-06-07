@@ -27,7 +27,7 @@ def setup_flavor(client, authorized_client_cookies):
     }
     
     # Act: Create the product
-    product_response = client.post("/orders/products", json=product_payload)
+    product_response = client.post("/orders/products/", json=product_payload)
     
     # Return the created product for use in other tests
     return product_response.json()
@@ -70,8 +70,6 @@ class TestFlavorsEndpoints:
         Ensure that providing incomplete or invalid data for flavor creation
         results in appropriate validation errors.
         """
-        
-        product_id = setup_flavor["id"]
         
         # Act: Set the payload for flavor creation, but omit required fields or provide invalid data
         flavor_payload = {
@@ -187,3 +185,64 @@ class TestFlavorsEndpoints:
         assert "id" in get_flavor_response.json()
         assert get_flavor_response.json()["product_id"] == product_id
         assert get_flavor_response.json()["description"] == "taco de carnitas"
+    
+    # ==============================================================================
+    # TEST 5: Unauthenticated User (No Cookie / Missing Credentials) for /all/ ednpoint
+    # ==============================================================================
+    def test_flavor_get_all_unauthenticated_redirects(self,client, setup_flavor):
+        """
+        Ensure that accessing the protected UI route without an active session
+        or auth cookie results in a clean redirect or unauthorized handling.
+        """
+
+        # Act: once product retreived, clear the cookie
+        client.cookies.clear()
+        
+        # Act: Execute the get request
+        response = client.get(
+            f"/orders/flavors/all/", 
+            follow_redirects=False
+        )
+        # Assert: Authentication blocks and redirects to login layout
+        assert response.status_code == status.HTTP_303_SEE_OTHER
+    
+    # ==============================================================================
+    # TEST 6: Test the flavors/all/ endpoint
+    # ==============================================================================
+    def test_flavor_get_all_success(self,client, setup_flavor):
+        """
+        Ensure that accessing the protected UI route without an active session
+        or auth cookie results in a clean redirect or unauthorized handling.
+        """
+        
+        # Act: add a flavor, to catch it later
+        product_id = setup_flavor["id"]
+        flavor_payload = {
+            "product_id": product_id,
+            "description": "chicken"
+        }
+        # Act: Execute the post request
+        response = client.post(
+            f"/orders/flavors/", 
+            json=flavor_payload,
+            follow_redirects=False
+        )
+        # assert the creation
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # retrieve the values
+
+        flavor_data = response.json()
+
+        # Act: Execute the get all request
+        response = client.get(
+            f"/orders/flavors/all/", 
+            follow_redirects=False
+        )
+        # Assert: a 200 OK response code
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        # Assert the response content
+        assert len(data) == 1 # just one record
+        assert data[0]['product_id'] == product_id
+        assert data[0]['description'] == flavor_data["description"]
