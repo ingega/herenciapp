@@ -196,10 +196,6 @@ async def get_add_product_page(
     Renders the dedicated 'Add New Product' workspace form.
     Only allows access if valid auth tokens are found.
     """
-    # debug: delete this print in production
-    print(f"*********************************"
-        f"current_user value: {current_user}"
-        f"***********************************")
     return templates.TemplateResponse(
         request=request,
         name="products.html",
