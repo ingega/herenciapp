@@ -21,7 +21,7 @@ This branch is too add the first authorization stage: Add a role to the user, al
 an OrderDetail selection field will be added.
 
 ### Added
-- N/A
+- A Role manager for dependency injection, in order to protect some routes from standar users
 
 ### Changed
 - Added a 'role' field to the user's model
