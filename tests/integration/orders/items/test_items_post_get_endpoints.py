@@ -69,7 +69,7 @@ def setup_item(client, authorized_client_cookies):
     }
 
 
-class TestOrdersEndpoints:
+class TestItemsEndpoints:
 
     # ==============================================================================
     # TEST 1: Unauthenticated User (No Cookie / Missing Credentials)

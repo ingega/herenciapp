@@ -1,5 +1,5 @@
 # src/api/v1/apps/orders/router.py
-from fastapi import APIRouter, status, Request, Depends, HTTPException
+from fastapi import APIRouter, status, Request, Depends, HTTPException, Response
 from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
@@ -140,6 +140,7 @@ def api_get_all_items_for_order(
 def api_append_item_to_ticket(
     order_id: int,
     item_payload: OrderDetailCreate,
+    response: Response,
     service: OrderService = Depends(get_order_service),
     current_user: dict = Depends(get_current_user_from_cookie)
 ):
@@ -147,9 +148,14 @@ def api_append_item_to_ticket(
     REST API: Pushes a new item onto a ticket. If matching combinations (product, flavor, seat)
     exist on an unsent ticket, it sums quantities dynamically in memory to prevent table pollution.
     """
-    return service.add_or_update_item(order_id=order_id, item_in=item_payload)
+    # it is new item or updated item?
+    db_order, is_new_item = service.add_or_update_item(order_id=order_id, item_in=item_payload)
+    if not is_new_item:
+        response.status_code = status.HTTP_200_OK
+    return db_order
 
-@router.delete("/delete/{order_id}/items/{item_id}", response_model=OrderRead, tags=["Items"])
+@router.delete("/delete/{order_id}/items/{item_id}", 
+               response_model=OrderRead, tags=["Items"])
 def api_remove_item_from_ticket(
     order_id: int,
     item_id: int,

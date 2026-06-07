@@ -46,6 +46,7 @@ This version add the test for the next enspoints:
 ### Fixed
 - Added the user_id to the current_user payload for fixture auth user in `tests/conftest.py`
 - Fixed the missing "/" in tests in `tests/integration/test_update_and_delete_products_endpoints.py`
+- Removed the += in nested quantity update in `src/api/v1/apps/orders/services.py`
 
 ## [1.10.0] 2026-06-05
 This version add the orders module

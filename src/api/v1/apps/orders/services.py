@@ -137,10 +137,11 @@ class OrderService:
         db_order = self.get_order_by_id(order_id)
         return [OrderDetailReadNested.model_validate(item) for item in db_order.items]
 
-    def add_or_update_item(self, order_id: int, item_in: OrderDetailCreate) -> Order:
+    def add_or_update_item(self, order_id: int, item_in: OrderDetailCreate) -> tuple[Order, bool]:
         """
         Adds a product/variant combination to an open ticket. If the product/flavor/seat
-        combination already exists on the unsent ticket, it increments quantity instead.
+        combination already exists, it increments quantity instead.
+        Returns a tuple: (Updated Order, boolean indicating if a new row was created).
         """
         db_order = self.get_order_by_id(order_id)
         
@@ -150,18 +151,19 @@ class OrderService:
                 detail="Cannot add items to a closed and checked-out order."
             )
 
-        # Check if identical item combination exists for that customer seat on this order
         statement = select(OrderDetail).where(
             OrderDetail.order_id == order_id,
             OrderDetail.product_id == item_in.product_id,
             OrderDetail.flavor_id == item_in.flavor_id,
             OrderDetail.person_number == item_in.person_number,
-            OrderDetail.prep_status == ItemPrepStatus.QUEUED  # Only combine if it hasn't fired to kitchen
+            OrderDetail.prep_status == ItemPrepStatus.QUEUED 
         )
         existing_item = self.session.exec(statement).first()
 
+        is_new_item = False  # Our flag!
+
         if existing_item:
-            existing_item.quantity += item_in.quantity
+            existing_item.quantity = item_in.quantity
             if item_in.notes:
                 existing_item.notes = f"{existing_item.notes} | {item_in.notes}" if existing_item.notes else item_in.notes
             self.session.add(existing_item)
@@ -176,11 +178,13 @@ class OrderService:
                 extra_charge=item_in.extra_charge
             )
             self.session.add(db_item)
+            is_new_item = True  # Flag marked as True because a row was added
 
         self.calculate_order_total(db_order)
         self.session.commit()
         self.session.refresh(db_order)
-        return db_order
+        
+        return db_order, is_new_item
 
     def delete_item(self, order_id: int, item_id: int) -> Order:
         """
