@@ -86,7 +86,6 @@ class OrderDetailReadNested(OrderDetailRead):
     product: ProductRead
     flavor: FlavorCatalogueRead
 
-
 # ==========================================
 # 4. ORDER SCHEMAS
 # ==========================================
@@ -150,6 +149,7 @@ class OrderDetailResponse(OrderRead):
     """
     items: List[OrderDetailReadNested] = []
 
+OrderDetailResponse.model_rebuild()
 
 # ==========================================
 # 1. MEAT CATALOGUE SCHEMAS

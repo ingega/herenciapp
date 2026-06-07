@@ -25,8 +25,8 @@ This version add the test for the next enspoints:
   - /get/{order_id} # created in this version.
   - /get/all/ # created in this version
 - items:
-  - /all/
-  - /{order_id}/items
+  - GET /all/
+  - POST /{order_id}/items
   - /delete/{order_id}/items/{item_id}
 - products:
   - /all/
@@ -41,7 +41,7 @@ This version add the test for the next enspoints:
   - patch and delete endpoints in `test/integration/orders/test_update_and_delete_endpoints.py`
 
 ### Changed
-- N/A
+- Schemas to create the correct flow for order details in `src/api/v1/apps/orders/schemas.py`
 
 ### Fixed
 - Added the user_id to the current_user payload for fixture auth user in `tests/conftest.py`

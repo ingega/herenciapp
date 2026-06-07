@@ -1,173 +1,192 @@
-# tests/integration/test_flavor_endpoints.py
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from src.api.v1.apps.orders.models import Order
+from src.api.v1.apps.orders.models import OrderDetail as Item
 
-# 1. app fixture in tests/conftest.py 
 # ==============================================================================
-# DATA SETUP FIXTURE (Authenticated for product creation)
+# DATA SETUP FIXTURE (Authenticated for complex item nested creation)
 # ==============================================================================
 @pytest.fixture(scope="function")
-def setup_order(client, authorized_client_cookies):
+def setup_item(client, authorized_client_cookies):
     """
-    Creates a baseline order in the catalogue to reuse across test cases.
-    Injects authorized cookies to safely bypass authentication during creation.
+    Creates baseline product, flavor, order, and nested item records.
+    Returns a unified mapping of IDs for seamless down-stream test consumption.
     """
-    
-    # Act: creates an authorized user
+    # Act: Inject authenticated session cookies
     client.cookies.update(authorized_client_cookies)
-
-    # Act: Add a new product uased as baseline for flavors
     
+    # 1. Create a Baseline Product
+    product_payload = {
+        "main_dish": "taco",
+        "category": "food",
+        "price": 10.00
+    }
+    product_response = client.post("/orders/products/", json=product_payload)
+    assert product_response.status_code == status.HTTP_201_CREATED
+    product_id = product_response.json()["id"]
+
+    # 2. Create a Baseline Flavor mapped to Product
+    flavor_payload = {
+        "product_id": product_id,
+        "description": "carne"
+    }
+    flavor_response = client.post("/orders/flavors/", json=flavor_payload)
+    assert flavor_response.status_code == status.HTTP_201_CREATED
+    flavor_id = flavor_response.json()["id"]
+
+    # 3. Create an Empty Parent Order
     order_payload = {
         "table_no": 1,
         "number_of_persons": 2,
-        "items": [] # empty list, because we only want to create the order baseline.
+        "items": []
     }
-    
-    # Act: Create the order
     order_response = client.post("/orders/create", json=order_payload)
+    assert order_response.status_code == status.HTTP_201_CREATED
+    order_id = order_response.json()["id"]
+
+    # 4. Append Item to Ticket (Endpoint returns updated Parent Order dict)
+    item_payload = {
+        "person_number": 1,
+        "product_id": product_id,
+        "flavor_id": flavor_id,
+        "quantity": 2,
+        "notes": "extra spicy",
+        "extra_charge": 1.50
+    }
+    item_response = client.post(f"/orders/{order_id}/items", json=item_payload)
+    assert item_response.status_code == status.HTTP_201_CREATED
     
-    # Return the created order for use in other tests
-    return order_response.json()
+    order_data = item_response.json()
+    nested_item = order_data["items"][0]
+
+    # Return a normalized dictionary so tests have simple access to all entity IDs
+    return {
+        "order_id": order_id,
+        "product_id": product_id,
+        "flavor_id": flavor_id,
+        "item_id": nested_item["id"],
+        "person_number": nested_item["person_number"]
+    }
+
 
 class TestOrdersEndpoints:
 
     # ==============================================================================
     # TEST 1: Unauthenticated User (No Cookie / Missing Credentials)
     # ==============================================================================
-    def test_order_create_unauthenticated_redirects(self,client, setup_order):
+    def test_item_create_unauthenticated_redirects(self, client, setup_item):
         """
-        Ensure that accessing the protected UI route without an active session
-        or auth cookie results in a clean redirect or unauthorized handling.
+        Ensure that accessing the protected endpoint without auth cookies
+        blocks execution with a 401 Unauthorized response status code.
         """
-
-        # Act: clear the cookie (Unauthenticated state, because 
-        # the setup_order fixture creates an order with authenticated client)
         client.cookies.clear()
-        
-        # Act: Set the payload for order creation
-        order_payload = {
-        "table_no": 1,
-        "number_of_persons": 2,
-        "items": []
-    }
-        # Act: Execute the post request
+        order_id = setup_item["order_id"]
+
+        item_payload = {
+            "person_number": 1,
+            "product_id": setup_item["product_id"],
+            "flavor_id": setup_item["flavor_id"],
+            "quantity": 1
+        }
+
+        # Act: Pass payload along to trigger security interceptor before validation blocks it
         response = client.post(
-            f"/orders/create", 
-            json=order_payload,
+            f"/orders/{order_id}/items",
+            json=item_payload,
             follow_redirects=False
         )
-        # Assert: Authentication blocks and redirects to login layout
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
     
     # ==============================================================================
-    # TEST 2: Test that invalid data types or formats trigger validation errors
+    # TEST 2: Schema Type or Format Violations
     # ==============================================================================
-    def test_order_create_invalid_data_types_validation_errors(self,client, setup_order):
+    def test_item_create_invalid_data_types_validation_errors(self, client, authorized_client_cookies, setup_item):
         """
-        Ensure that providing invalid data type for order creation
-        results in appropriate validation errors.
+        Ensure omitting required schema values (like product_id) throws a 422 error.
         """
-        
-        # Act: Set the payload for order creation, but omit required fields or provide invalid data
-        order_payload = {
-            "table_no": "invalid_string_instead_of_int",
-            "number_of_persons": 2,
-            "items": []
+        client.cookies.update(authorized_client_cookies)
+        order_id = setup_item["order_id"]
+
+        # Act: Omit product_id and flavor_id completely
+        item_payload = {
+            "person_number": 1,
+            "quantity": 2,
+            "notes": "extra spicy",
+            "extra_charge": 1.50
         }
-        # Act: Execute the post request
+        
         response = client.post(
-            f"/orders/create", 
-            json=order_payload,
+            f"/orders/{order_id}/items",
+            json=item_payload,
             follow_redirects=False
         )
-
-        # Assert: Validation errors are returned for incomplete or invalid data
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     
     # ==============================================================================
-    # TEST 3: Test the order creation endpoint
+    # TEST 3: Successful Item Appending / Upsert Flow
     # ==============================================================================
-    def test_order_create_valid_data(self,client, session, setup_order):
+    def test_item_create_valid_data(self, client, session, authorized_client_cookies, setup_item):
         """
-        Verify that providing valid data for order creation results in successful 
-        creation and correct response structure.
+        Verify that adding a unique seating item successfully alters parent ticket contents.
         """
+        client.cookies.update(authorized_client_cookies)
+        order_id = setup_item["order_id"]
+        product_id = setup_item["product_id"]
+        flavor_id = setup_item["flavor_id"]
 
-        # Act: Set the payload for order creation, but omit required fields or provide invalid data
-        order_payload = {
-            "table_no": 1,
-            "number_of_persons": 2,
-            "items": []
+        item_payload = {
+            "person_number": 2,  # Different seat number to append a clean new line
+            "product_id": product_id,
+            "flavor_id": flavor_id,
+            "quantity": 1,
+            "notes": "mild"
         }
-        # Act: Execute the post request
+        
         response = client.post(
-            f"/orders/create", 
-            json=order_payload,
+            f"/orders/{order_id}/items",
+            json=item_payload,
             follow_redirects=False
         )
 
-        # Assert: Successful creation and correct response structure
         assert response.status_code == status.HTTP_201_CREATED
-        response_data = response.json()
+        order_response_data = response.json()
 
-        # Assert the response
-        assert "id" in response_data
-        assert response_data["table_no"] == 1
-        assert response_data["number_of_persons"] == 2
+        # REMEMBER: The endpoint answers back with the Parent Order data schema!
+        assert order_response_data["id"] == order_id
+        # Our fixture inserted item 1, and this test inserted item 2 -> len must be 2
+        assert len(order_response_data["items"]) == 2 
 
-        # Bonus assert, verify that also ths database add the new record
-        # Act: clean the session for database updated veryfication
-
-        # retrieve the order id from the response to query the database
-        order_id = response_data["id"]
+        # Direct DB session validation check on Item table model
         session.expire_all()
         session.rollback()
-        # Act: creates a db object
-        db_order = session.get(Order, order_id)
-        # Assert: query executed successfully
-        assert db_order is not None
-        # Assert: Verify the information in database
-        assert int(db_order.table_no) == 1  # db sends string types
-        assert db_order.number_of_persons == 2
+        
+        # Verify both items exist in the database linked to this order
+        db_order_items = session.query(Item).filter(Item.order_id == order_id).all()
+        assert len(db_order_items) == 2
     
     # ==============================================================================
-    # TEST 4: Test the get order endpoint
+    # TEST 4: Get All Orders containing updated child items
     # ==============================================================================
-    def test_order_get(self,client, setup_order):
+    def test_item_get_all(self, client, authorized_client_cookies, setup_item):
         """
-        Verify that the get order endpoint returns the correct data for an existing order.
+        Verify that fetching all active ticket nodes handles embedded elements smoothly.
         """
-        # act: retrieve the order id from the setup_order fixture
-        order_id = setup_order["id"]
-        # now we have the order id, we can test the get endpoint
+        client.cookies.update(authorized_client_cookies)
+        order_id = setup_item['order_id']
+
         get_order_response = client.get(
-            f"/orders/{order_id}",
+            f"/orders/items/all/?order_id={order_id}",
             follow_redirects=False
         )
-        # Assert: Successful retrieval and correct response structure
+        
+        # Assert: Serialization validation passes flawlessly!
         assert get_order_response.status_code == status.HTTP_200_OK
-        assert "id" in get_order_response.json()
-        assert get_order_response.json()["table_no"] == 1
-        assert get_order_response.json()["number_of_persons"] == 2
-    
-    # ==============================================================================
-    # TEST 5: Test the get all orders endpoint
-    # ==============================================================================
-    def test_order_get_all(self,client, setup_order):
-        """
-        Verify that the get all orders endpoint returns the correct data for existing orders.
-        """
-        # act: retrieve all the orders from the setup_order fixture
-        get_order_response = client.get(
-            f"/orders/all/",
-            follow_redirects=False
-        )
-        # Assert: Successful retrieval and correct response structure
-        assert get_order_response.status_code == status.HTTP_200_OK
-        # there's only one order created by the setup_order fixture, 
-        # so we can assert that the first order in the list is the one we created
-        assert len(get_order_response.json()) == 1
-        assert get_order_response.json()[0]["number_of_persons"] == 2
+        items_list = get_order_response.json()
+        
+        assert isinstance(items_list, list)
+        assert len(items_list) >= 1
+        
+        # Extract item properties directly out of index position 0
+        target_item = items_list[0]
+        assert target_item["product_id"] == setup_item["product_id"]
+        assert target_item["person_number"] == setup_item["person_number"]

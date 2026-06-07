@@ -9,6 +9,7 @@ from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductS
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
+from src.api.v1.apps.orders.schemas import OrderDetailResponse
 from src.api.v1.apps.orders.models import Product
 from src.api.v1.apps.orders.services import OrderService
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -131,8 +132,11 @@ def api_get_all_items_for_order(
     """
     return service.get_all_items_for_order(order_id=order_id)
 
-# this endpoint add or updated an itme if already exists
-@router.post("/{order_id}/items", response_model=OrderRead, tags=["Items"])
+# this endpoint add or updated an item if already exists
+@router.post("/{order_id}/items", 
+             response_model=OrderDetailResponse,
+             status_code=status.HTTP_201_CREATED, 
+             tags=["Items"])
 def api_append_item_to_ticket(
     order_id: int,
     item_payload: OrderDetailCreate,
