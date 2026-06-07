@@ -28,7 +28,7 @@ an OrderDetail selection field will be added.
 - Updated the Alembic head
 
 ### Fixed
-- N/A
+- Dependency inject for role verifycation in ui for products/flavors/meat
 
 ## [1.10.1] 2026-06-06
 This version add the test for the next enspoints:

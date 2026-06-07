@@ -323,7 +323,8 @@ async def get_flavors_management_page(request: Request,
     )
 
 # ui template endpoint for flavors additon
-@router_flavors.get("/add", response_class=HTMLResponse)
+@router_flavors.get("/add", response_class=HTMLResponse,
+                    dependencies=[Depends(allow_admin)])
 async def add_flavors_page(request: Request,
                         current_user: dict = Depends(get_current_user_from_cookie),
                         session: Session = Depends(get_session)
@@ -422,7 +423,9 @@ async def get_flavors_all(
 ##########  --- Meat catalogue endpoints init --- ##############
 
 # ui template endpoint for meat catalogue management
-@router_meat.get("/add/ui", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
+@router_meat.get("/add/ui", response_class=HTMLResponse, 
+                 dependencies=[Depends(allow_admin)],
+                 status_code=status.HTTP_200_OK)
 async def get_meat_add_page(request: Request,
                            current_user: dict = Depends(get_current_user_from_cookie),
                            session: Session = Depends(get_session)
