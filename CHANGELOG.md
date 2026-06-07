@@ -40,11 +40,12 @@ This version add the test for the next enspoints:
   - get and post orders endpoints in `tests/integration/orders/test_order_post_get_endpoints.py`
   - patch and delete endpoints in `test/integration/orders/test_orders_update_and_delete_endpoints.py`
   - get and post items endpoints in `tests/integration/orders/items/test_items_post_get_endpoints.py`
-  - patch and delete endpoints in `test/integration/orders/items/test_items_update_and_delete_endpoints.py`
+  - patch and delete items endpoints in `test/integration/orders/items/test_items_update_and_delete_endpoints.py`
 
 ### Changed
 - Schemas to create the correct flow for order details in `src/api/v1/apps/orders/schemas.py`
-- Added a all endpoint test for products in `test/integration/products/test_products.py`
+- Added an all endpoint test for products in `test/integration/products/test_products.py`
+- Added an all endpoint test for flavors in `tests/integration/flavors/test_flavor_post_get_endpoints.py`
 
 ### Fixed
 - Added the user_id to the current_user payload for fixture auth user in `tests/conftest.py`

@@ -379,7 +379,8 @@ async def get_flavor_by_id(
 
     return flavor
 
-@router_flavors.get("/all/", response_model=List[FlavorCatalogueRead], status_code=status.HTTP_200_OK)
+@router_flavors.get("/all/", response_model=List[FlavorCatalogueRead], 
+                    status_code=status.HTTP_200_OK)
 async def get_flavors_all(
     current_user: dict = Depends(get_current_user_from_cookie),
     session: Session = Depends(get_session)
