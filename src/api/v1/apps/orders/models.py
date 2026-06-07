@@ -88,6 +88,7 @@ class OrderDetail(SQLModel, table=True):
     person_number: int = Field(sa_type=SmallInteger(), default=1, index=True)  # Tracks your Person 1, Person 2 logic!
     product_id: int = Field(foreign_key="products.id")
     flavor_id: int = Field(foreign_key="flavor_catalogue.id")
+    selection: str | None = Field(max_length=50, default=None)
     quantity: int = Field(default=1, sa_type=SmallInteger())
     notes: Optional[str] = Field(default=None, sa_type=Text())
     
