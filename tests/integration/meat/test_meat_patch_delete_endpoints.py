@@ -51,12 +51,16 @@ class TestPatchDeleteMeats:
         response = client.patch(
             f"/orders/flavors/meat/{meat_id}", 
             json={"description": "updated description"},
-            follow_redirects=False
+            follow_redirects=False,
+            headers={"accept": "application/json"}
         )
+        # Assert: AJAX protection captures it as a 401 API Error, NOT a 303 browser bounce!
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
         
-        # Assert: Authentication blocks and redirects to login layout
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/auth/login"
+        # Read the JSON response body payload validation asset
+        json_data = response.json()
+        assert json_data["status"] == "error"
+        assert "detail" in json_data
     
     # ==============================================================================
     # TEST 2: test the PATCH orders/flavors/meat/{id} enpoint 
@@ -115,12 +119,16 @@ class TestPatchDeleteMeats:
         # Act: Execute the patch request
         response = client.delete(
             f"/orders/flavors/meat/{meat_id}", 
-            follow_redirects=False
+            follow_redirects=False,
+            headers={"accept": "application/json"}
         )
+        # Assert: AJAX protection captures it as a 401 API Error
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
         
-        # Assert: Authentication blocks and redirects to login layout
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/auth/login"
+        # Read the JSON response body payload validation asset
+        json_data = response.json()
+        assert json_data["status"] == "error"
+        assert "detail" in json_data
     
     # ==============================================================================
     # TEST 4: test the DELETE orders/flavors/meat/{id} enpoint 

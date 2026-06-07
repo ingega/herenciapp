@@ -55,9 +55,13 @@ class TestUpdateDeleteProducts:
             follow_redirects=False
         )
         
-        # Assert: Authentication blocks and redirects to login layout
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/auth/login"
+        # Assert: AJAX protection captures it as a 401 API Error
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Read the JSON response body payload validation asset
+        json_data = response.json()
+        assert json_data["status"] == "error"
+        assert "detail" in json_data
     
     # ==============================================================================
     # TEST 2: test the PATCH orders/products/{id} enpoint 
@@ -116,9 +120,13 @@ class TestUpdateDeleteProducts:
             follow_redirects=False
         )
         
-        # Assert: Authentication blocks and redirects to login layout
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/auth/login"
+        # Assert: AJAX protection captures it as a 401 API Error
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Read the JSON response body payload validation asset
+        json_data = response.json()
+        assert json_data["status"] == "error"
+        assert "detail" in json_data
     
     # ==============================================================================
     # TEST 4: test the DELETE orders/products/{id} enpoint 

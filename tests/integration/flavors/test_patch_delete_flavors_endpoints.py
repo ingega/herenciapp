@@ -63,12 +63,16 @@ class TestPatchDeleteFlavors:
             f"/orders/flavors/{flavor_id}", 
             json={"product_id": product_id, 
                   "description": "updated description"},
-            follow_redirects=False
+            headers={"accept": "application/json"} # Explicitly flag it as JSON context
         )
         
-        # Assert: Authentication blocks and redirects to login layout
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/auth/login"
+        # Assert: AJAX protection captures it as a 401 API Error
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Read the JSON response body payload validation asset
+        json_data = response.json()
+        assert json_data["status"] == "error"
+        assert "detail" in json_data
     
     # ==============================================================================
     # TEST 2: test the PATCH orders/flavors/{id} enpoint 
@@ -120,7 +124,6 @@ class TestPatchDeleteFlavors:
         or auth cookie results in a clean redirect or unauthorized handling.
         """
         
-        product_id = setup_flavor["id"]
         flavor_id = setup_flavor["id"]
 
         # Act: once flavor retreived, clear the cookie
@@ -129,12 +132,16 @@ class TestPatchDeleteFlavors:
         # Act: Execute the patch request
         response = client.delete(
             f"/orders/flavors/{flavor_id}", 
-            follow_redirects=False
+            headers={"accept": "application/json"} # Explicitly flag it as JSON context
         )
         
-        # Assert: Authentication blocks and redirects to login layout
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/auth/login"
+        # Assert: AJAX protection captures it as a 401 API Error, NOT a 303 browser bounce!
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Read the JSON response body payload validation asset
+        json_data = response.json()
+        assert json_data["status"] == "error"
+        assert "detail" in json_data
     
     # ==============================================================================
     # TEST 4: test the DELETE orders/flavors/{id} enpoint 

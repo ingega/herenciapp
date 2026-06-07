@@ -29,6 +29,7 @@ an OrderDetail selection field will be added.
 
 ### Fixed
 - Dependency inject for role verifycation in ui for products/flavors/meat
+- Fixed responses codes for no auth tests
 
 ## [1.10.1] 2026-06-06
 This version add the test for the next enspoints:

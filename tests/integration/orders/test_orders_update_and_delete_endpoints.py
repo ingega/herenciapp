@@ -52,12 +52,17 @@ class TestUpdateDeleteOrders:
         response = client.patch(
             f"/orders/update/{order_id}", 
             json={"number_of_persons": 3},
-            follow_redirects=False
+            follow_redirects=False,
+            headers={"accept": "application/json"}
         )
         
-        # Assert: Authentication blocks and redirects to login layout
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/auth/login"
+        # Assert: AJAX protection captures it as a 401 API Error
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Read the JSON response body payload validation asset
+        json_data = response.json()
+        assert json_data["status"] == "error"
+        assert "detail" in json_data
     
     # ==============================================================================
     # TEST 2: test the PATCH orders/{id} enpoint 
@@ -113,12 +118,17 @@ class TestUpdateDeleteOrders:
         # Act: Execute the patch request
         response = client.delete(
             f"/orders/delete/{order_id}", 
-            follow_redirects=False
+            follow_redirects=False,
+            headers={"accept": "application/json"}
         )
         
-        # Assert: Authentication blocks and redirects to login layout
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/auth/login"
+        # Assert: AJAX protection captures it as a 401 API Error
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Read the JSON response body payload validation asset
+        json_data = response.json()
+        assert json_data["status"] == "error"
+        assert "detail" in json_data
     
     # ==============================================================================
     # TEST 4: test the DELETE orders/{id} enpoint 

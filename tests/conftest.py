@@ -79,7 +79,7 @@ def authorized_client_cookies(test_user):
     Generates a valid signed access token cookie dictionary for the TestClient.
     """
     # 1. Create token data structure matching what your auth middleware expects
-    token_data = {"sub": test_user.email, "user_id": test_user.id}
+    token_data = {"sub": test_user.email, "user_id": test_user.id, "role": "admin"}
     
     # 2. Build the token string using your existing utility helper
     # (assuming it accepts data and an optional expiration window)
