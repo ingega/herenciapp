@@ -25,13 +25,13 @@ def setup_flavor(client, authorized_client_cookies):
     }
     
     # Act: Create the product
-    product_response = client.post("/orders/products", json=payload)
+    product_response = client.post("/orders/products/", json=payload)
     # Assert: the endpoint must response with a 201 response code
     assert product_response.status_code == status.HTTP_201_CREATED
     # Act: with a valid product, add the flavor for tests cases
     product_id = product_response.json()["id"]
     flavor_response = client.post(
-        "/orders/flavors",
+        "/orders/flavors/",
         json={
             "product_id": product_id,
             "description": "taco de carnitas"

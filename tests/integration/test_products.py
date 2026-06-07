@@ -43,7 +43,7 @@ def test_create_product_unauthenticated(client: TestClient):
         "category": "taco",
         "price": 25.50
     }
-    response = client.post("orders/products", json=payload)
+    response = client.post("orders/products/", json=payload)
     
     # It should fail authentication (401 Unauthorized)
     assert response.status_code == 401
@@ -63,7 +63,7 @@ def test_create_product_malformed_data(client: TestClient, mock_authenticated_us
         "price": 20.50
     }
     
-    response = client.post("orders/products", json=malformed_payload)
+    response = client.post("orders/products/", json=malformed_payload)
     
     assert response.status_code == 422
     # Verify Pydantic validation details are attached
@@ -84,7 +84,7 @@ def test_create_product_invalid_data(client: TestClient, mock_authenticated_user
         "price": "Not a number"
     }
     
-    response = client.post("orders/products", json=not_valid_payload)
+    response = client.post("orders/products/", json=not_valid_payload)
     
     assert response.status_code == 422
     # Verify Pydantic validation details are attached
@@ -105,7 +105,7 @@ def test_create_product_success(client: TestClient,
         "price": 85.00
     }
     
-    response = client.post("orders/products", json=payload)
+    response = client.post("orders/products/", json=payload)
     
     # 4. Assert Response status code is explicitly 201 CREATED
     assert response.status_code == 201
@@ -127,7 +127,7 @@ def test_create_product_success(client: TestClient,
     # 6. Test: Assert 200 OK, Validate Output Schema & DB Persistence
     # usign get_product_by_id endpoint
     # -------------------------------------------------------------------------
-def test_create_product_success(client: TestClient, 
+def test_get_product_success(client: TestClient, 
                                 session: Session, mock_authenticated_user):
     """
     Asserts a successful post returns 201, matches our ProductRead serialization shape,
@@ -139,7 +139,7 @@ def test_create_product_success(client: TestClient,
         "price": 85.00
     }
     
-    response = client.post("orders/products", json=payload)
+    response = client.post("orders/products/", json=payload)
     
     # 4. Assert Response status code is explicitly 201 CREATED
     assert response.status_code == 201
