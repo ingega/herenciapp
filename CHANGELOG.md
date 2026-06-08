@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.11.0] 2026-06-08
+This version adds the orders template and tests
+
+### Added
+- N/A
+
+### Changed
+- Added a selection field to the OrderDetail Schema in `src/api/v1/apps/orders/schemas.py`
+
+### Fixed
+- N/A
+
 ## [1.10.2] 2026-06-07
 This branch is too add the first authorization stage: Add a role to the user, also
 an OrderDetail selection field will be added.
