@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This version adds the orders template and tests
 
 ### Added
-- N/A
+- Template for orders in `src/templates/orders/create.html`
 
 ### Changed
 - Added a selection field to the OrderDetail Schema in `src/api/v1/apps/orders/schemas.py`

@@ -17,7 +17,7 @@ from src.api.v1.apps.orders.models import Product
 
 # services
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
-from src.api.v1.apps.orders.services import OrderService
+from src.api.v1.apps.orders.services import OrderService, MeatService
 
 # functions, database, auth
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -27,6 +27,7 @@ from src.database import get_session
 # authz
 from src.api.v1.authz.authz import RoleChecker
 
+# routers
 router = APIRouter(prefix="/orders", tags=["orders"], redirect_slashes=False)
 router_products = APIRouter(prefix="/orders/products", tags=["products"], redirect_slashes=False)
 router_flavors = APIRouter(prefix="/orders/flavors", tags=["flavors"], redirect_slashes=False)
@@ -37,13 +38,55 @@ templates = Jinja2Templates(directory="src/templates")
 # authz
 allow_admin = RoleChecker(["admin"])
 
-#### --- orders endpoints --- ###
-
-# first, add the dependency for service injection
+# dependencies for service injection
 def get_order_service(session: Session = Depends(get_session)) -> OrderService:
     return OrderService(session)
 
+def get_product_service(session: Session = Depends(get_session)) -> ProductService:
+    return ProductService(session)
+
+def get_flavor_service(session: Session = Depends(get_session)) -> FlavorService:
+    return FlavorService(session)
+
+def get_meat_service(session: Session = Depends(get_session)) -> MeatService:
+    return MeatService(session)
+
+
+#### --- orders endpoints --- ###
+
 # templates endpoints first
+
+# main orders creation template
+@router.get("/create-ticket", response_class=HTMLResponse)
+def render_order_creation_workspace(
+    request: Request,
+    order_service: OrderService = Depends(get_order_service),
+    product_service: ProductService = Depends(get_product_service),
+    flavor_service: FlavorService = Depends(get_flavor_service),
+    meat_service: MeatService = Depends(get_meat_service), # Dynamic meat injection
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    UI VIEW: Serves the ticket workspace. Dynamically pulls active 
+    products, explicit flavors, and the database-backed meat catalogue.
+    """
+    all_products = product_service.get_products()
+    all_flavors = flavor_service.get_flavors()
+    
+    # FETCH DIRECTLY FROM YOUR LIVE DATABASE SERVICE SPRINT!
+    db_meat_catalogue = meat_service.get_meat_catalogue()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/create.html",
+        context={
+            "config": settings,
+            "products": all_products,
+            "flavors": all_flavors,
+            "meat_catalogue": db_meat_catalogue,
+            "current_user": current_user # for nav_bar
+        }
+    )
 
 # list of active orders
 @router.get("/", response_class=HTMLResponse)

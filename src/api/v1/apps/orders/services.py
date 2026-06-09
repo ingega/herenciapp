@@ -173,6 +173,7 @@ class OrderService:
                 person_number=item_in.person_number,
                 product_id=item_in.product_id,
                 flavor_id=item_in.flavor_id,
+                selection=item_in.selection,
                 quantity=item_in.quantity,
                 notes=item_in.notes,
                 extra_charge=item_in.extra_charge
