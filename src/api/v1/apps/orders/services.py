@@ -165,7 +165,6 @@ class OrderService:
         
         return data
 
-
     def add_or_update_item(self, order_id: int, item_in: OrderDetailCreate) -> tuple[Order, bool]:
         """
         Adds a product/variant combination to an open ticket. If the product/flavor/seat
@@ -189,7 +188,7 @@ class OrderService:
         )
         existing_item = self.session.exec(statement).first()
 
-        is_new_item = False  # Our flag!
+        is_new_item = False  # flag for code response
 
         if existing_item:
             existing_item.quantity = item_in.quantity
@@ -215,6 +214,31 @@ class OrderService:
         self.session.refresh(db_order)
         
         return db_order, is_new_item
+
+    # first time that the waiter sends an order, the status must change
+    def change_sended_status(self, order_id: int) -> bool:
+        """
+        Safely retrieves the parent Order entity and updates its 'sended' state to True,
+        making it visible on the HTMX Live Kitchen Panel.
+        """
+        # 1. Fetch the correct parent record from the database
+        db_order = self.get_order_by_id(order_id)
+        if not db_order:
+            return False
+        
+        # 2. Mutate the status column on the parent object directly
+        db_order.sended = True
+        
+        # 3. Commit state changes to the DB session
+        try:
+            self.session.add(db_order)
+            self.session.commit()
+            self.session.refresh(db_order)
+            return True
+        except Exception as e:
+            self.session.rollback()
+            raise e
+
 
     def delete_item(self, order_id: int, item_id: int) -> Order:
         """

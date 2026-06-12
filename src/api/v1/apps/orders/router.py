@@ -242,6 +242,14 @@ def api_append_item_to_ticket(
     db_order, is_new_item = service.add_or_update_item(order_id=order_id, item_in=item_payload)
     if not is_new_item:
         response.status_code = status.HTTP_200_OK
+    else: # mean new item
+        status_updated = service.change_sended_status(order_id)
+        if not status_updated:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail=f"Order ticket with ID {order_id} could not be found."
+            )
+    
     return db_order
 
 @router.delete("/delete/{order_id}/items/{item_id}", 

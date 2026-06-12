@@ -318,10 +318,6 @@
             const createdOrder = await orderResponse.json();
             const orderId = createdOrder.id;
 
-            console.log("=========================================");
-            console.log(`MASTER TICKET INITIALIZED -> Order ID: ${orderId}`);
-            console.log("=========================================");
-
             // Step 2: Append item configurations (POST /orders/{order_id}/items)
             for (let row of allRows) {
                 const lineId = row.id.split('-').pop();
@@ -353,7 +349,6 @@
                     extra_charge: extra_charge
                 };
 
-                console.log(`[CLIENT DISPATCH] Submitting Line Row ${lineId} inside Ticket ${orderId}:`, itemPayload);
 
                 const itemResponse = await fetch(`/orders/${orderId}/items`, {
                     method: "POST",
@@ -363,7 +358,7 @@
 
                 if (!itemResponse.ok) {
                     console.error(`Error processing item line allocation block index ${lineId}`);
-                    alert(`Error 422 en Línea #${lineId}: Verify the exact error by inspectin the console (F12).`);
+                    alert(`Error 422 in line #${lineId}: Verify the exact error by inspectin the console (F12).`);
                 }
             }
 
