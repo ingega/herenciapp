@@ -21,9 +21,14 @@ This version adds the orders template and tests
 
 ### Added
 - Template for orders in `src/templates/orders/create.html`
+- Kitchen flow implemententation:
+  - dashboard template in `src/templates/orders/kitchen/dashboard.html`
+  - cards auxiliar dashboard template in `src/templates/orders/kitchen/cards.html`
+- endpoints for kitchen in `src/api/v1/apps/orders/routes.py`
 
 ### Changed
 - Added a selection field to the OrderDetail Schema in `src/api/v1/apps/orders/schemas.py`
+- Added services for items in `src/api/v1/apps/orders/services.py`
 
 ### Fixed
 - N/A

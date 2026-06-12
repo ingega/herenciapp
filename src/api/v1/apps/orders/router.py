@@ -60,7 +60,6 @@ def get_meat_service(session: Session = Depends(get_session)) -> MeatService:
 @router.get("/create-ticket", response_class=HTMLResponse)
 def render_order_creation_workspace(
     request: Request,
-    order_service: OrderService = Depends(get_order_service),
     product_service: ProductService = Depends(get_product_service),
     flavor_service: FlavorService = Depends(get_flavor_service),
     meat_service: MeatService = Depends(get_meat_service), # Dynamic meat injection
@@ -84,6 +83,40 @@ def render_order_creation_workspace(
             "products": all_products,
             "flavors": all_flavors,
             "meat_catalogue": db_meat_catalogue,
+            "current_user": current_user # for nav_bar
+        }
+    )
+
+
+# kitchen-dashboard
+@router.get("/kitchen/dashboard", response_class=HTMLResponse)
+def get_kitchen_orders(
+    request: Request,                   
+    current_user: dict = Depends(get_current_user_from_cookie)
+    ):
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/kitchen/dashboard.html",
+        context={
+            "config": settings,
+            "current_user": current_user # for nav_bar
+        }
+    )
+
+# kitchen-dashboard-cards
+@router.get("/kitchen/cards", response_class=HTMLResponse)
+async def get_kitchen_cards(
+    request: Request,
+    order_service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)):
+    
+    active_orders = order_service.get_active_items()
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/kitchen/cards.html",
+        context={
+            "config": settings,
+            "active_orders": active_orders,
             "current_user": current_user # for nav_bar
         }
     )

@@ -135,7 +135,36 @@ class OrderService:
         Retrieves all items for a given order, including nested product and flavor details.
         """
         db_order = self.get_order_by_id(order_id)
+        if not db_order:
+            return []
         return [OrderDetailReadNested.model_validate(item) for item in db_order.items]
+    
+    def get_all_orders_sended(self) -> List[Order]:
+        """
+        This method returns all order_id with sended=True
+        """
+        statement = select(Order).where(
+            Order.sended == True,
+            Order.closed == False
+            )
+        results = self.session.exec(statement)
+        return list(results.all())
+    
+    def get_active_items(self):
+        """
+        This method uses two internal methods to return active items
+        """
+        # first: get the orders filter
+        orders_filter = self.get_all_orders_sended()
+        # now retrieve the items for each order sent
+        data = []
+        for order in orders_filter:
+            individual_order = self.get_all_items_for_order(order.id)
+            if len(individual_order) > 0:
+                data.extend(individual_order)
+        
+        return data
+
 
     def add_or_update_item(self, order_id: int, item_in: OrderDetailCreate) -> tuple[Order, bool]:
         """
