@@ -20,6 +20,7 @@ dependencies = [
     "fastapi-mail (>=1.6.4,<2.0.0)",
     "python-jose[cryptography] (>=3.5.0,<4.0.0)",
     "passlib (>=1.7.4,<2.0.0)",
+    "tzdata (>=2026.2,<2027.0)",
 ]
 
 [tool.poetry]

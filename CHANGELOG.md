@@ -26,6 +26,8 @@ This version adds the orders template and tests
   - cards auxiliar dashboard template in `src/templates/orders/kitchen/cards.html`
 - endpoints for kitchen in `src/api/v1/apps/orders/routes.py`
 - endpoint for playground, testing propousses in `src/router.py`
+- tzdata package with poetry in `pypoetry.toml`
+- complete kitchen dashboard in `src/templates/orders/kitchen/cards.html`
 
 ### Changed
 - Added a selection field to the OrderDetail Schema in `src/api/v1/apps/orders/schemas.py`
@@ -33,6 +35,7 @@ This version adds the orders template and tests
 - Added a service for change sended status in `src/api/v1/apps/orders/services.py`
 - Added the implementation to use the new method for change sended status in `src/api/v1/apps/orders/router.py`
 - logic to retreives the active items in kitchen in `src/api/v1/apps/orders/router.py`
+- Time zone by default to mexico CST in `src/api/v1/apps/orders/models.py`
 
 ### Fixed
 - N/A

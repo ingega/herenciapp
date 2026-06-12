@@ -1,51 +1,164 @@
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="flex items-center justify-between mb-6 border-b border-slate-700 pb-4">
+    <div class="flex items-center space-x-3">
+        <span class="flex h-3 w-3 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full 
+            rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        </span>
+        <h2 class="text-2xl font-black text-white tracking-tight uppercase">
+            Comandas Activas en Cocina
+        </h2>
+    </div>
+    <span class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 
+        rounded-md font-mono text-slate-400">
+        Total Activas: {{ active_orders|length }}
+    </span>
+</div>
+
+<div class="grid grid-cols-[repeat(auto-fill,minmax(24rem,1fr))] 
+    gap-6 items-start" id="kitchen-container">
+    
     {% for order in active_orders %}
-    <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-lg p-5">
-        <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
-            <div>
-                <h3 class="text-xl font-bold text-emerald-400">Mesa #{{ order.table_no }}</h3>
-                <p class="text-xs text-slate-400">{{ order.number_of_persons }} personas</p>
+    <div class="bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl flex flex-col overflow-hidden hover:border-slate-500 transition-colors">
+        
+        <div class="bg-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-slate-700">
+            <div class="flex items-center space-x-5">
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Ubicación</span>
+                    <h3 class="text-xl font-black text-amber-400">Mesa #{{ order.table_no }}</h3>
+                </div>
+                <div class="border-l border-slate-600 pl-4 hidden sm:block">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Pax</span>
+                    <p class="text-sm font-semibold text-slate-200">
+                        {{ order.number_of_persons }}
+                    </p>
+                </div>
+                <div class="border-l border-slate-600 pl-4">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">ID</span>
+                    <span class="font-mono text-xs bg-slate-950 px-2 py-0.5 rounded text-slate-300 border border-slate-800">#{{ order.id }}</span>
+                </div>
             </div>
-            <span class="text-xs bg-slate-900 text-slate-400 px-2.5 py-1 rounded font-mono">
-                ID: #{{ order.id }}
-            </span>
+            
+            <div class="flex items-center space-x-3">
+                <div class="bg-slate-950/80 rounded-lg px-3 py-1.5 border border-slate-800 text-right">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 block">Recibida</span>
+                    <span class="text-sm font-bold font-mono text-amber-400">
+                        <i class="fa-regular fa-clock text-xs mr-1 text-slate-500"></i>
+                        {{ order.created_at.strftime('%H:%M') if order.created_at else '00:00' }}
+                    </span>
+                </div>
+
+                <button hx-post="/orders/{{ order.id }}/dispatch" 
+                        hx-target="#kitchen-container" 
+                        class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 
+                        text-white font-bold px-4 py-2 rounded-lg shadow-md transition duration-150 flex items-center space-x-2 text-sm">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Despachar</span>
+                </button>
+            </div>
         </div>
 
-        <div class="space-y-3">
-            {% for item in order.items | sort(attribute='person_number') %}
-            <div class="bg-slate-900/40 p-3 rounded-lg border border-slate-800 flex justify-between items-start">
-                <div>
-                    <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">
-                        Persona {{ item.person_number }}
+        <div class="p-5 overflow-y-auto max-h-[60vh] space-y-6 bg-slate-900/60">
+            {% for person_number, items in order.items | groupby('person_number') %}
+            <div class="space-y-3">
+                
+                <div class="flex items-center space-x-3 border-b border-slate-700/80 pb-2">
+                    <span class="inline-flex items-center space-x-1.5 px-3 py-1 
+                        bg-amber-500/10 border border-amber-500/20 rounded-full 
+                        text-xs font-bold text-amber-400 uppercase tracking-wide">
+                        <i class="fa-solid fa-user text-[10px]"></i>
+                        <span>Asiento {{ person_number }}</span>
                     </span>
-                    <span class="text-white font-medium text-md">
-                        {{ item.quantity }}x {{ item.product.main_dish }}
-                    </span>
-                    {% if item.flavor %}
-                    <span class="text-slate-400 text-sm block">({{ item.flavor.description }} - {{ item.selection }})</span>
-                    {% endif %}
-                    {% if item.notes %}
-                    <p class="text-xs text-rose-300 italic mt-1">⚠️ "{{ item.notes }}"</p>
-                    {% endif %}
+                    <span class="text-xs text-slate-500 font-medium">{{ items|length }} platillos</span>
                 </div>
-                <span class="text-xs bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
-                    {{ item.prep_status.value }}
-                </span>
+                
+                <div class="grid grid-cols-1 gap-2.5">
+                    {% for item in items %}
+                    <div class="bg-slate-800/40 rounded-lg border border-slate-700/60 p-3 flex flex-col justify-between hover:bg-slate-800/80 transition-colors">
+                        <div class="space-y-1">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-baseline space-x-2">
+                                    <span class="text-xl font-extrabold text-white">{{ item.quantity }}x</span>
+                                    <span class="text-md font-semibold text-slate-100">{{ item.product.main_dish }}</span>
+                                </div>
+                                <span class="text-[9px] uppercase tracking-wider font-extrabold 
+                                    bg-slate-950 text-slate-400 px-2 py-0.5 rounded-md border border-slate-700">
+                                    {{ item.prep_status.value }}
+                                </span>
+                            </div>
+                            
+                            {% if item.flavor %}
+                            <span class="text-xs text-slate-400 block font-medium pl-6">
+                                <i class="fa-solid fa-angles-right text-amber-500/70 mr-1 text-[10px]"></i>
+                                {{ item.flavor.description }} <span class="text-slate-500">({{ item.selection }})</span>
+                            </span>
+                            {% endif %}
+                            
+                            {% if item.notes %}
+                            <div class="ml-6 mt-2 bg-rose-500/10 border border-rose-500/20 px-2 py-1.5 
+                                rounded text-xs text-rose-300 font-medium flex items-start space-x-1.5">
+                                <i class="fa-solid fa-triangle-exclamation text-rose-400 animate-pulse mt-0.5"></i>
+                                <span class="break-words leading-tight">"{{ item.notes }}"</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             {% endfor %}
         </div>
-
-        <div class="mt-5 pt-3 border-t border-slate-700">
-            <button hx-post="/orders/{{ order.id }}/dispatch" 
-                    hx-target="#kitchen-container" 
-                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
-                ✓ Listo / Despachar
-            </button>
-        </div>
-    </div>
+    </div> 
     {% else %}
-    <div class="col-span-full text-center py-12">
-        <p class="text-slate-500 text-lg">🍳 ¡Línea limpia! No hay comandas pendientes en cocina.</p>
+    <div class="col-span-full bg-slate-900/40 border-2 border-dashed border-slate-800 rounded-xl text-center py-16 px-4">
+        <div class="h-16 w-16 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700 shadow-inner">
+            <i class="fa-solid fa-kitchen-set text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-300">¡Línea limpia, Chef!</h3>
+        <p class="text-sm text-slate-500 max-w-sm mx-auto mt-1">No hay comandas pendientes de preparar en este momento. Buen trabajo.</p>
     </div>
     {% endfor %}
 </div>
+
+{% block scripts %}
+<script>
+    function updateKitchenTimers() {
+        const timers = document.querySelectorAll('.kitchen-timer');
+        timers.forEach(timer => {
+            const timestampStr = timer.getAttribute('data-timestamp');
+            if (!timestampStr) return;
+            
+            // Convert timezone payload cleanly to runtime client epoch miliseconds
+            const createdTime = new Date(timestampStr);
+            const now = new Date();
+            const differenceMs = now - createdTime;
+            
+            if (isNaN(differenceMs) || differenceMs < 0) {
+                timer.textContent = "0m";
+                return;
+            }
+            
+            const totalMinutes = Math.floor(differenceMs / 60000);
+            const totalSeconds = Math.floor((differenceMs % 60000) / 1000);
+            
+            // Format standard clock string display layout output
+            const displayTime = `${totalMinutes}m ${totalSeconds.toString().padStart(2, '0')}s`;
+            timer.textContent = displayTime;
+            
+            // Threshold Alert State Indicators
+            if (totalMinutes >= 25) {
+                timer.className = "text-md font-bold font-mono text-rose-400 animate-pulse";
+            } else if (totalMinutes >= 15) {
+                timer.className = "text-md font-bold font-mono text-amber-400";
+            } else {
+                timer.className = "text-md font-bold font-mono text-emerald-400";
+            }
+        });
+    }
+
+    // Initialize continuous polling loop execution every 1 second
+    if (window.kitchenTimerInterval) clearInterval(window.kitchenTimerInterval);
+    window.kitchenTimerInterval = setInterval(updateKitchenTimers, 1000);
+    updateKitchenTimers();
+</script>
+{% endblock %}

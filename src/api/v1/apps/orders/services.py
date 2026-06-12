@@ -1,6 +1,7 @@
 # src/api/v1/apps/orders/services.py
 
 from datetime import datetime
+from decimal import Decimal
 from typing import List
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
