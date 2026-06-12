@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from typing import List
-from decimal import Decimal
+from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product, Order, OrderDetail
@@ -146,6 +146,7 @@ class OrderService:
         statement = select(Order).where(
             Order.sended == True,
             Order.closed == False
+            ).options(selectinload(Order.items)
             )
         results = self.session.exec(statement)
         return list(results.all())

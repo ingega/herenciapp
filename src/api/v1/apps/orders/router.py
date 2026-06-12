@@ -110,7 +110,8 @@ async def get_kitchen_cards(
     order_service: OrderService = Depends(get_order_service),
     current_user: dict = Depends(get_current_user_from_cookie)):
     
-    active_orders = order_service.get_active_items()
+    db_orders = order_service.get_all_orders_sended()
+    active_orders = [OrderDetailResponse.model_validate(order) for order in db_orders]
     return templates.TemplateResponse(
         request=request,
         name="orders/kitchen/cards.html",

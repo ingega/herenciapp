@@ -25,12 +25,14 @@ This version adds the orders template and tests
   - dashboard template in `src/templates/orders/kitchen/dashboard.html`
   - cards auxiliar dashboard template in `src/templates/orders/kitchen/cards.html`
 - endpoints for kitchen in `src/api/v1/apps/orders/routes.py`
+- endpoint for playground, testing propousses in `src/router.py`
 
 ### Changed
 - Added a selection field to the OrderDetail Schema in `src/api/v1/apps/orders/schemas.py`
 - Added services for items in `src/api/v1/apps/orders/services.py`
 - Added a service for change sended status in `src/api/v1/apps/orders/services.py`
 - Added the implementation to use the new method for change sended status in `src/api/v1/apps/orders/router.py`
+- logic to retreives the active items in kitchen in `src/api/v1/apps/orders/router.py`
 
 ### Fixed
 - N/A

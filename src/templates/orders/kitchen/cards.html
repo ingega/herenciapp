@@ -1,35 +1,51 @@
-{% for item in active_orders %}
-<div class="flex justify-between items-start text-sm pb-2 border-b border-slate-800/50 last:border-0 bg-slate-900/40 p-3 rounded-lg hover:bg-slate-900/80 transition-colors duration-150">
-    <div class="space-y-1">
-        <p class="font-semibold text-slate-200">
-            <span class="text-amber-400 font-bold mr-1">{{ item.quantity }}x</span> 
-            {{ item.product.main_dish if item.product else "Item" }}
-        </p>
-        
-        <div class="flex flex-wrap gap-1.5 pt-1">
-            {% if item.selection %}
-            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md font-medium border border-slate-700/50">
-                🌮 {{ item.selection }}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for order in active_orders %}
+    <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-lg p-5">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
+            <div>
+                <h3 class="text-xl font-bold text-emerald-400">Mesa #{{ order.table_no }}</h3>
+                <p class="text-xs text-slate-400">{{ order.number_of_persons }} personas</p>
+            </div>
+            <span class="text-xs bg-slate-900 text-slate-400 px-2.5 py-1 rounded font-mono">
+                ID: #{{ order.id }}
             </span>
-            {% endif %}
-            
-            {% if item.flavor %}
-            <span class="text-xs bg-indigo-950/40 text-indigo-300 px-2 py-0.5 rounded-md font-medium border border-indigo-900/30">
-                ✨ {{ item.flavor.description }}
-            </span>
-            {% endif %}
         </div>
 
-        {% if item.notes %}
-        <p class="text-xs text-rose-300 bg-rose-950/30 px-2 py-1 rounded border border-rose-900/20 mt-1 italic">
-            📌 "{{ item.notes }}"
-        </p>
-        {% endif %}
+        <div class="space-y-3">
+            {% for item in order.items | sort(attribute='person_number') %}
+            <div class="bg-slate-900/40 p-3 rounded-lg border border-slate-800 flex justify-between items-start">
+                <div>
+                    <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">
+                        Persona {{ item.person_number }}
+                    </span>
+                    <span class="text-white font-medium text-md">
+                        {{ item.quantity }}x {{ item.product.main_dish }}
+                    </span>
+                    {% if item.flavor %}
+                    <span class="text-slate-400 text-sm block">({{ item.flavor.description }} - {{ item.selection }})</span>
+                    {% endif %}
+                    {% if item.notes %}
+                    <p class="text-xs text-rose-300 italic mt-1">⚠️ "{{ item.notes }}"</p>
+                    {% endif %}
+                </div>
+                <span class="text-xs bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
+                    {{ item.prep_status.value }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-5 pt-3 border-t border-slate-700">
+            <button hx-post="/orders/{{ order.id }}/dispatch" 
+                    hx-target="#kitchen-container" 
+                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                ✓ Listo / Despachar
+            </button>
+        </div>
     </div>
-    <span class="text-xs text-slate-500 font-mono bg-slate-900 px-2 py-1 rounded border border-slate-800">Seat {{ item.person_number }}</span>
+    {% else %}
+    <div class="col-span-full text-center py-12">
+        <p class="text-slate-500 text-lg">🍳 ¡Línea limpia! No hay comandas pendientes en cocina.</p>
+    </div>
+    {% endfor %}
 </div>
-{% else %}
-<div class="col-span-full text-center py-12 text-slate-500 italic">
-    🍳 No active items in the queue right now. Everything is served!
-</div>
-{% endfor %}
