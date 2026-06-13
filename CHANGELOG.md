@@ -22,9 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Changed
-- Improve the UI design, changes names and delete prints for debugging
-- Added test structure to README file
-- Improved menu design to be more responsive
+- Improve the UI design, changes names and delete prints for debugging in `src/templates/orders/kitchen/dashboard.html`
+- Added test structure to README file in `README.md`
+- Improved menu design to be more responsive in `src/templates/base_nav.html`
+- Added a filter to prep_status in `src/api/v1/apps/services.py`
 
 ### Fixed
 - N/A

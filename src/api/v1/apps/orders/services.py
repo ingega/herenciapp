@@ -143,13 +143,18 @@ class OrderService:
         """
         This method returns all order_id with sended=True
         """
-        statement = select(Order).where(
+        statement = (
+        select(Order)
+        .where(
             Order.sended == True,
             Order.closed == False
-            ).options(selectinload(Order.items)
-            )
-        results = self.session.exec(statement)
-        return list(results.all())
+        )
+        .options(selectinload(Order.items))
+    )
+        results = self.session.exec(statement).all()
+        for order in results:
+            order.items = [item for item in order.items if item.prep_status == "queued"]
+        return list(results)
     
     def get_active_items(self):
         """
