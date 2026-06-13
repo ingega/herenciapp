@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.11.1] 2026-06-13
 
 ### Added
-- N/A
+- Service for order dispatch in `src/api/v1/apps/services.py`
 
 ### Changed
 - Improve the UI design, changes names and delete prints for debugging in `src/templates/orders/kitchen/dashboard.html`

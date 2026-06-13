@@ -12,6 +12,7 @@ from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRea
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderUpdate, OrderClose, ItemPrepStatus
 from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus
+from src.api.v1.apps.orders.models import get_mexico_time
 
 
 ### --- Orders service class init ---  ####
@@ -245,6 +246,35 @@ class OrderService:
             self.session.rollback()
             raise e
 
+    # Order dispatched
+    def dispatch_order_item(self, item_id: int) -> bool:
+        """
+        Marks a single order item line as delivered, and updates the parent 
+        order's delivery timestamp using local Mexico time mapping.
+        """
+        # 1. Grab the child record
+        db_item = self.session.get(OrderDetail, item_id)
+        if not db_item:
+            return False
+            
+        try:
+            # 2. Update the item's preparation status state
+            db_item.prep_status = "delivered"
+            self.session.add(db_item)
+            
+            # 3. Access parent relationship directly to update header timestamp
+            if db_item.order:
+                db_item.order.delivered_at = get_mexico_time()
+                self.session.add(db_item.order)
+                
+            # 4. Flush and commit atomicity
+            self.session.commit()
+            return True
+            
+        except Exception as e:
+            self.session.rollback()
+            # Logging here if needed
+            return False
 
     def delete_item(self, order_id: int, item_id: int) -> Order:
         """
