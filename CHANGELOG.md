@@ -28,6 +28,7 @@ This version adds the orders template and tests
 - endpoint for playground, testing propousses in `src/router.py`
 - tzdata package with poetry in `pypoetry.toml`
 - complete kitchen dashboard in `src/templates/orders/kitchen/cards.html`
+- Test for kitchen/dashboard template in `tests/integration/orders/kitchen/test_dashboard_template.py`
 
 ### Changed
 - Added a selection field to the OrderDetail Schema in `src/api/v1/apps/orders/schemas.py`
@@ -38,7 +39,7 @@ This version adds the orders template and tests
 - Time zone by default to mexico CST in `src/api/v1/apps/orders/models.py`
 
 ### Fixed
-- N/A
+- Removed utc.now() from payload in OrderService on `src/api/v1/apps/orders/services.py`
 
 ## [1.10.2] 2026-06-07
 This branch is too add the first authorization stage: Add a role to the user, also

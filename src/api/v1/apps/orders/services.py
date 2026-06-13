@@ -65,8 +65,7 @@ class OrderService:
         db_order = Order(
             user_id=user_id,
             table_no=order_in.table_no,
-            number_of_persons=order_in.number_of_persons,
-            created_at=datetime.utcnow()
+            number_of_persons=order_in.number_of_persons
         )
         
         self.session.add(db_order)
