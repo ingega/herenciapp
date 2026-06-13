@@ -60,6 +60,7 @@ class OrderDetailBase(SQLModel):
     person_number: int = Field(default=1, description="Tracks individual customer seats")
     product_id: int
     flavor_id: int
+    selection: str = Field(default="standar")
     quantity: int = Field(default=1)
     notes: Optional[str] = None
     extra_charge: condecimal(max_digits=5, decimal_places=2) = Field(default=0.00)

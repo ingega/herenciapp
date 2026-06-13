@@ -1,0 +1,384 @@
+{% extends "base_nav.html" %}
+
+{% block title %}Herenciapp - New Order Ticket{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-200 pb-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900">Abrir comanda</h1>
+            <p class="text-xs text-gray-500 mt-1">
+                Agrega los datos necesarios para enviarla a la cocina
+            </p>
+        </div>
+        <a href="/main" class="mt-3 sm:mt-0 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm">
+            <i class="fa-solid fa-arrow-left"></i> <span>Regresar al tablero principal</span>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        
+        <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                <h2 class="text-base font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-clipboard-list text-amber-500 mr-2"></i> Llena los campos
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="table_no" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">mesa #:</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
+                                <i class="fa-solid fa-chair"></i>
+                            </span>
+                            <input type="number" id="table_no" name="table_no" min="1" required placeholder="e.g. 4"
+                                   class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 font-medium focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="number_of_persons" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5"># de comensales:</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
+                                <i class="fa-solid fa-users"></i>
+                            </span>
+                            <input type="number" id="number_of_persons" name="number_of_persons" min="1" max="20" value="1" required
+                                   class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 font-medium focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition text-sm"
+                                   onchange="regenerateSeatSections()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-gray-200 space-y-2.5">
+                    <button type="button" onclick="submitCompleteTicket(event)"
+                            class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 text-sm">
+                        <i class="fa-solid fa-paper-plane"></i> <span>Enviar comanda a cocina</span>
+                    </button>
+                    <button type="button" onclick="resetWorkspace()"
+                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 text-xs font-medium py-2 rounded-lg transition">
+                        Limpiar los campos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+            <div id="seats-workspace-root" class="space-y-4">
+                </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Maps live databases elements into browser execution arrays
+    const PRODUCT_CATALOG = [
+        {% for p in products %}
+        { 
+            id: {{ p.id }}, 
+            name: "{{ p.main_dish }}", 
+            price: {{ p.price }}, 
+            category: "{{ p.category if p.category else '' }}" 
+        },
+        {% endfor %}
+    ];
+
+    const FLAVOR_CATALOG = [
+        {% for f in flavors %}
+        { 
+            id: {{ f.id }}, 
+            product_id: {{ f.product_id }}, 
+            description: "{{ f.description }}" 
+        },
+        {% endfor %}
+    ];
+
+    // Dynamic meat items sourced directly from your MeatService database records
+    const MEAT_CATALOG = [
+        {% for m in meat_catalogue %}
+        { id: {{ m.id }}, description: "{{ m.description }}" },
+        {% endfor %}
+    ];
+
+    let globalLineIndex = 0;
+
+    /**
+     * Rebuilds container card blocks reflecting guest counts designated by the waiter
+     */
+    function regenerateSeatSections() {
+        const workspaceRoot = document.getElementById('seats-workspace-root');
+        const totalPersons = parseInt(document.getElementById('number_of_persons').value) || 1;
+        
+        workspaceRoot.innerHTML = '';
+
+        for (let seatNum = 1; seatNum <= totalPersons; seatNum++) {
+            const seatCard = document.createElement('div');
+            seatCard.className = "bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition duration-150";
+            seatCard.id = `seat-card-block-${seatNum}`;
+            
+            seatCard.innerHTML = `
+                <div class="bg-slate-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="flex items-center justify-center w-6 h-6 bg-amber-100 text-amber-800 rounded-md text-xs font-bold border border-amber-200">
+                            ${seatNum}
+                        </span>
+                        <h3 class="font-bold text-gray-700 text-sm">order de persona #${seatNum}</h3>
+                    </div>
+                    <button type="button" onclick="appendItemRow(${seatNum})" 
+                            class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> <span>Add Item</span>
+                    </button>
+                </div>
+                <div class="p-3">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-200 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                                <th class="pb-1.5 px-2 w-[25%]">Platillo</th>
+                                <th class="pb-1.5 px-2 w-[20%]">descripición</th>
+                                <th class="pb-1.5 px-2 w-[10%] text-center">Cant</th>
+                                <th class="pb-1.5 px-2 w-[35%]">Notas adicionals</th>
+                                <th class="pb-1.5 px-2 w-[10%] text-center">Extra ($)</th>
+                                <th class="pb-1.5 w-[30px] text-right"><i 
+                                    class="fa-solid fa-trash-can text-gray-300"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="seat-tbody-${seatNum}" class="divide-y divide-gray-100">
+                            </tbody>
+                    </table>
+                </div>
+            `;
+            workspaceRoot.appendChild(seatCard);
+            appendItemRow(seatNum);
+        }
+    }
+
+    /**
+     * Appends an input row item mapped to an individual person's container
+     */
+    function appendItemRow(seatNumber) {
+        const tbody = document.getElementById(`seat-tbody-${seatNumber}`);
+        globalLineIndex++;
+        const lineId = globalLineIndex;
+
+        const tr = document.createElement('tr');
+        tr.id = `order-line-row-${lineId}`;
+        tr.className = "group text-xs font-medium text-gray-700";
+        tr.dataset.seatNumber = seatNumber;
+
+        let productOptionsHtml = '<option value="">-- elige platillo --</option>';
+        PRODUCT_CATALOG.forEach(p => {
+            productOptionsHtml += `<option value="${p.id}">${p.name} ($${p.price})</option>`;
+        });
+
+        tr.innerHTML = `
+            <td class="py-2.5 pr-2">
+                <select id="product-select-${lineId}" onchange="handleProductChange(${lineId})" required
+                        class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-gray-900 focus:outline-none focus:border-amber-500 transition text-xs">
+                    ${productOptionsHtml}
+                </select>
+            </td>
+            <td class="py-2.5 pr-2">
+                <select id="variant-select-${lineId}" required
+                        class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-gray-900 focus:outline-none focus:border-amber-500 transition text-xs">
+                    <option value="">-- elige opcion --</option>
+                </select>
+            </td>
+            <td class="py-2.5 pr-2 flex justify-center">
+                <input type="number" id="quantity-input-${lineId}" min="1" value="1" required
+                       class="w-14 bg-white border border-gray-300 rounded-md px-1.5 py-1.5 text-gray-900 text-center focus:outline-none focus:border-amber-500 transition text-xs">
+            </td>
+            <td class="py-2.5 pr-2">
+                <input type="text" id="notes-input-${lineId}" placeholder="ejemplo, sin cebolla"
+                   class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-amber-500 transition text-xs">
+            </td>
+            <td class="py-2.5 pr-2 flex justify-center">
+                <input type="number" id="extra-charge-input-${lineId}" min="0" value="0" required
+                       class="w-14 bg-white border border-gray-300 rounded-md px-1.5 py-1.5 text-gray-900 text-center focus:outline-none focus:border-amber-500 transition text-xs">
+            </td>
+            </td>
+            <td class="py-2.5 text-right">
+                <button type="button" onclick="removeItemRow(${lineId})"
+                        class="text-gray-400 hover:text-rose-500 p-1 transition rounded-md hover:bg-rose-50">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    }
+
+    function removeItemRow(lineId) {
+        const row = document.getElementById(`order-line-row-${lineId}`);
+        if (row) row.remove();
+    }
+
+    /**
+     * TARGET CHALLENGE SOLVED:
+     * Evaluates standard flavors matching the targeted item. If a option 
+     * description reads "carne", it injects the dynamic database Meat Catalogue instead!
+     */
+    function handleProductChange(lineId) {
+    const productSelect = document.getElementById(`product-select-${lineId}`);
+    const variantSelect = document.getElementById(`variant-select-${lineId}`);
+    
+    const selectedProductId = parseInt(productSelect.value);
+    const productMatch = PRODUCT_CATALOG.find(p => p.id === selectedProductId);
+
+    variantSelect.innerHTML = '<option value="">-- Choose Option --</option>';
+
+    if (!productMatch) {
+        variantSelect.innerHTML = '<option value="">-- Select Item First --</option>';
+        return;
+    }
+
+    // Filtrar los sabores correspondientes a este platillo del catálogo base
+    const filteredFlavors = FLAVOR_CATALOG.filter(f => f.product_id === selectedProductId);
+
+    // CASO 1: Si el producto no tiene configurado ningún sabor en absoluto (ej: una porción de papas sencilla)
+    if (filteredFlavors.length === 0) {
+        let option = document.createElement("option");
+        option.value = "0"; // Flag numérico neutro o ID 0 estructural para evitar nulos
+        option.text = "Standard / No Options";
+        option.dataset.selectionText = "Standard"; // Asegura que nunca envíe un string vacío o nulo
+        variantSelect.appendChild(option);
+        return;
+    }
+
+    // Buscamos si existe la fila ancla "carne" para disparar el Meat Catalogue dinámico
+    const carnePlaceholderFlavor = filteredFlavors.find(f => f.description.toLowerCase() === "carne");
+
+    if (carnePlaceholderFlavor) {
+        // CASO 2: Es un platillo basado en carnes (Tacos, Burritos, etc.)
+        MEAT_CATALOG.forEach(meat => {
+            let option = document.createElement("option");
+            option.value = carnePlaceholderFlavor.id; // 🔑 SALVAMOS EL FLAVOR_ID: Mantiene el ID base estructural invariable
+            option.text = meat.description;
+            option.dataset.selectionText = meat.description; // Inyecta el nombre real (ej: 'maciza', 'lengua')
+            variantSelect.appendChild(option);
+        });
+    } else {
+        // CASO 3: Es un producto normal con sabores estándar (Refrescos -> Coca, Fanta, Sprite)
+        filteredFlavors.forEach(flavor => {
+            let option = document.createElement("option");
+            option.value = flavor.id;              // Envía el ID exacto de la opción de refresco
+            option.text = flavor.description;
+            option.dataset.selectionText = flavor.description; // 🔑 SALVAMOS EL TEXTO: Protege la columna 'selection' en el backend
+            variantSelect.appendChild(option);
+        });
+        }
+    }
+
+    /**
+     * Loops over active rows and submits payload to backend REST endpoints
+     */
+    async function submitCompleteTicket(event) {
+
+        if (event) {
+        event.preventDefault();
+        }
+
+        const tableNoInput = document.getElementById('table_no');
+        const tableNo = parseInt(tableNoInput.value);
+        const totalPersons = parseInt(document.getElementById('number_of_persons').value) || 1;
+
+        if (!tableNo) {
+            alert("Please assign a valid Table Number before trying to send.");
+            tableNoInput.focus();
+            return;
+        }
+
+        const allRows = document.querySelectorAll('[id^="order-line-row-"]');
+        if (allRows.length === 0) {
+            alert("Cannot dispatch an empty ticket. Please select at least one item line.");
+            return;
+        }
+
+        const orderPayload = {
+            table_no: tableNo,
+            number_of_persons: totalPersons,
+            items: []
+        };
+
+        try {
+            // Step 1: Open the Ticket (POST /orders/create)
+            const orderResponse = await fetch("/orders/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderPayload)
+            });
+
+            if (!orderResponse.ok) {
+                const errorData = await orderResponse.json();
+                throw new Error(errorData.detail || "Failed initializing base ticket state.");
+            }
+
+            const createdOrder = await orderResponse.json();
+            const orderId = createdOrder.id;
+
+            // Step 2: Append item configurations (POST /orders/{order_id}/items)
+            for (let row of allRows) {
+                const lineId = row.id.split('-').pop();
+                const productSelect = document.getElementById(`product-select-${lineId}`);
+                const variantSelect = document.getElementById(`variant-select-${lineId}`);
+                const quantityInput = document.getElementById(`quantity-input-${lineId}`);
+                const notesInput = document.getElementById(`notes-input-${lineId}`);
+                const extraChargeInput = document.getElementById(`extra-charge-input-${lineId}`);
+
+                const productId = parseInt(productSelect.value);
+                const quantity = parseInt(quantityInput.value) || 1;
+                const notes = notesInput ? notesInput.value.trim() : "";
+                const extra_charge = extraChargeInput ? parseFloat(extraChargeInput.value) : 0.00;
+                const seatNumber = parseInt(row.dataset.seatNumber);
+
+                if (!productId) continue;
+
+                const chosenOption = variantSelect.options[variantSelect.selectedIndex];
+                const flavorIdVal = chosenOption ? chosenOption.value : "";
+                const selectionText = chosenOption ? chosenOption.dataset.selectionText : "Standard";
+
+                const itemPayload = {
+                    person_number: seatNumber,
+                    product_id: productId,
+                    flavor_id: flavorIdVal !== "" ? parseInt(flavorIdVal) : null,
+                    selection: selectionText || "",
+                    quantity: quantity,
+                    notes: notes,
+                    extra_charge: extra_charge
+                };
+
+
+                const itemResponse = await fetch(`/orders/${orderId}/items`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(itemPayload)
+                });
+
+                if (!itemResponse.ok) {
+                    console.error(`Error processing item line allocation block index ${lineId}`);
+                    alert(`Error 422 in line #${lineId}: Verify the exact error by inspectin the console (F12).`);
+                }
+            }
+
+            alert(`¡Comanda enviada a la cocina con éxito para la Mesa ${tableNo}!`);
+            window.location.href = "/orders/";
+
+        } catch (err) {
+            console.error(err);
+            alert(`Ticket Processing Exception: ${err.message}`);
+        }
+    }
+
+    function resetWorkspace() {
+        document.getElementById('table_no').value = '';
+        document.getElementById('number_of_persons').value = '1';
+        regenerateSeatSections();
+    }
+
+    window.onload = function() {
+        regenerateSeatSections();
+    };
+</script>
+{% endblock %}

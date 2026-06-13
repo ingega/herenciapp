@@ -1,8 +1,9 @@
 # src/api/v1/apps/orders/services.py
 
 from datetime import datetime
-from typing import List
 from decimal import Decimal
+from typing import List
+from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product, Order, OrderDetail
@@ -64,8 +65,7 @@ class OrderService:
         db_order = Order(
             user_id=user_id,
             table_no=order_in.table_no,
-            number_of_persons=order_in.number_of_persons,
-            created_at=datetime.utcnow()
+            number_of_persons=order_in.number_of_persons
         )
         
         self.session.add(db_order)
@@ -135,7 +135,36 @@ class OrderService:
         Retrieves all items for a given order, including nested product and flavor details.
         """
         db_order = self.get_order_by_id(order_id)
+        if not db_order:
+            return []
         return [OrderDetailReadNested.model_validate(item) for item in db_order.items]
+    
+    def get_all_orders_sended(self) -> List[Order]:
+        """
+        This method returns all order_id with sended=True
+        """
+        statement = select(Order).where(
+            Order.sended == True,
+            Order.closed == False
+            ).options(selectinload(Order.items)
+            )
+        results = self.session.exec(statement)
+        return list(results.all())
+    
+    def get_active_items(self):
+        """
+        This method uses two internal methods to return active items
+        """
+        # first: get the orders filter
+        orders_filter = self.get_all_orders_sended()
+        # now retrieve the items for each order sent
+        data = []
+        for order in orders_filter:
+            individual_order = self.get_all_items_for_order(order.id)
+            if len(individual_order) > 0:
+                data.extend(individual_order)
+        
+        return data
 
     def add_or_update_item(self, order_id: int, item_in: OrderDetailCreate) -> tuple[Order, bool]:
         """
@@ -160,7 +189,7 @@ class OrderService:
         )
         existing_item = self.session.exec(statement).first()
 
-        is_new_item = False  # Our flag!
+        is_new_item = False  # flag for code response
 
         if existing_item:
             existing_item.quantity = item_in.quantity
@@ -173,6 +202,7 @@ class OrderService:
                 person_number=item_in.person_number,
                 product_id=item_in.product_id,
                 flavor_id=item_in.flavor_id,
+                selection=item_in.selection,
                 quantity=item_in.quantity,
                 notes=item_in.notes,
                 extra_charge=item_in.extra_charge
@@ -185,6 +215,31 @@ class OrderService:
         self.session.refresh(db_order)
         
         return db_order, is_new_item
+
+    # first time that the waiter sends an order, the status must change
+    def change_sended_status(self, order_id: int) -> bool:
+        """
+        Safely retrieves the parent Order entity and updates its 'sended' state to True,
+        making it visible on the HTMX Live Kitchen Panel.
+        """
+        # 1. Fetch the correct parent record from the database
+        db_order = self.get_order_by_id(order_id)
+        if not db_order:
+            return False
+        
+        # 2. Mutate the status column on the parent object directly
+        db_order.sended = True
+        
+        # 3. Commit state changes to the DB session
+        try:
+            self.session.add(db_order)
+            self.session.commit()
+            self.session.refresh(db_order)
+            return True
+        except Exception as e:
+            self.session.rollback()
+            raise e
+
 
     def delete_item(self, order_id: int, item_id: int) -> Order:
         """

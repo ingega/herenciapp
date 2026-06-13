@@ -1,10 +1,21 @@
 # src/api/v1/apps/orders/models.py
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from enum import Enum
 from typing import List, Optional
 from pydantic import condecimal
 from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
 from sqlalchemy import SmallInteger, Text
+
+# system must use the MEXICO CITY CST TIME, but in future we can add a env var in config
+MEXICO_TZ = ZoneInfo("America/Mexico_City")
+
+def get_mexico_time() -> datetime:
+    """
+    Guarantees that regardless of whether this code executes locally or inside an
+    AWS Linux EC2/Docker host configured to UTC, it returns true Mexico City time.
+    """
+    return datetime.now(MEXICO_TZ)
 
 
 class PayMethod(str, Enum):
@@ -32,9 +43,9 @@ class Order(SQLModel, table=True):
     number_of_persons: int = Field(sa_type=SmallInteger(), default=1)
 
     # Combined date & time with default to current timestamp in UTC/CST mapping
-    created_at: datetime = Field(default_factory=datetime.now, index=True)
-    delivered_at: datetime = Field(default_factory=datetime.now, index=True)
-    closed_at: datetime = Field(default_factory=datetime.now, index=True)
+    created_at: datetime = Field(default_factory=get_mexico_time, index=True)
+    delivered_at: datetime = Field(default_factory=get_mexico_time, index=True)
+    closed_at: datetime = Field(default_factory=get_mexico_time, index=True)
     
     # Workflow control flags
     sended: bool = Field(default=False, index=True)

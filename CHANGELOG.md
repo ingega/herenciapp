@@ -16,6 +16,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.11.0] 2026-06-08
+This version adds the orders template and tests
+
+### Added
+- Template for orders in `src/templates/orders/create.html`
+- Kitchen flow implemententation:
+  - dashboard template in `src/templates/orders/kitchen/dashboard.html`
+  - cards auxiliar dashboard template in `src/templates/orders/kitchen/cards.html`
+- endpoints for kitchen in `src/api/v1/apps/orders/routes.py`
+- endpoint for playground, testing propousses in `src/router.py`
+- tzdata package with poetry in `pypoetry.toml`
+- complete kitchen dashboard in `src/templates/orders/kitchen/cards.html`
+- Test for kitchen/dashboard template in `tests/integration/orders/kitchen/test_dashboard_template.py`
+
+### Changed
+- Added a selection field to the OrderDetail Schema in `src/api/v1/apps/orders/schemas.py`
+- Added services for items in `src/api/v1/apps/orders/services.py`
+- Added a service for change sended status in `src/api/v1/apps/orders/services.py`
+- Added the implementation to use the new method for change sended status in `src/api/v1/apps/orders/router.py`
+- logic to retreives the active items in kitchen in `src/api/v1/apps/orders/router.py`
+- Time zone by default to mexico CST in `src/api/v1/apps/orders/models.py`
+
+### Fixed
+- Removed utc.now() from payload in OrderService on `src/api/v1/apps/orders/services.py`
+
 ## [1.10.2] 2026-06-07
 This branch is too add the first authorization stage: Add a role to the user, also
 an OrderDetail selection field will be added.
