@@ -8,14 +8,14 @@
 
 <div class="w-full px-4 sm:px-8 py-6" 
      x-data="{ lastRefreshed: new Date().toLocaleTimeString() }"
-     x-init="console.log('🚀 [ALPINE DIAGNOSTIC] Alpine runtime successfully connected and active!')"
      @tick.window="console.log('⚡ [ALPINE DIAGNOSTIC] Tick event captured!'); lastRefreshed = new Date().toLocaleTimeString()">
      
     <div class="flex items-center justify-between border-b border-slate-700 pb-4 mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-yellow tracking-wide">👨‍🍳 Kitchen Dashboard</h1>
+            <h1 class="text-3xl font-bold text-yellow tracking-wide">👨‍🍳 Tablero de cocina</h1>
             <p class="text-sm text-slate-400 mt-1">
-                Live active ticket feeds • <span class="text-xs font-mono text-indigo-400">Last update: <span x-text="lastRefreshed"></span></span>
+                tickets actualizados al momento • <span class="text-xs 
+                font-mono text-indigo-400">última actualización: <span x-text="lastRefreshed"></span></span>
             </p>
         </div>
         
@@ -27,13 +27,13 @@
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
             </span>
             <span class="text-xs font-semibold text-emerald-400 
-            tracking-wider uppercase">Engine Live</span>
+            tracking-wider uppercase">Sistema online</span>
         </div>
     </div>
 
     <div class="min-h-screen bg-slate-950 p-6 text-slate-100 rounded-xl 
         border border-slate-900 shadow-2xl">
-        <h2 class="text-2xl font-bold mb-6 text-slate-400">Live Kitchen Operations Desk</h2>
+        <h2 class="text-2xl font-bold mb-6 text-slate-400">Ordenes pendientes</h2>
     
         <div id="kitchen-cards-container" 
              class="w-full transition-all duration-300"
