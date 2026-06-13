@@ -87,7 +87,6 @@ def render_order_creation_workspace(
         }
     )
 
-
 # kitchen-dashboard
 @router.get("/kitchen/dashboard", response_class=HTMLResponse)
 def get_kitchen_orders(
@@ -211,6 +210,38 @@ def api_get_all_orders(
     return service.get_orders()
 
 # -- nested items in order endpoints ---
+
+# items dispatched
+@router.post("/items/{item_id}/dispatch")
+async def api_dispatch_kitchen_item(
+    item_id: int,
+    request: Request,
+    current_user: dict = Depends(get_current_user_from_cookie),
+    # Inject your service class context instance here
+    service: OrderService = Depends(get_order_service) 
+    ):
+    """
+    Endpoint targeted by HTMX to clear an item line from the active board.
+    Returns the newly computed HTML cards partial view grid.
+    """
+    # Execute the database update routine
+    success = service.dispatch_order_item(item_id)
+    if not success:
+        raise HTTPException(status_code=400, detail="Could not update item status")
+        
+    # Re-fetch active tickets utilizing our lightning fast memory filter layout
+    active_orders = service.get_all_orders_sended()
+    
+    # Return the clean template partial to dynamically snap update without refreshing
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/kitchen/cards.html",
+        context={
+            "config": settings,
+            "current_user": current_user, # for nav_bar
+            "orders": active_orders
+        }
+    )
 
 @router.get("/items/all/", response_model=List[OrderDetailReadNested], tags=["Items"])
 def api_get_all_items_for_order(

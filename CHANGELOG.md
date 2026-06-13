@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added test structure to README file in `README.md`
 - Improved menu design to be more responsive in `src/templates/base_nav.html`
 - Added a filter to prep_status in `src/api/v1/apps/services.py`
+- Added logic to dispatch an order in `src/templates/orders/kitchen/cards.html`
 
 ### Fixed
 - N/A
