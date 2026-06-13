@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Improve the UI design, changes names and delete prints for debugging
+- Added test structure to README file
 
 ### Fixed
 - N/A

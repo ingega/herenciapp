@@ -27,6 +27,8 @@ herenciapp/
 │   ├── templates/      # Jinja2 HTML templates
 │   └── main.py         # Entry point & Lifespan management
 ├── tests/              # Pytest suite
+|    |── integration    # Test with integrated elements (database, endpoints).
+|    |── unit           # Test for functions. 
 └── docker-compose.yml  # Orchestration for App and DB
 ```
 
