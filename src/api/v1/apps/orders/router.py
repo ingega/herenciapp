@@ -12,10 +12,10 @@ from src.api.v1.apps.orders.schemas import OrderDetailReadNested, ProductCreate,
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
-from src.api.v1.apps.orders.schemas import OrderDetailResponse, OrderDiscount
+from src.api.v1.apps.orders.schemas import OrderDetailResponse, OrderDiscount, OrderClose
 
 # models
-from src.api.v1.apps.orders.models import Product
+from src.api.v1.apps.orders.models import Product, Order
 
 # services
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
@@ -26,7 +26,7 @@ from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
 from src.database import get_session
 
-# authz
+# authz importation
 from src.api.v1.authz.authz import RoleChecker
 
 # routers
@@ -37,7 +37,7 @@ router_meat = APIRouter(prefix="/orders/flavors/meat", tags=["meat"], redirect_s
 
 templates = Jinja2Templates(directory="src/templates")
 
-# authz
+# authz role checker
 allow_admin = RoleChecker(["admin"])
 
 # dependencies for service injection
@@ -157,7 +157,7 @@ async def get_waiter_cards(
         }
     )
 
-# this is a sub-function to update the discount
+# sub-function to update the discount
 @router.patch("/{order_id}/discount", response_class=HTMLResponse, tags=["waiter"])
 def order_discount(
     request: Request,
@@ -168,6 +168,8 @@ def order_discount(
 ):
     """Endpoint for update the discuount and return data for card in HTMX"""
     
+    # debug, delete on production
+
     # Execute the query
     result, code = service.update_order_discount(order_id, payload=payload)
     
@@ -176,6 +178,11 @@ def order_discount(
         
     # We need to resend the updated data
     updated_order = service.get_order_by_id(order_id)
+
+    # debug: delete on production
+    print(f"{'-' * 10} [UPDATED VALUES] {'-' * 10}\n"
+          f"{updated_order}\n"
+          f"{'-' * 25}")
     
     # Retornamos directamente el fragmento de la card para que HTMX haga el swap atómico
     return templates.TemplateResponse(
@@ -187,6 +194,18 @@ def order_discount(
             "current_user": current_user # for nav_bar
         }
     )
+
+# close an order
+@router.patch("/{order_id}/closed", response_model=Order ,tags=["waiter"])
+def order_closed(
+    request: Request,
+    order_id: int,
+    payload: OrderClose,  
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    order_service = service.close_order(order_id=order_id, checkout_payload=payload)
+    return order_service
 
 # list of active orders
 @router.get("/", response_class=HTMLResponse)

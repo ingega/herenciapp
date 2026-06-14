@@ -7,11 +7,17 @@ from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product, Order, OrderDetail
+# flavors schemas
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate, OrderDetailReadNested 
+# meat schemas
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate 
+# product schemas
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductUpdate
+# order schemas
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderUpdate, OrderClose, ItemPrepStatus
-from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus, OrderDiscount
+from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus
+from src.api.v1.apps.orders.schemas import OrderDiscount
+# local datetime funcs
 from src.api.v1.apps.orders.models import get_mexico_time
 
 
@@ -25,7 +31,7 @@ class OrderService:
         self.session = session
 
     # ==========================================
-    # CORE ORDER CRUD METHODS (REFACTORED)
+    # CORE ORDER CRUD METHODS
     # ==========================================
 
     def get_orders(self, skip: int = 0, limit: int = 100) -> List[Order]:
@@ -306,6 +312,7 @@ class OrderService:
             self.session.add(db_order)
             self.session.commit()
             self.session.refresh(db_order)
+
             return True, 200
         except Exception as e:
             self.session.rollback()
@@ -405,7 +412,7 @@ class OrderService:
             extra = Decimal(str(item.extra_charge))
             quantity = Decimal(str(item.quantity))
             
-            subtotal += (base_price + extra) * quantity
+            subtotal += (base_price * quantity) + extra 
             
         # Total Formula: Subtotal - Discount + Tip
         calculated_total = subtotal - Decimal(str(order.discount)) + Decimal(str(order.tip))
@@ -434,8 +441,6 @@ class OrderService:
 
         # Apply final payment metadata definitions
         db_order.pay_method = checkout_payload.pay_method
-        db_order.discount = checkout_payload.discount
-        db_order.discount_motive = checkout_payload.discount_motive
         db_order.tip = checkout_payload.tip
         
         # Run final master validation pass on financial formulas
@@ -443,7 +448,7 @@ class OrderService:
         
         # Complete system closure sequence operations
         db_order.closed = True
-        db_order.closed_at = datetime.now()
+        db_order.closed_at = get_mexico_time()
         
         self.session.add(db_order)
         self.session.commit()

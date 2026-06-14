@@ -24,6 +24,7 @@ class FlavorCatalogueCreate(FlavorCatalogueBase):
 class FlavorCatalogueRead(FlavorCatalogueBase):
     id: int
 
+
 class FlavorCatalogueUpdate(SQLModel):
     product_id: Optional[int] = None
     description: Optional[str] = Field(default=None, max_length=50)
@@ -44,6 +45,7 @@ class ProductCreate(ProductBase):
 
 class ProductRead(ProductBase):
     id: int
+
 
 class ProductUpdate(SQLModel):
     main_dish: Optional[str] = Field(default=None, max_length=50)
@@ -89,9 +91,12 @@ class OrderDetailReadNested(OrderDetailRead):
     product: ProductRead
     flavor: FlavorCatalogueRead
 
+
 # ==========================================
 # 4. ORDER SCHEMAS
 # ==========================================
+
+
 class OrderBase(SQLModel):
     table_no: int = Field(default=0)
     number_of_persons: int = Field(default=1)
@@ -129,9 +134,8 @@ class OrderSend(SQLModel):
 class OrderClose(SQLModel):
     """Final step to close table out and process final billing math safely."""
     pay_method: PayMethod
-    discount: condecimal(max_digits=6, decimal_places=2) = Field(default=0.00)
-    discount_motive: Optional[str] = None
     tip: condecimal(max_digits=6, decimal_places=2) = Field(default=0.00)
+
 
 class OrderDiscount(SQLModel):
     """Schema to add a discount to an order"""
@@ -145,6 +149,7 @@ class OrderDiscount(SQLModel):
         discount_motive: Optional[str] = Form(None)
     ):
         return cls(discount=discount, discount_motive=discount_motive)
+
 
 class OrderRead(OrderBase):
     id: int
@@ -164,11 +169,14 @@ class OrderDetailResponse(OrderRead):
     """
     items: List[OrderDetailReadNested] = []
 
+
 OrderDetailResponse.model_rebuild()
 
 # ==========================================
 # 1. MEAT CATALOGUE SCHEMAS
 # ==========================================
+
+
 class MeatCatalogueBase(SQLModel):
     description: str = Field(max_length=50)
 
