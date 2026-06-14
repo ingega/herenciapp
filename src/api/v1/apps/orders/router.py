@@ -12,7 +12,7 @@ from src.api.v1.apps.orders.schemas import OrderDetailReadNested, ProductCreate,
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
-from src.api.v1.apps.orders.schemas import OrderDetailResponse
+from src.api.v1.apps.orders.schemas import OrderDetailResponse, OrderDiscount
 
 # models
 from src.api.v1.apps.orders.models import Product
@@ -153,6 +153,37 @@ async def get_waiter_cards(
         context={
             "config": settings,
             "active_orders": active_orders,
+            "current_user": current_user # for nav_bar
+        }
+    )
+
+# this is a sub-function to update the discount
+@router.patch("/{order_id}/discount", response_class=HTMLResponse, tags=["waiter"])
+def order_discount(
+    request: Request,
+    order_id: int,
+    payload: OrderDiscount = Depends(OrderDiscount.as_form), # for htpx 
+    service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """Endpoint for update the discuount and return data for card in HTMX"""
+    
+    # Execute the query
+    result, code = service.update_order_discount(order_id, payload=payload)
+    
+    if not result:
+        raise HTTPException(status_code=code, detail="data could not be updated")
+        
+    # We need to resend the updated data
+    updated_order = service.get_order_by_id(order_id)
+    
+    # Retornamos directamente el fragmento de la card para que HTMX haga el swap atómico
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/waiter/cards.html",
+        context={
+            "config": settings,
+            "active_orders": [updated_order],
             "current_user": current_user # for nav_bar
         }
     )

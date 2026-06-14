@@ -19,12 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.11.1] 2026-06-13
 
 ### Added
-- Service for order dispatch in `src/api/v1/apps/services.py`
-- Service for waiter dashboard in `src/api/v1/apps/services.py`
-- Added Endpoint for waiter dashboard in `src/api/v1/apps/routes.py`
+- Service for order dispatch in `src/api/v1/apps/orders/services.py`
+- Service for waiter dashboard in `src/api/v1/apps/orders/services.py`
+- Added Endpoint for waiter dashboard in `src/api/v1/apps/orders/routes.py`
 - Templates for waiter dashboard:
   - Dashboard `src/templates/orders/waiter/dashboard.html`
   - Cards `src/templates/orders/waiter/cards.html`
+- Logic for update discount:
+  - Schema in `src/api/v1/apps/orders/schemas.py`
+  - Service in `src/api/v1/apps/orders/services.py`
+  - Endpoint in `src/api/v1/apps/orders/routes.py`
+- Added python-multipart via poetry to use Form
 
 ### Changed
 - Improve the UI design, changes names and delete prints for debugging in `src/templates/orders/kitchen/dashboard.html`

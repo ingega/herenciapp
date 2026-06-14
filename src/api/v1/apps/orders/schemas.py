@@ -1,6 +1,8 @@
 # src/api/v1/apps/orders/schemas.py
 from datetime import datetime
 from typing import List, Optional
+from decimal import Decimal
+from fastapi import Form
 from pydantic import Field, condecimal
 from sqlmodel import SQLModel
 
@@ -131,6 +133,18 @@ class OrderClose(SQLModel):
     discount_motive: Optional[str] = None
     tip: condecimal(max_digits=6, decimal_places=2) = Field(default=0.00)
 
+class OrderDiscount(SQLModel):
+    """Schema to add a discount to an order"""
+    discount: Decimal = Field(default=0.00, max_digits=6, decimal_places=2)
+    discount_motive: Optional[str] = None
+
+    @classmethod
+    def as_form(
+        cls,
+        discount: Decimal = Form(default=0.00),
+        discount_motive: Optional[str] = Form(None)
+    ):
+        return cls(discount=discount, discount_motive=discount_motive)
 
 class OrderRead(OrderBase):
     id: int

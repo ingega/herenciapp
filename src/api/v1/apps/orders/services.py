@@ -11,7 +11,7 @@ from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogu
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate 
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderUpdate, OrderClose, ItemPrepStatus
-from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus
+from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus, OrderDiscount
 from src.api.v1.apps.orders.models import get_mexico_time
 
 
@@ -285,6 +285,31 @@ class OrderService:
             self.session.rollback()
             # Logging here if needed
             return False
+
+    # update order discount
+    def update_order_discount(self, order_id: int, payload: OrderDiscount) -> tuple[bool, int]:
+        # 1. retrieve data from db
+        db_order = self.get_order_by_id(order_id)
+        if not db_order:
+            return False, 404
+            
+        # 2. Verify that order don't be already closed
+        if db_order.closed:
+            return False, 403
+            
+        # 3. Update the fields
+        db_order.discount = payload.discount
+        db_order.discount_motive = payload.discount_motive
+        
+        # 4. Atomic way changes application
+        try:
+            self.session.add(db_order)
+            self.session.commit()
+            self.session.refresh(db_order)
+            return True, 200
+        except Exception as e:
+            self.session.rollback()
+            raise e
 
     def delete_item(self, order_id: int, item_id: int) -> Order:
         """
