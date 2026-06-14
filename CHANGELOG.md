@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Service for order dispatch in `src/api/v1/apps/services.py`
 - Service for waiter dashboard in `src/api/v1/apps/services.py`
+- Added Endpoint for waiter dashboard in `src/api/v1/apps/routes.py`
 - Templates for waiter dashboard:
   - Dashboard `src/templates/orders/waiter/dashboard.html`
   - Cards `src/templates/orders/waiter/cards.html`
