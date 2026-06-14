@@ -1,6 +1,8 @@
 # src/api/v1/apps/orders/router.py
 from fastapi import APIRouter, status, Request, Depends, HTTPException, Response
-from fastapi.responses import Response, HTMLResponse
+from fastapi.responses import Response, HTMLResponse, RedirectResponse
+
+
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from typing import List
@@ -121,6 +123,47 @@ async def get_kitchen_cards(
         }
     )
 
+# waiter-dashboard
+@router.get("/waiter/dashboard", response_class=HTMLResponse)
+def get_waiter_orders(
+    request: Request,
+    order_service: OrderService = Depends(get_order_service),                   
+    current_user: dict = Depends(get_current_user_from_cookie)
+    ):
+    db_orders = order_service.get_all_orders_delivered()
+    active_orders = [OrderDetailResponse.model_validate(order) for order in db_orders]
+    # debug, delete in production
+    print(f"[active orders] - orders: {len(active_orders)}")
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/waiter/dashboard.html",
+        context={
+            "config": settings,
+            "current_user": current_user # for nav_bar
+        }
+    )
+
+# waiter-dashboard-cards
+@router.get("/waiter/cards", response_class=HTMLResponse)
+async def get_waiter_cards(
+    request: Request,
+    order_service: OrderService = Depends(get_order_service),
+    current_user: dict = Depends(get_current_user_from_cookie)):
+    
+    db_orders = order_service.get_all_orders_delivered()
+    active_orders = [OrderDetailResponse.model_validate(order) for order in db_orders]
+    # debug, delete in production
+    print(f"[active orders] - {active_orders}")
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/waiter/cards.html",
+        context={
+            "config": settings,
+            "active_orders": active_orders,
+            "current_user": current_user # for nav_bar
+        }
+    )
+
 # list of active orders
 @router.get("/", response_class=HTMLResponse)
 def view_active_orders_dashboard(
@@ -232,16 +275,8 @@ async def api_dispatch_kitchen_item(
     # Re-fetch active tickets utilizing our lightning fast memory filter layout
     active_orders = service.get_all_orders_sended()
     
-    # Return the clean template partial to dynamically snap update without refreshing
-    return templates.TemplateResponse(
-        request=request,
-        name="orders/kitchen/cards.html",
-        context={
-            "config": settings,
-            "current_user": current_user, # for nav_bar
-            "orders": active_orders
-        }
-    )
+    # Return a redirect to dashboard to refresh the values
+    return RedirectResponse(url="/orders/kitchen/dashboard")
 
 @router.get("/items/all/", response_model=List[OrderDetailReadNested], tags=["Items"])
 def api_get_all_items_for_order(

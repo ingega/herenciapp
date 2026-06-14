@@ -157,6 +157,16 @@ class OrderService:
             order.items = [item for item in order.items if item.prep_status == "queued"]
         return list(results)
     
+    def get_all_orders_delivered(self) -> List[Order]:
+        """
+        This method returns all order_id with sended=True
+        """
+        statement = select(Order).where(Order.closed == False)
+        
+        results = self.session.exec(statement).all()
+        
+        return list(results)
+    
     def get_active_items(self):
         """
         This method uses two internal methods to return active items

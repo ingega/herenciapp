@@ -5,7 +5,7 @@
             <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
         </span>
         <h2 class="text-2xl font-black text-white tracking-tight uppercase">
-            Comandas Activas en Cocina
+            Comandas Activas
         </h2>
     </div>
     <span class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-md font-mono text-slate-400">
@@ -16,7 +16,7 @@
 <div class="grid grid-cols-[repeat(auto-fill,minmax(24rem,1fr))] gap-6 items-start" id="kitchen-container">
     
     {% for order in active_orders %}
-    {# 🎯 Renderiza la tarjeta de la mesa solo si tiene platillos activos en cola #}
+    
     {% if order.items|length > 0 %}
     <div class="bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl flex flex-col overflow-hidden hover:border-slate-500 transition-colors">
         
@@ -34,14 +34,6 @@
                     <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">ID Ticket</span>
                     <span class="font-mono text-xs bg-slate-950 px-2 py-0.5 rounded text-slate-300 border border-slate-800">#{{ order.id }}</span>
                 </div>
-            </div>
-            
-            <div class="bg-slate-950/80 rounded-lg px-3 py-1.5 border border-slate-800 text-right">
-                <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 block">Tiempo en Espera</span>
-                <span class="kitchen-timer text-md font-bold font-mono text-emerald-400" 
-                      data-timestamp="{{ order.created_at.isoformat() if order.created_at else '' }}">
-                    0m 00s
-                </span>
             </div>
         </div>
 
