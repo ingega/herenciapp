@@ -126,14 +126,9 @@ async def get_kitchen_cards(
 # waiter-dashboard
 @router.get("/waiter/dashboard", response_class=HTMLResponse)
 def get_waiter_orders(
-    request: Request,
-    order_service: OrderService = Depends(get_order_service),                   
+    request: Request,                   
     current_user: dict = Depends(get_current_user_from_cookie)
     ):
-    db_orders = order_service.get_all_orders_delivered()
-    active_orders = [OrderDetailResponse.model_validate(order) for order in db_orders]
-    # debug, delete in production
-    print(f"[active orders] - orders: {len(active_orders)}")
     return templates.TemplateResponse(
         request=request,
         name="orders/waiter/dashboard.html",
@@ -152,8 +147,6 @@ async def get_waiter_cards(
     
     db_orders = order_service.get_all_orders_delivered()
     active_orders = [OrderDetailResponse.model_validate(order) for order in db_orders]
-    # debug, delete in production
-    print(f"[active orders] - {active_orders}")
     return templates.TemplateResponse(
         request=request,
         name="orders/waiter/cards.html",

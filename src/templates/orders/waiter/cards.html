@@ -1,158 +1,169 @@
-<div class="flex items-center justify-between mb-6 border-b border-slate-700 pb-4">
-    <div class="flex items-center space-x-3">
-        <span class="flex h-3 w-3 relative">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-        </span>
-        <h2 class="text-2xl font-black text-white tracking-tight uppercase">
-            Comandas Activas
-        </h2>
-    </div>
-    <span class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-md font-mono text-slate-400">
-        Total Activas: {{ active_orders|length }}
-    </span>
-</div>
-
-<div class="grid grid-cols-[repeat(auto-fill,minmax(24rem,1fr))] gap-6 items-start" id="kitchen-container">
-    
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
     {% for order in active_orders %}
     
-    {% if order.items|length > 0 %}
-    <div class="bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl flex flex-col overflow-hidden hover:border-slate-500 transition-colors">
+    {% set order_subtotal = namespace(value=0) %}
+    {% for item in order.items %}
+        {% set line_cost = (item.quantity * item.product.price) + (item.extra_charge | default(0)) %}
+        {% set order_subtotal.value = order_subtotal.value + line_cost %}
+    {% endfor %}
+    
+    {% set current_discount = order.discount | default(0) | float %}
+    {% set current_subtotal = order_subtotal.value | float %}
+    {% set calculated_grand_total = current_subtotal - current_discount %}
+    {% if calculated_grand_total < 0 %}
+        {% set calculated_grand_total = 0 %}
+    {% endif %}
+
+    <div id="order-card-{{ order.id }}" 
+         class="flex flex-col bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden h-auto min-h-[25rem]">
         
-        <div class="bg-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-slate-700">
-            <div class="flex items-center space-x-5">
-                <div>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Ubicación</span>
-                    <h3 class="text-xl font-black text-amber-400">Mesa #{{ order.table_no }}</h3>
-                </div>
-                <div class="border-l border-slate-600 pl-4 hidden sm:block">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Pax</span>
-                    <p class="text-sm font-semibold text-slate-200">{{ order.number_of_persons }}</p>
-                </div>
-                <div class="border-l border-slate-600 pl-4">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">ID Ticket</span>
-                    <span class="font-mono text-xs bg-slate-950 px-2 py-0.5 rounded text-slate-300 border border-slate-800">#{{ order.id }}</span>
-                </div>
+        <div class="bg-gradient-to-r from-amber-600 to-amber-700 p-4 flex justify-between items-center shadow-md">
+            <div>
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-utensils"></i> Mesa {{ order.table_no }}
+                </h3>
+                <span class="text-xs text-amber-100 font-medium tracking-wide">
+                    <i class="fa-solid fa-users"></i> {{ order.number_of_persons }} Comensales
+                </span>
+            </div>
+            <div class="text-right">
+                <span class="bg-slate-950/40 text-white px-2 py-1 rounded text-xs font-mono font-bold">
+                    <i class="fa-regular fa-clock"></i> {{ order.created_at.strftime('%H:%M') if order.created_at else '--:--' }}
+                </span>
             </div>
         </div>
 
-        <div class="p-5 overflow-y-auto max-h-[60vh] space-y-6 bg-slate-900/60">
-            {% for person_number, items in order.items | groupby('person_number') %}
-            <div class="space-y-3">
-                
-                <div class="flex items-center space-x-3 border-b border-slate-700/80 pb-2">
-                    <span class="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs font-bold text-amber-400 uppercase tracking-wide">
-                        <i class="fa-solid fa-user text-[10px]"></i>
-                        <span>Asiento {{ person_number }}</span>
-                    </span>
-                    <span class="text-xs text-slate-500 font-medium">{{ items|length }} pendientes</span>
-                </div>
-                
-                <div class="grid grid-cols-1 gap-2.5">
-                    {% for item in items %}
-                    <div class="bg-slate-800/40 rounded-lg border border-slate-700/60 p-3 flex items-center justify-between hover:bg-slate-800/80 transition-colors gap-4">
-                        <div class="space-y-1 flex-1">
-                            <div class="flex items-baseline space-x-2">
-                                <span class="text-xl font-extrabold text-white">{{ item.quantity }}x</span>
-                                <span class="text-md font-semibold text-slate-100">{{ item.selection }}</span>
-                            </div>
-                            
-                            {% if item.notes %}
-                            <div class="mt-2 bg-rose-500/10 border border-rose-500/20 px-2 py-1.5 rounded text-xs text-rose-300 font-medium flex items-start space-x-1.5">
-                                <i class="fa-solid fa-triangle-exclamation text-rose-400 animate-pulse mt-0.5"></i>
-                                <span class="break-words leading-tight">"{{ item.notes }}"</span>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <button hx-post="/orders/items/{{ item.id }}/dispatch" 
-                            hx-target="#kitchen-container"
-                            hx-swap="innerHTML"
-                            x-data="{ despachado: false }"
-                            x-on:click="despachado = true"
-                            x-bind:disabled="despachado"
-                            x-bind:class="despachado ? 'bg-emerald-700 cursor-not-allowed 
-                                opacity-90' : 'bg-emerald-600 hover:bg-emerald-500 
-                                active:bg-emerald-700'"
-                            class="relative text-white font-bold px-4 py-2 rounded-lg 
-                            shadow-md transition duration-150 text-xs tracking-wide uppercase 
-                            flex items-center justify-center overflow-hidden 
-                            min-w-[6rem] h-9">
-    
-                            <template x-if="!despachado">
-                                <span class="flex items-center space-x-1 
-                                    bg-emerald-600 hover:bg-emerald-500 animate-fade-in">
-                                    <span>Despachar</span>
-                                </span>
-                            </template>
-
-                            <template x-if="despachado">
-                                <span class="flex items-center justify-center animate-scale-up">
-                                    <i class="fa-solid fa-circle-check text-lg text-white"></i>
-                                </span>
-                            </template>
-                        </button>
+        <div class="p-4 flex-1 space-y-4 overflow-y-auto max-h-[24rem] scrollbar-thin scrollbar-thumb-slate-700">
+            {% for seat_num in range(1, order.number_of_persons + 1) %}
+                <div class="bg-slate-950/40 border border-slate-800/80 rounded-lg p-3 space-y-2">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+                        <span class="text-sm font-bold text-amber-400">
+                            <i class="fa-solid fa-user-tag text-xs"></i> Persona #{{ seat_num }}
+                        </span>
                     </div>
-                    {% endfor %}
+
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        {% set seat_total = namespace(value=0) %}
+                        {% set seat_has_items = false %}
+                        
+                        {% for item in order.items %}
+                            {% if item.person_number == seat_num %}
+                                {% set seat_has_items = true %}
+                                {% set line_total = (item.quantity * item.product.price) + (item.extra_charge | default(0)) %}
+                                {% set seat_total.value = seat_total.value + line_total %}
+                                
+                                <li class="flex justify-between items-start gap-2 bg-slate-900/60 p-2 rounded border border-slate-800/40">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-1.5 font-medium text-slate-200">
+                                            <span class="bg-slate-800 text-amber-500 font-bold px-1.5 py-0.5 rounded text-xs">
+                                                {{ item.quantity }}x
+                                            </span>
+                                            <span>{{ item.product.main_dish }}</span>
+                                        </div>
+                                        
+                                        {% if item.selection %}
+                                        <span class="text-xs text-slate-400 block pl-7 italic">
+                                            ↳ selección: {{ item.selection }}
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if item.notes %}
+                                        <span class="text-xs text-rose-400 block pl-7 font-medium">
+                                            <i class="fa-solid fa-comment-dots text-[10px]"></i> "{{ item.notes }}"
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="text-right flex flex-col items-end gap-1 min-w-[5rem]">
+                                        {% if item.prep_status.value == 'delivered' %}
+                                            <span class="text-[10px] bg-emerald-950/80 text-emerald-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider border border-emerald-800/60 flex items-center gap-0.5">
+                                                <i class="fa-solid fa-circle-check"></i> Entregado
+                                            </span>
+                                        {% else %}
+                                            <span class="text-[10px] bg-amber-950/80 text-amber-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider border border-amber-800/60 flex items-center gap-0.5">
+                                                <i class="fa-solid fa-spinner animate-spin"></i> Pendiente
+                                            </span>
+                                        {% endif %}
+                                        <span class="font-mono text-xs text-slate-400">${{ "{:,.2f}".format(line_total) }}</span>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+
+                    <div class="flex justify-between items-center text-xs font-mono pt-1 text-slate-400 border-t border-slate-800/50">
+                        <span>Total Persona:</span>
+                        <span class="font-bold text-slate-200">${{ "{:,.2f}".format(seat_total.value) }}</span>
+                    </div>
                 </div>
-            </div>
             {% endfor %}
         </div>
-    </div> 
-    {% endif %}
-    {% else %}
-    <div class="col-span-full bg-slate-900/40 border-2 border-dashed border-slate-800 rounded-xl text-center py-16 px-4">
-        <div class="h-16 w-16 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700 shadow-inner">
-            <i class="fa-solid fa-kitchen-set text-2xl"></i>
-        </div>
-        <h3 class="text-lg font-bold text-slate-300">¡Línea limpia, Chef!</h3>
-        <p class="text-sm text-slate-500 max-w-sm mx-auto mt-1">No hay comandas pendientes de preparar en este momento. Buen trabajo.</p>
+
+        <form id="ledger-form-{{ order.id }}"
+              hx-patch="/orders/{{ order.id }}/discount"
+              hx-target="#order-card-{{ order.id }}"
+              hx-swap="outerHTML"
+              class="p-4 bg-slate-950 border-t border-slate-800 space-y-3">
+            
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">
+                        Descuento ($)
+                    </label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-500 text-xs font-mono">
+                            $
+                        </div>
+                        <input type="number" 
+                               name="discount" 
+                               step="0.01" 
+                               min="0"
+                               max="{{ current_subtotal }}"
+                               value="{{ '%.2f' | format(current_discount) }}" 
+                               class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 pl-6 font-mono text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition-colors"
+                               placeholder="0.00">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">
+                        Motivo Descuento
+                    </label>
+                    <input type="text" 
+                           name="discount_motive" 
+                           value="{{ order.discount_motive if order.discount_motive else '' }}" 
+                           class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 font-sans text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition-colors"
+                           placeholder="Ej: Familiar, INSEN">
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-1">
+                <button type="submit"
+                        class="bg-amber-600/20 hover:bg-amber-600 text-amber-400 hover:text-white border border-amber-500/30 transition-all duration-150 py-1 px-3 rounded text-xs font-bold flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk"></i> Actualizar Cuenta
+                </button>
+            </div>
+
+            <div class="flex justify-between items-center pt-2 border-t border-slate-800/60">
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-slate-500 font-mono">Subtotal: ${{ "{:,.2f}".format(current_subtotal) }}</span>
+                    <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Total Cuenta:</span>
+                </div>
+                <span class="text-2xl font-mono font-bold text-emerald-400 tracking-tight">
+                    ${{ "{:,.2f}".format(calculated_grand_total) }}
+                </span>
+            </div>
+            
+            <button type="button"
+                    hx-patch="/api/v1/orders/{{ order.id }}/close"
+                    hx-target="#order-card-{{ order.id }}"
+                    hx-swap="outerHTML"
+                    hx-include="#ledger-form-{{ order.id }} input"
+                    hx-confirm="¿Confirmar el cobro final de ${{ '%.2f' | format(calculated_grand_total) }} para la Mesa {{ order.table_no }}?"
+                    class="w-full bg-slate-800 hover:bg-emerald-600 active:bg-emerald-700 text-slate-200 hover:text-white transition-all duration-200 py-2 px-4 rounded-lg font-bold text-sm shadow-md flex items-center justify-center gap-2 group mt-1 cursor-pointer">
+                <i class="fa-solid fa-cash-register group-hover:scale-110 transition-transform"></i> 
+                Cerrar Mesa / Cobrar
+            </button>
+        </form>
     </div>
     {% endfor %}
 </div>
-
-{% block scripts %}
-<script>
-    function updateKitchenTimers() {
-        const timers = document.querySelectorAll('.kitchen-timer');
-        timers.forEach(timer => {
-            const timestampStr = timer.getAttribute('data-timestamp');
-            if (!timestampStr) return;
-            
-            const createdTime = new Date(timestampStr);
-            const now = new Date();
-            const differenceMs = now - createdTime;
-            
-            if (isNaN(differenceMs) || differenceMs < 0) {
-                timer.textContent = "0m 00s";
-                return;
-            }
-            
-            const totalMinutes = Math.floor(differenceMs / 60000);
-            const totalSeconds = Math.floor((differenceMs % 60000) / 1000);
-            
-            timer.textContent = `${totalMinutes}m ${totalSeconds.toString().padStart(2, '0')}s`;
-            
-            if (totalMinutes >= 20) {
-                timer.className = "kitchen-timer text-md font-bold font-mono text-rose-400 animate-pulse";
-            } else if (totalMinutes >= 10) {
-                timer.className = "kitchen-timer text-md font-bold font-mono text-amber-400";
-            } else {
-                timer.className = "kitchen-timer text-md font-bold font-mono text-emerald-400";
-            }
-        });
-    }
-
-    if (window.kitchenTimerInterval) clearInterval(window.kitchenTimerInterval);
-    window.kitchenTimerInterval = setInterval(updateKitchenTimers, 1000);
-    updateKitchenTimers();
-</script>
-<style>
-    /* Oculta el check por defecto */
-    .htmx-indicator { display: none; }
-    /* Cuando el botón entra en estado de procesamiento (request), HTMX le añade la clase .htmx-request automáticamente */
-    .htmx-request .htmx-normal { display: none; }
-    .htmx-request .htmx-indicator { display: flex !important; }
-</style>
-{% endblock %}
