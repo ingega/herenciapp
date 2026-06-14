@@ -40,7 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improving the logic of cards to add a discount field in `src/templates/orders/kitchen/cards.html`
 
 ### Fixed
-- N/A
+- Schema for close order in `src/api/v1/apps/orers/schema.py`
+- Service for close order in `src/api/v1/apps/services.py`
 
 ## [1.11.0] 2026-06-08
 This version adds the orders template and tests
