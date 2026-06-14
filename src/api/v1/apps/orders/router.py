@@ -168,8 +168,6 @@ def order_discount(
 ):
     """Endpoint for update the discuount and return data for card in HTMX"""
     
-    # debug, delete on production
-
     # Execute the query
     result, code = service.update_order_discount(order_id, payload=payload)
     
@@ -178,11 +176,6 @@ def order_discount(
         
     # We need to resend the updated data
     updated_order = service.get_order_by_id(order_id)
-
-    # debug: delete on production
-    print(f"{'-' * 10} [UPDATED VALUES] {'-' * 10}\n"
-          f"{updated_order}\n"
-          f"{'-' * 25}")
     
     # Retornamos directamente el fragmento de la card para que HTMX haga el swap atómico
     return templates.TemplateResponse(
