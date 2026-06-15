@@ -25,11 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Templates for waiter dashboard:
   - Dashboard `src/templates/orders/waiter/dashboard.html`
   - Cards `src/templates/orders/waiter/cards.html`
+  -Check-out order `src/templates/orders/waiter/cards.html`
+  - close order in `src/templates/orders/check-out.html`
 - Logic for update discount:
   - Schema in `src/api/v1/apps/orders/schemas.py`
   - Service in `src/api/v1/apps/orders/services.py`
   - Endpoint in `src/api/v1/apps/orders/routes.py`
 - Added python-multipart via poetry to use Form
+- Logic to close the order
+  - endpoint in `src/api/v1/apps/orders/router.py`
 
 ### Changed
 - Improve the UI design, changes names and delete prints for debugging in `src/templates/orders/kitchen/dashboard.html`

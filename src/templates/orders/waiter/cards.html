@@ -159,12 +159,15 @@
             </div>
             
             <button type="button"
-                    hx-patch="/api/v1/orders/{{ order.id }}/close"
-                    hx-target="#order-card-{{ order.id }}"
-                    hx-swap="outerHTML"
+                    hx-get="/orders/{{ order.id }}/checkout-form"
+                    hx-target="#global-modal-container"
+                    hx-swap="innerHTML"
                     hx-include="#ledger-form-{{ order.id }} input"
                     hx-confirm="¿Confirmar el cobro final de ${{ '%.2f' | format(calculated_grand_total) }} para la Mesa {{ order.table_no }}?"
-                    class="w-full bg-slate-800 hover:bg-emerald-600 active:bg-emerald-700 text-slate-200 hover:text-white transition-all duration-200 py-2 px-4 rounded-lg font-bold text-sm shadow-md flex items-center justify-center gap-2 group mt-1 cursor-pointer">
+                    class="w-full bg-slate-800 hover:bg-emerald-600 active:bg-emerald-700 
+                        text-slate-200 hover:text-white transition-all duration-200 py-2 px-4 
+                        rounded-lg font-bold text-sm shadow-md flex items-center justify-center 
+                        gap-2 group mt-1 cursor-pointer">
                 <i class="fa-solid fa-cash-register group-hover:scale-110 transition-transform"></i> 
                 Cerrar Mesa / Cobrar
             </button>

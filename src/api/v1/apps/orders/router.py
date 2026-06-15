@@ -157,6 +157,26 @@ async def get_waiter_cards(
         }
     )
 
+# close order template
+@router.get("/{order_id}/checkout-form", response_class=HTMLResponse)
+def get_checkout_template(
+    order_id: int,
+    request: Request,
+    service: OrderService = Depends(get_order_service),                   
+    current_user: dict = Depends(get_current_user_from_cookie)
+    ):
+    # retrieve order data
+    order = service.get_order_by_id(order_id)
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/check_out.html",
+        context={
+            "config": settings,
+            "order": order,
+            "current_user": current_user # for nav_bar
+        }
+    )
+
 # sub-function to update the discount
 @router.patch("/{order_id}/discount", response_class=HTMLResponse, tags=["waiter"])
 def order_discount(
@@ -189,9 +209,11 @@ def order_discount(
     )
 
 # close an order
-@router.patch("/{order_id}/closed", response_model=Order ,tags=["waiter"])
+@router.patch("/{order_id}/closed", 
+              response_model=Order,
+              status_code=status.HTTP_200_OK, 
+              tags=["waiter"])
 def order_closed(
-    request: Request,
     order_id: int,
     payload: OrderClose,  
     service: OrderService = Depends(get_order_service),
