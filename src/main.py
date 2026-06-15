@@ -7,17 +7,22 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from sqlmodel import Session
 from datetime import datetime
 
+# config
 from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
-from src.router import api_router
 from src.__init__ import __version__ as version
-from .database import init_db
+from .database import init_db, get_session
+# routers
+from src.router import api_router
 from .api.v1.apps.users.router import router as users_router
 from .api.v1.auth.router import router as auth_router
 from .api.v1.apps.orders.router import router as orders_router
 from .api.v1.apps.orders.router import router_flavors, router_meat, router_products
+# services
+from .api.v1.apps.orders.services import OrderService
 
 # logger config
 logger = logging.getLogger("uvicorn.error")
@@ -97,6 +102,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 templates = Jinja2Templates(directory="src/templates")
 templates.env.globals.update(config=settings)
 
+# Authenticated user main page
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     """When the root URL is reached, we need to check if
@@ -115,14 +121,20 @@ async def read_root(request: Request):
         }
     )
 
+# Authenticated user main page
 @app.get("/main")
-async def main(request: Request, 
+async def main(request: Request,
+               session: Session = Depends(get_session), 
                current_user: dict = Depends(get_current_user_from_cookie)):
+    # the page needs the active orders
+    active_orders = OrderService(session).get_active_orders()
+
     return templates.TemplateResponse(
         request=request,
         name="main.html",
         context={
             "config": settings,
+            "active_orders": active_orders,
             "current_user": current_user  # current user data from the JWT payload
         }
     )
