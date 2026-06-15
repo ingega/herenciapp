@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 First release with a MVP of herenciapp, with all the customer-kitchen-waiter-checkout flow 
 
 ### Added
-- N/A
+- Added a service to calculate the total per date in `src/api/v1/apps/orders/services.py`
 
 ### Changed
 - N/A

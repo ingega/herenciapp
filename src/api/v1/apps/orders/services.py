@@ -455,7 +455,29 @@ class OrderService:
         self.session.refresh(db_order)
         return db_order
 
-
+    def total_day_sales(self, date:datetime):
+        """This service returns the sum of tips, discounts and sales for a date"""
+        # 1. Retrieve the orders filtered by day
+        statement = select(Order).where(Order.closed_at == date)
+        results = self.session.exec(statement).all()
+        # initial dict
+        data={"day_sales": 0, "day_discounts": 0, "day_tips": 0}
+        if len(results) == 0:
+            return data # no sales for this day
+        else:
+            day_sales = 0
+            day_discounts = 0
+            day_tips = 0
+            for item in results.items:
+                # the total sale is saved in total
+                day_sales += item.total
+                day_discounts += item.discount
+                day_tips += item.tip
+            data["day_sales"] = day_sales
+            data["day_discounts"] = day_discounts
+            data["day_tips"] = day_tips
+        return data
+        
 
 ### --- Products service class init ---  ####
 
