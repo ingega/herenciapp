@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.0.0] 2026-06-15
+First release with a MVP of herenciapp, with all the customer-kitchen-waiter-checkout flow 
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.11.1] 2026-06-13
 
 ### Added
