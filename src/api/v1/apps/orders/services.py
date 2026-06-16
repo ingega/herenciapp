@@ -1,11 +1,11 @@
 # src/api/v1/apps/orders/services.py
 
-from datetime import datetime
+from datetime import datetime, time, date
 from decimal import Decimal
-from typing import List
+from typing import List, Dict, Any
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product, Order, OrderDetail
 # flavors schemas
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate, OrderDetailReadNested 
@@ -455,28 +455,35 @@ class OrderService:
         self.session.refresh(db_order)
         return db_order
 
-    def total_day_sales(self, date:datetime):
-        """This service returns the sum of tips, discounts and sales for a date"""
-        # 1. Retrieve the orders filtered by day
-        statement = select(Order).where(Order.closed_at == date)
-        results = self.session.exec(statement).all()
-        # initial dict
-        data={"day_sales": 0, "day_discounts": 0, "day_tips": 0}
-        if len(results) == 0:
-            return data # no sales for this day
-        else:
-            day_sales = 0
-            day_discounts = 0
-            day_tips = 0
-            for item in results.items:
-                # the total sale is saved in total
-                day_sales += item.total
-                day_discounts += item.discount
-                day_tips += item.tip
-            data["day_sales"] = day_sales
-            data["day_discounts"] = day_discounts
-            data["day_tips"] = day_tips
-        return data
+    def total_day_sales(self, target_date: date) -> Dict[str, Any]:
+        """
+        Retrieves the total sum of sales, discounts, and tips for a specific day.
+        Uses database-level aggregation for maximum speed.
+        """
+        # 1. Define boundaries: from 00:00:00.000000 to 23:59:59.999999 of the target day
+        start_of_day = datetime.combine(target_date, time.min)
+        end_of_day = datetime.combine(target_date, time.max)
+        
+        # 2. Build an efficient aggregation query
+        statement = select(
+            func.sum(Order.total).label("sales"),
+            func.sum(Order.discount).label("discounts"),
+            func.sum(Order.tip).label("tips")
+        ).where(
+            Order.closed_at >= start_of_day,
+            Order.closed_at <= end_of_day,
+            Order.closed == True
+        )
+        
+        # 3. Execute and capture scalar aggregates
+        results = self.session.exec(statement).first()
+        
+        # 4. Handle None cases gracefully (SQL SUM returns None if there are 0 records matching)
+        return {
+            "day_sales": float(results.sales or 0.0),
+            "day_discounts": float(results.discounts or 0.0),
+            "day_tips": float(results.tips or 0.0)
+        }
         
 
 ### --- Products service class init ---  ####

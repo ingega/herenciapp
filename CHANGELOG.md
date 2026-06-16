@@ -23,7 +23,7 @@ First release with a MVP of herenciapp, with all the customer-kitchen-waiter-che
 - Added a service to calculate the total per date in `src/api/v1/apps/orders/services.py`
 
 ### Changed
-- N/A
+- Removed placeholders for main and changed for real data in `src/templates/main.html`
 
 ### Fixed
 - Added role checker to tickets and meat endpoints

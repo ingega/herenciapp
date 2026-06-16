@@ -1,6 +1,7 @@
 # src/router.py
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
+from datetime import date
 from src.api.v1.apps.orders.services import OrderService
 from src.api.v1.apps.orders.schemas import OrderDetailResponse
 from src.database import get_session
@@ -17,8 +18,6 @@ def get_playground(session: Session = Depends(get_session)):
     This space is for test new endpoints or functions
     """
     order_service = OrderService(session)
-    db_orders = order_service.get_all_orders_sended()
+    db_orders = order_service.total_day_sales(target_date=date(2026,6,15))
 
-    active_orders = [OrderDetailResponse.model_validate(order) for order in db_orders]
-
-    return active_orders
+    return db_orders

@@ -8,7 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session
-from datetime import datetime
+from datetime import datetime, date
 
 # config
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -127,7 +127,10 @@ async def main(request: Request,
                session: Session = Depends(get_session), 
                current_user: dict = Depends(get_current_user_from_cookie)):
     # the page needs the active orders
-    active_orders = OrderService(session).get_active_orders()
+    order_service = OrderService(session)
+    active_orders = order_service.get_active_orders()
+    # add to the context day's financial info
+    financial_info = order_service.total_day_sales(date.today())
 
     return templates.TemplateResponse(
         request=request,
@@ -135,6 +138,7 @@ async def main(request: Request,
         context={
             "config": settings,
             "active_orders": active_orders,
+            "financial_info": financial_info,
             "current_user": current_user  # current user data from the JWT payload
         }
     )
