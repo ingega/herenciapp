@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from enum import Enum
 from typing import List, Optional
 from pydantic import condecimal
-from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint, text
+from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint, DateTime, Column
 from sqlalchemy import SmallInteger, Text
 
 # system must use the MEXICO CITY CST TIME, but in future we can add a env var in config
@@ -44,14 +44,17 @@ class Order(SQLModel, table=True):
 
     # Combined date & time with default to current timestamp in UTC/CST mapping
     created_at: datetime = Field(default_factory=get_mexico_time, 
-                                 sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
-                                 index=True)
+                                 sa_column=Column(DateTime(timezone=True), 
+                                                  nullable=False, index=True)
+                                 )
     delivered_at: datetime = Field(default_factory=get_mexico_time, 
-                                   sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
-                                   index=True)
+                                   sa_column=Column(DateTime(timezone=True), 
+                                                    nullable=False, index=True)
+                                   )
     closed_at: datetime = Field(default_factory=get_mexico_time, 
-                                sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
-                                index=True)
+                                sa_column=Column(DateTime(timezone=True), 
+                                                 nullable=False, index=True)
+                                )
 
     
     # Workflow control flags
