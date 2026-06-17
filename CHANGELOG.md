@@ -32,6 +32,7 @@ First release with a MVP of herenciapp, with all the customer-kitchen-waiter-che
 ### Fixed
 - Added role checker to tickets and meat endpoints
 - Added the appropiate context to main.html
+- Improved timer UI
 
 ## [1.11.1] 2026-06-13
 

@@ -173,6 +173,7 @@ def get_checkout_template(
     ):
     # retrieve order data
     order = service.get_order_by_id(order_id)
+    
     return templates.TemplateResponse(
         request=request,
         name="orders/check_out.html",

@@ -8,36 +8,46 @@
             Comandas Activas en Cocina
         </h2>
     </div>
-    <span class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-md font-mono text-slate-400">
+    <span class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-md 
+        font-mono text-slate-400">
         Total Activas: {{ active_orders|length }}
     </span>
 </div>
 
-<div class="grid grid-cols-[repeat(auto-fill,minmax(24rem,1fr))] gap-6 items-start" id="kitchen-container">
+<div class="grid grid-cols-[repeat(auto-fill,minmax(24rem,1fr))] gap-6 items-start" 
+    id="kitchen-container">
     
     {% for order in active_orders %}
-    {# 🎯 Renderiza la tarjeta de la mesa solo si tiene platillos activos en cola #}
     {% if order.items|length > 0 %}
-    <div class="bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl flex flex-col overflow-hidden hover:border-slate-500 transition-colors">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl flex flex-col 
+        overflow-hidden hover:border-slate-500 transition-colors">
         
-        <div class="bg-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-slate-700">
+        <div class="bg-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-4 
+            border-b border-slate-700">
             <div class="flex items-center space-x-5">
                 <div>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Ubicación</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest 
+                        text-slate-400 
+                        block">Ubicación</span>
                     <h3 class="text-xl font-black text-amber-400">Mesa #{{ order.table_no }}</h3>
                 </div>
                 <div class="border-l border-slate-600 pl-4 hidden sm:block">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Pax</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 
+                        block">Pax</span>
                     <p class="text-sm font-semibold text-slate-200">{{ order.number_of_persons }}</p>
                 </div>
                 <div class="border-l border-slate-600 pl-4">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">ID Ticket</span>
-                    <span class="font-mono text-xs bg-slate-950 px-2 py-0.5 rounded text-slate-300 border border-slate-800">#{{ order.id }}</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 
+                        block">ID Ticket</span>
+                    <span class="font-mono text-xs bg-slate-950 px-2 py-0.5 rounded text-slate-300 
+                        border border-slate-800">#{{ order.id }}</span>
                 </div>
             </div>
             
-            <div class="bg-slate-950/80 rounded-lg px-3 py-1.5 border border-slate-800 text-right">
-                <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 block">Tiempo en Espera</span>
+            <div class="bg-slate-950/80 rounded-lg px-3 py-1.5 border border-slate-800 
+                text-right">
+                <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 
+                    block">Tiempo en Espera</span>
                 <span class="kitchen-timer text-md font-bold font-mono text-emerald-400" 
                       data-timestamp="{{ order.created_at.isoformat() if order.created_at else '' }}">
                     0m 00s
@@ -50,7 +60,9 @@
             <div class="space-y-3">
                 
                 <div class="flex items-center space-x-3 border-b border-slate-700/80 pb-2">
-                    <span class="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs font-bold text-amber-400 uppercase tracking-wide">
+                    <span class="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-500/10 
+                        border border-amber-500/20 rounded-full text-xs font-bold text-amber-400 
+                        uppercase tracking-wide">
                         <i class="fa-solid fa-user text-[10px]"></i>
                         <span>Asiento {{ person_number }}</span>
                     </span>
@@ -59,7 +71,8 @@
                 
                 <div class="grid grid-cols-1 gap-2.5">
                     {% for item in items %}
-                    <div class="bg-slate-800/40 rounded-lg border border-slate-700/60 p-3 flex items-center justify-between hover:bg-slate-800/80 transition-colors gap-4">
+                    <div class="bg-slate-800/40 rounded-lg border border-slate-700/60 p-3 flex 
+                        items-center justify-between hover:bg-slate-800/80 transition-colors gap-4">
                         <div class="space-y-1 flex-1">
                             <div class="flex items-baseline space-x-2">
                                 <span class="text-xl font-extrabold text-white">{{ item.quantity }}x</span>
@@ -142,9 +155,9 @@
             
             timer.textContent = `${totalMinutes}m ${totalSeconds.toString().padStart(2, '0')}s`;
             
-            if (totalMinutes >= 20) {
-                timer.className = "kitchen-timer text-md font-bold font-mono text-rose-400 animate-pulse";
-            } else if (totalMinutes >= 10) {
+            if (totalMinutes >= 10) {
+                timer.className = "kitchen-timer text-md font-bold font-mono text-red-400 animate-pulse";
+            } else if (totalMinutes >= 5) {
                 timer.className = "kitchen-timer text-md font-bold font-mono text-amber-400";
             } else {
                 timer.className = "kitchen-timer text-md font-bold font-mono text-emerald-400";
