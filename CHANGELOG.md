@@ -21,6 +21,7 @@ First release with a MVP of herenciapp, with all the customer-kitchen-waiter-che
 
 ### Added
 - Added a service to calculate the total per date in `src/api/v1/apps/orders/services.py`
+- Added a filter for UI datetime acurate visualization in `src/api/v1/apps/orders/models.py`
 
 ### Changed
 - Removed placeholders for main and changed for real data in `src/templates/main.html`

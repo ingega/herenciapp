@@ -17,6 +17,24 @@ def get_mexico_time() -> datetime:
     """
     return datetime.now(MEXICO_TZ)
 
+# this filter is for UI information
+def mexico_time_filter(utc_dt: datetime) -> str:
+    """
+    Jinja2 filter that safely accepts a DB timestamp (naive or UTC-aware)
+    and converts it to America/Mexico_City presentation time.
+    """
+    if not utc_dt:
+        return ""
+        
+    # If the database returns a naive datetime, assume it was stored as UTC
+    if utc_dt.tzinfo is None:
+        utc_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC"))
+        
+    # Shift the clock values directly to Mexico City time matching offsets natively
+    local_dt = utc_dt.astimezone(MEXICO_TZ)
+    
+    # Return a clean format for screens (e.g., "15:53" or "03:53 PM")
+    return local_dt.strftime("%I:%M %p")
 
 class PayMethod(str, Enum):
     CASH = "cash"
