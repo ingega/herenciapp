@@ -16,6 +16,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.0.0] 2026-06-15
+First release with a MVP of herenciapp, with all the customer-kitchen-waiter-checkout flow 
+
+### Added
+- Added a service to calculate the total per date in `src/api/v1/apps/orders/services.py`
+- Added a filter for UI datetime acurate visualization in `src/api/v1/apps/orders/models.py`
+- Added a filter to Jinja2 templates for datetime tz conversion
+
+### Changed
+- Removed placeholders for main and changed for real data in `src/templates/main.html`
+- Correct time zone
+- Added a Column to allow datetime receive timezone values in `src/api/v1/apps/orders/models.py`
+
+### Fixed
+- Added role checker to tickets and meat endpoints
+- Added the appropiate context to main.html
+- Improved timer UI
+
 ## [1.11.1] 2026-06-13
 
 ### Added

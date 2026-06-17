@@ -15,7 +15,7 @@ from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, 
 from src.api.v1.apps.orders.schemas import OrderDetailResponse, OrderDiscount, OrderClose
 
 # models
-from src.api.v1.apps.orders.models import Product, Order
+from src.api.v1.apps.orders.models import Product, Order, mexico_time_filter
 
 # services
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
@@ -36,9 +36,11 @@ router_flavors = APIRouter(prefix="/orders/flavors", tags=["flavors"], redirect_
 router_meat = APIRouter(prefix="/orders/flavors/meat", tags=["meat"], redirect_slashes=False)
 
 templates = Jinja2Templates(directory="src/templates")
+templates.env.filters["mexico_time"] = mexico_time_filter
 
 # authz role checker
 allow_admin = RoleChecker(["admin"])
+allow_user = RoleChecker(["admin", "user"])
 
 # dependencies for service injection
 def get_order_service(session: Session = Depends(get_session)) -> OrderService:
@@ -59,7 +61,9 @@ def get_meat_service(session: Session = Depends(get_session)) -> MeatService:
 # templates endpoints first
 
 # main orders creation template
-@router.get("/create-ticket", response_class=HTMLResponse)
+@router.get("/create-ticket", 
+            dependencies=[Depends(allow_user)],
+            response_class=HTMLResponse)
 def render_order_creation_workspace(
     request: Request,
     product_service: ProductService = Depends(get_product_service),
@@ -158,7 +162,9 @@ async def get_waiter_cards(
     )
 
 # close order template
-@router.get("/{order_id}/checkout-form", response_class=HTMLResponse)
+@router.get("/{order_id}/checkout-form", 
+            dependencies=[Depends(allow_user)],
+            response_class=HTMLResponse)
 def get_checkout_template(
     order_id: int,
     request: Request,
@@ -167,6 +173,7 @@ def get_checkout_template(
     ):
     # retrieve order data
     order = service.get_order_by_id(order_id)
+    
     return templates.TemplateResponse(
         request=request,
         name="orders/check_out.html",
@@ -178,7 +185,9 @@ def get_checkout_template(
     )
 
 # sub-function to update the discount
-@router.patch("/{order_id}/discount", response_class=HTMLResponse, tags=["waiter"])
+@router.patch("/{order_id}/discount",
+              dependencies=[Depends(allow_user)], 
+              response_class=HTMLResponse, tags=["waiter"])
 def order_discount(
     request: Request,
     order_id: int,
@@ -211,16 +220,20 @@ def order_discount(
 # close an order
 @router.patch("/{order_id}/closed", 
               response_model=Order,
+              dependencies=[Depends(allow_user)],
               status_code=status.HTTP_200_OK, 
               tags=["waiter"])
 def order_closed(
     order_id: int,
+    response: Response,
     payload: OrderClose,  
     service: OrderService = Depends(get_order_service),
     current_user: dict = Depends(get_current_user_from_cookie)
 ):
-    order_service = service.close_order(order_id=order_id, checkout_payload=payload)
-    return order_service
+    service.close_order(order_id=order_id, checkout_payload=payload)
+    # return a redirect
+    response.headers["HX-Redirect"] = "/orders/waiter/dashboard"
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 # list of active orders
 @router.get("/", response_class=HTMLResponse)
@@ -246,7 +259,9 @@ def view_active_orders_dashboard(
     )
 
 # add an order (API)
-@router.post("/create", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=OrderRead,
+             dependencies=[Depends(allow_user)], 
+             status_code=status.HTTP_201_CREATED)
 def api_open_new_table_ticket(
     payload: OrderCreate,
     service: OrderService = Depends(get_order_service),
@@ -648,7 +663,9 @@ async def get_meat_add_page(request: Request,
         }
     )
 
-@router_meat.post("/add", response_model=MeatCatalogueRead, status_code=status.HTTP_201_CREATED)
+@router_meat.post("/add", response_model=MeatCatalogueRead, 
+                  dependencies=[Depends(allow_user)],
+                  status_code=status.HTTP_201_CREATED)
 def create_new_meat(meat_in: MeatCatalogueCreate, 
                     current_user: dict = Depends(get_current_user_from_cookie),
                     session: Session = Depends(get_session)):
@@ -721,7 +738,9 @@ async def get_meat_by_id(
     return meat
 
 @router_meat.patch("/{meat_id}", 
-              response_model=MeatCatalogueRead, status_code=status.HTTP_200_OK)
+              response_model=MeatCatalogueRead,
+              dependencies=[Depends(allow_user)], 
+              status_code=status.HTTP_200_OK)
 async def update_meat(meat_update: MeatCatalogueUpdate,
                       meat_id: int, 
                       current_user: dict = Depends(get_current_user_from_cookie),
@@ -732,7 +751,7 @@ async def update_meat(meat_update: MeatCatalogueUpdate,
     
     return meat_service.update_meat(meat_id=meat_id, meat_in=meat_update)
 
-@router_meat.delete("/{meat_id}")
+@router_meat.delete("/{meat_id}", dependencies=[Depends(allow_user)])
 async def delete_meat(meat_id: int, 
                        current_user: dict = Depends(get_current_user_from_cookie),
                        session: Session = Depends(get_session)

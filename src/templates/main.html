@@ -7,7 +7,7 @@
     
     <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-lg border border-slate-700 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <span class="text-xs font-bold uppercase tracking-widest text-amber-500">System Connected</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-amber-500">usuario activo:</span>
             <h1 class="text-2xl font-black text-white tracking-tight mt-1">
                 ¡Hola, <span class="text-amber-400">{{ current_user['sub'] if current_user else 'Staff' }}</span>! 👋
             </h1>
@@ -30,12 +30,16 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-center justify-between border-l-8 border-amber-500 hover:shadow-md transition-shadow duration-200">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-center 
+            justify-between border-l-8 border-amber-500 hover:shadow-md transition-shadow duration-200">
             <div>
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Órdenes Pendientes</span>
-                <span class="text-4xl font-black text-slate-800 tracking-tight mt-1 block">12</span>
+                <!--Pending orders and active tables dashboard-->
+                <span class="text-xs font-bold text-gray-400 uppercase 
+                    tracking-wider block">Órdenes Abiertas</span>
+                <span class="text-4xl font-black text-slate-800 tracking-tight mt-1 block">{{ active_orders | length }}</span>
             </div>
-            <div class="h-12 w-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500 text-xl shadow-inner">
+            <div class="h-12 w-12 bg-amber-50 rounded-xl flex items-center justify-center 
+                text-amber-500 text-xl shadow-inner">
                 <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
         </div>
@@ -43,27 +47,34 @@
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-center justify-between border-l-8 border-emerald-500 hover:shadow-md transition-shadow duration-200">
             <div>
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Ventas del Día</span>
-                <span class="text-4xl font-black text-slate-800 tracking-tight mt-1 block">$4,850.00</span>
+                <span class="text-4xl font-black text-slate-800 tracking-tight mt-1 block">${{ financial_info.day_sales}}</span>
             </div>
             <div class="h-12 w-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 text-xl shadow-inner">
                 <i class="fa-solid fa-money-bill-trend-up"></i>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-center justify-between border-l-8 border-blue-500 hover:shadow-md transition-shadow duration-200 sm:col-span-2 lg:col-span-1">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-center 
+            justify-between border-l-8 border-blue-500 hover:shadow-md transition-shadow 
+            duration-200 sm:col-span-2 lg:col-span-1">
             <div>
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Mesas Activas</span>
-                <span class="text-4xl font-black text-slate-800 tracking-tight mt-1 block">8 / 20</span>
+                <span class="text-xs font-bold text-gray-400 uppercase 
+                    tracking-wider block">Mesas Activas</span>
+                <span class="text-4xl font-black text-slate-800 tracking-tight 
+                    mt-1 block">{{ active_orders | length }} / 20</span>
             </div>
-            <div class="h-12 w-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 text-xl shadow-inner">
+            <div class="h-12 w-12 bg-blue-50 rounded-xl flex items-center justify-center 
+                text-blue-500 text-xl shadow-inner">
                 <i class="fa-solid fa-utensils"></i>
             </div>
         </div>
     </div>
 
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
-            <h3 class="text-sm font-bold uppercase text-amber-400 tracking-wider flex items-center gap-2">
+        <div class="px-6 py-4 bg-slate-800 border-b border-slate-700 flex justify-between 
+            items-center">
+            <h3 class="text-sm font-bold uppercase text-amber-400 tracking-wider flex 
+                items-center gap-2">
                 <i class="fa-solid fa-bolt"></i> Acceso Rápido Operativo
             </h3>
             <span class="text-[10px] font-mono text-slate-400 bg-slate-900/50 border border-slate-700 px-2 py-0.5 rounded">
@@ -73,30 +84,43 @@
         
         <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <div id="ordersActionCard" class="group cursor-pointer bg-slate-50 hover:bg-amber-50/40 border border-gray-200 hover:border-amber-300 rounded-xl p-5 flex flex-col justify-between transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md">
+            <div id="ordersActionCard" class="group cursor-pointer bg-slate-50 
+                hover:bg-amber-50/40 border border-gray-200 hover:border-amber-300 
+                rounded-xl p-5 flex flex-col justify-between transition-all duration-300 
+                transform hover:-translate-y-1 hover:shadow-md">
                 <div class="flex items-start gap-4">
-                    <div class="h-12 w-12 rounded-xl bg-slate-800 text-amber-400 flex items-center justify-center text-xl group-hover:bg-amber-500 group-hover:text-slate-950 transition-colors duration-300 shadow">
+                    <div class="h-12 w-12 rounded-xl bg-slate-800 text-amber-400 flex 
+                        items-center justify-center text-xl group-hover:bg-amber-500 
+                        group-hover:text-slate-950 transition-colors duration-300 shadow">
                         <i class="fa-solid fa-fire-burner"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slate-800 text-base group-hover:text-amber-600 transition-colors">Módulo Operativo de Cocina</h4>
+                        <h4 class="font-bold text-slate-800 text-base group-hover:text-amber-600 
+                            transition-colors">Módulo Operativo de Cocina</h4>
                         <p class="text-xs text-gray-500 mt-1 leading-relaxed">
                             Inspecciona, despacha y procesa el flujo en tiempo real de las comandas activas enviadas por los meseros.
                         </p>
                     </div>
                 </div>
-                <div class="text-right mt-4 text-xs font-bold text-amber-600 flex items-center justify-end gap-1 group-hover:translate-x-1 transition-transform">
+                <div class="text-right mt-4 text-xs font-bold text-amber-600 flex items-center 
+                    justify-end gap-1 group-hover:translate-x-1 transition-transform">
                     Abrir Comandas <i class="fa-solid fa-arrow-right-long"></i>
                 </div>
             </div>
 
-            <div id="catalogueActionCard" class="group cursor-pointer bg-slate-50 hover:bg-blue-50/40 border border-gray-200 hover:border-blue-300 rounded-xl p-5 flex flex-col justify-between transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md">
+            <div id="catalogueActionCard" class="group cursor-pointer bg-slate-50 
+                hover:bg-blue-50/40 border border-gray-200 hover:border-blue-300 
+                rounded-xl p-5 flex flex-col justify-between transition-all duration-300 
+                transform hover:-translate-y-1 hover:shadow-md">
                 <div class="flex items-start gap-4">
-                    <div class="h-12 w-12 rounded-xl bg-slate-800 text-blue-400 flex items-center justify-center text-xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300 shadow">
+                    <div class="h-12 w-12 rounded-xl bg-slate-800 text-blue-400 flex 
+                        items-center justify-center text-xl group-hover:bg-blue-600 
+                        group-hover:text-white transition-colors duration-300 shadow">
                         <i class="fa-solid fa-sliders"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slate-800 text-base group-hover:text-blue-600 transition-colors">Mantenimiento de Catálogo</h4>
+                        <h4 class="font-bold text-slate-800 text-base group-hover:text-blue-600 
+                            transition-colors">Mantenimiento de Catálogo</h4>
                         <p class="text-xs text-gray-500 mt-1 leading-relaxed">
                             Administra el menú global del restaurante. Actualiza precios, categorías o da de baja productos del inventario.
                         </p>
@@ -142,7 +166,7 @@
 
     if (ordersCard) {
         ordersCard.addEventListener('click', () => {
-            window.location.href = '/orders';
+            window.location.href = '/orders/waiter/dashboard';
         });
     }
 

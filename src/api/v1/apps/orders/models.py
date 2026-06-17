@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from enum import Enum
 from typing import List, Optional
 from pydantic import condecimal
-from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
+from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint, DateTime, Column
 from sqlalchemy import SmallInteger, Text
 
 # system must use the MEXICO CITY CST TIME, but in future we can add a env var in config
@@ -17,6 +17,24 @@ def get_mexico_time() -> datetime:
     """
     return datetime.now(MEXICO_TZ)
 
+# this filter is for UI information
+def mexico_time_filter(utc_dt: datetime) -> str:
+    """
+    Jinja2 filter that safely accepts a DB timestamp (naive or UTC-aware)
+    and converts it to America/Mexico_City presentation time.
+    """
+    if not utc_dt:
+        return ""
+        
+    # If the database returns a naive datetime, assume it was stored as UTC
+    if utc_dt.tzinfo is None:
+        utc_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC"))
+        
+    # Shift the clock values directly to Mexico City time matching offsets natively
+    local_dt = utc_dt.astimezone(MEXICO_TZ)
+    
+    # Return a clean format for screens (e.g., "15:53" or "03:53 PM")
+    return local_dt.strftime("%I:%M %p")
 
 class PayMethod(str, Enum):
     CASH = "cash"
@@ -43,9 +61,19 @@ class Order(SQLModel, table=True):
     number_of_persons: int = Field(sa_type=SmallInteger(), default=1)
 
     # Combined date & time with default to current timestamp in UTC/CST mapping
-    created_at: datetime = Field(default_factory=get_mexico_time, index=True)
-    delivered_at: datetime = Field(default_factory=get_mexico_time, index=True)
-    closed_at: datetime = Field(default_factory=get_mexico_time, index=True)
+    created_at: datetime = Field(default_factory=get_mexico_time, 
+                                 sa_column=Column(DateTime(timezone=True), 
+                                                  nullable=False, index=True)
+                                 )
+    delivered_at: datetime = Field(default_factory=get_mexico_time, 
+                                   sa_column=Column(DateTime(timezone=True), 
+                                                    nullable=False, index=True)
+                                   )
+    closed_at: datetime = Field(default_factory=get_mexico_time, 
+                                sa_column=Column(DateTime(timezone=True), 
+                                                 nullable=False, index=True)
+                                )
+
     
     # Workflow control flags
     sended: bool = Field(default=False, index=True)
