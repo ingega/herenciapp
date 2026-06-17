@@ -24,6 +24,7 @@ First release with a MVP of herenciapp, with all the customer-kitchen-waiter-che
 
 ### Changed
 - Removed placeholders for main and changed for real data in `src/templates/main.html`
+- Correct time zone
 
 ### Fixed
 - Added role checker to tickets and meat endpoints

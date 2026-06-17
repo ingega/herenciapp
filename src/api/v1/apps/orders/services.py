@@ -6,7 +6,9 @@ from typing import List, Dict, Any
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
 from sqlmodel import Session, select, func
-from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product, Order, OrderDetail
+# models
+from src.api.v1.apps.orders.models import FlavorCatalogue, MeatCatalogue, Product, Order
+from src.api.v1.apps.orders.models import OrderDetail, get_mexico_time
 # flavors schemas
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate, OrderDetailReadNested 
 # meat schemas
@@ -68,11 +70,16 @@ class OrderService:
         Maps the inbound validation schema seamlessly into a database record,
         handles initial nested items safely, calculates totals, and persists.
         """
+        # Inject directly Mexico time, to override the UTC provided by AWS
+        mexico_time = get_mexico_time()
         # Create base order instance, explicitly injecting the waiter's user_id
         db_order = Order(
             user_id=user_id,
             table_no=order_in.table_no,
-            number_of_persons=order_in.number_of_persons
+            number_of_persons=order_in.number_of_persons,
+            created_at=mexico_time,
+            delivered_at=mexico_time,
+            closed_at=mexico_time
         )
         
         self.session.add(db_order)

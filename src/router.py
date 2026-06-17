@@ -5,6 +5,7 @@ from datetime import date
 from src.api.v1.apps.orders.services import OrderService
 from src.api.v1.apps.orders.schemas import OrderDetailResponse
 from src.database import get_session
+from src.api.v1.apps.orders.models import get_mexico_time
 
 api_router = APIRouter()
 
@@ -13,11 +14,10 @@ async def health_check():
     return {"status": "ok"}
 
 @api_router.get("/playground", status_code=200)
-def get_playground(session: Session = Depends(get_session)):
+def get_playground():
     """
     This space is for test new endpoints or functions
     """
-    order_service = OrderService(session)
-    db_orders = order_service.total_day_sales(target_date=date(2026,6,15))
+    mx_time = get_mexico_time()
 
-    return db_orders
+    return mx_time
