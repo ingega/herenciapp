@@ -15,7 +15,7 @@ from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, 
 from src.api.v1.apps.orders.schemas import OrderDetailResponse, OrderDiscount, OrderClose
 
 # models
-from src.api.v1.apps.orders.models import Product, Order
+from src.api.v1.apps.orders.models import Product, Order, mexico_time_filter
 
 # services
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
@@ -36,6 +36,7 @@ router_flavors = APIRouter(prefix="/orders/flavors", tags=["flavors"], redirect_
 router_meat = APIRouter(prefix="/orders/flavors/meat", tags=["meat"], redirect_slashes=False)
 
 templates = Jinja2Templates(directory="src/templates")
+templates.env.filters["mexico_time"] = mexico_time_filter
 
 # authz role checker
 allow_admin = RoleChecker(["admin"])
