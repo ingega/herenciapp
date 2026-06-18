@@ -420,12 +420,9 @@ class OrderService:
             quantity = Decimal(str(item.quantity))
             
             subtotal += (base_price * quantity) + extra 
-            
-        # Total Formula: Subtotal - Discount + Tip
-        calculated_total = subtotal - Decimal(str(order.discount)) + Decimal(str(order.tip))
         
         # Safety bound block: prevent billing negative balance errors
-        order.total = max(calculated_total, Decimal("0.00"))
+        order.total = max(subtotal, Decimal("0.00"))
 
     def close_order(self, order_id: int, checkout_payload: OrderClose) -> Order:
         """

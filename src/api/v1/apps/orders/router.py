@@ -173,6 +173,10 @@ def get_checkout_template(
     ):
     # retrieve order data
     order = service.get_order_by_id(order_id)
+    # not allways the total field is correct, there's a lot of logic sorround it
+    # update total with the in-build function
+    service.calculate_order_total(order=order)
+    
     
     return templates.TemplateResponse(
         request=request,

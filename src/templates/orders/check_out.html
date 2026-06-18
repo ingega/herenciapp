@@ -12,11 +12,11 @@
         </div>
 
         <div class="bg-slate-950/50 p-3 rounded-lg border border-slate-800/60 font-mono text-xs space-y-1.5 text-slate-400">
-            <div class="flex justify-between"><span>Subtotal:</span><span class="text-slate-200">${{ order.total + order.discount }}</span></div>
+            <div class="flex justify-between"><span>Subtotal:</span><span class="text-slate-200">${{ order.total }}</span></div>
             <div class="flex justify-between"><span>Descuento:</span><span class="text-rose-400">-${{ order.discount }}</span></div>
             <div class="flex justify-between border-t border-slate-800 pt-1.5 font-bold text-sm">
                 <span class="text-slate-300">Total Sugerido:</span>
-                <span class="text-emerald-400">${{ order.total }}</span>
+                <span class="text-emerald-400">${{ order.total - order.discount }}</span>
             </div>
         </div>
 
