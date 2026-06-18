@@ -23,7 +23,7 @@ This version add a main dashboard with main financial statistics
 - N/A
 
 ### Changed
-- N/A
+- Added logic for no pending waiter orders in `src/templates/orders/waiter/cards.html`
 
 ### Fixed
 - N/A
