@@ -16,7 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
-## [2.0.0] 2026-06-15
+## [2.1.0] 2026-06-18
+This version add a main dashboard with main financial statistics
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
+## [2.0.0][Released] 2026-06-15
 First release with a MVP of herenciapp, with all the customer-kitchen-waiter-checkout flow 
 
 ### Added
