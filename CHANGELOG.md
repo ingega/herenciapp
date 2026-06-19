@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.1.0] 2026-06-19
+This subversion adds the financial dashborad entire creation
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [2.0.1] 2026-06-18
 This patch fix the total flow in the UI
 
