@@ -178,12 +178,12 @@
     {% endfor %}
 </div>
 <!-- If all orders are closed, notice in dashboard -->
- {% if order|length == 0 %}
+ {% if active_orders|length == 0 %}
     <div class="col-span-full bg-slate-900/40 border-2 border-dashed border-slate-800 rounded-xl 
         text-center py-16 px-4">
         <div class="h-16 w-16 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center 
             mx-auto mb-4 border border-slate-700 shadow-inner">
-            <i class="fa-solid fa-kitchen-set text-2xl"></i>
+            <i class="fa-solid fas fa-clipboard-checked text-2xl"></i>
         </div>
         <h3 class="text-lg font-bold text-slate-300">¡Línea limpia!</h3>
         <p class="text-md text-slate-500 max-w-sm mx-auto mt-1">No hay comandas pendientes de atender en este momento. Buen trabajo.</p>

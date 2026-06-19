@@ -26,7 +26,8 @@ This subversion adds the financial dashborad entire creation
 - N/A
 
 ### Fixed
-- N/A
+- Changed the logic for empty pending orders in `src/templates/orders/waiter/cards.html`
+- Changed the icon for a checked clipboard in `src/templates/orders/waiter/cards.html`
 
 ## [2.0.1] 2026-06-18
 This patch fix the total flow in the UI
