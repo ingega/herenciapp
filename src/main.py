@@ -21,6 +21,7 @@ from .api.v1.apps.users.router import router as users_router
 from .api.v1.auth.router import router as auth_router
 from .api.v1.apps.orders.router import router as orders_router
 from .api.v1.apps.orders.router import router_flavors, router_meat, router_products
+from .api.v1.apps.main.router import main_router
 # services
 from .api.v1.apps.orders.services import OrderService
 
@@ -92,6 +93,7 @@ app.include_router(orders_router) # orders router
 app.include_router(router_flavors) # flavors router
 app.include_router(router_meat) # meat router
 app.include_router(router_products) # products router
+app.include_router(main_router) # statistics main router
 
 # Static Files
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
