@@ -28,6 +28,22 @@ def get_financial_service(session: Session=Depends(get_session)):
 # authz
 allow_admin = RoleChecker(["admin"])
 
+# auxiliar template
+@main_router.get("/", response_class=HTMLResponse, dependencies=[Depends(allow_admin)])
+def select_statistics_date_view(
+    request: Request,
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """Renders the single form entry screen for picking an audit day."""
+    return templates.TemplateResponse(
+        request=request,
+        name="main/statistics_entry.html",
+        context={
+            "config": settings,
+            "current_user": current_user
+        }
+    )
+
 # financial dashboard
 @main_router.get("/{date}", 
                  response_class=HTMLResponse, 
