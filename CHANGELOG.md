@@ -22,6 +22,8 @@ This subversion adds the financial dashborad entire creation
 ### Added
 - Template for financial dahboard in `src/templates/main/financial_dashboard.html`
 - New app called main for address dashboards and statistics in `src/api/v1/apps/main/`
+- Service for financial statistics in `src/api/v1/`
+- Template for entry of date for stats dashboard `src/templates/main/statistics_entry.html`
 
 ### Changed
 - N/A
@@ -34,7 +36,8 @@ This subversion adds the financial dashborad entire creation
 This patch fix the total flow in the UI
 
 ### Added
-- Router for financial dashboard in `src/api/v1/apps/main/router.py`
+- Router get_financial_statistics for financial dashboard in `src/api/v1/apps/main/router.py`
+- Service for financial statistics in `src/api/v1/apps/main/services.py`
 
 ### Changed
 - Added logic for no pending waiter orders in `src/templates/orders/waiter/cards.html`
