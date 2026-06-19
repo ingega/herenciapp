@@ -16,8 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
-## [2.1.0] 2026-06-18
-This version add a main dashboard with main financial statistics
+## [2.0.1] 2026-06-18
+This patch fix the total flow in the UI
 
 ### Added
 - N/A
