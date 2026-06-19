@@ -16,7 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
-## [2.0.0] 2026-06-15
+## [2.0.1] 2026-06-18
+This patch fix the total flow in the UI
+
+### Added
+- N/A
+
+### Changed
+- Added logic for no pending waiter orders in `src/templates/orders/waiter/cards.html`
+
+### Fixed
+- Entire flow to calculate totals add discounts and tip correctly in `src/api/v1/apps/orders/services.py`
+- Fix the correct visualization of totals and discounts in `src/templates/orders/check_out.html`
+
+## [2.0.0][Released] 2026-06-15
 First release with a MVP of herenciapp, with all the customer-kitchen-waiter-checkout flow 
 
 ### Added
