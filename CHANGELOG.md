@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This subversion adds the financial dashborad entire creation
 
 ### Added
-- N/A
+- Template for financial dahboard in `src/templates/main/financial_dashboard.html`
 
 ### Changed
 - N/A
