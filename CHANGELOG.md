@@ -26,11 +26,15 @@ This subversion adds the financial dashborad entire creation
 - Template for entry of date for stats dashboard `src/templates/main/statistics_entry.html`
 
 ### Changed
-- N/A
+- Added date ranges for statisticas in:
+  - `src/api/v1/apps/main/services.py`
+  - `src/api/v1/apps/main/router.py`
+  - `src/templates/main/statistics_entry.html`
 
 ### Fixed
 - Changed the logic for empty pending orders in `src/templates/orders/waiter/cards.html`
 - Changed the icon for a checked clipboard in `src/templates/orders/waiter/cards.html`
+- hiperlonks and text in `src/templates/main/statistics_entry.html`
 
 ## [2.0.1] 2026-06-18
 This patch fix the total flow in the UI

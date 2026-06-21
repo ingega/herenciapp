@@ -12,20 +12,21 @@ class FinancialService:
         """Use the common session for all methods"""
         self.session = session
     
-    def get_totals_per_date(self, date: date):
+    def get_totals_per_date(self, initial_date: date, final_date: date) -> dict:
         """
         This method retrieves the total ammount for
         - Orders
         - Discounts
         - Tips
         :params:
-            date: datetime. Statistics date
+            initial_date: datetime. Statistics initial date
+            final_date: datetime. Statistics final date
         """
         # defensive code
         try:
             # closed_at is datetime, let's get 1 more day
-            bod = date  # begining of date
-            eod = date + timedelta(1)
+            bod = initial_date  # begining of date
+            eod = final_date + timedelta(1) # end of date plus one
             statement = select(
                 func.coalesce(func.sum(Order.total), 0).label("sales"),
                 func.coalesce(func.sum(Order.discount), 0).label("discount"),

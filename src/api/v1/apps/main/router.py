@@ -45,19 +45,20 @@ def select_statistics_date_view(
     )
 
 # financial dashboard
-@main_router.get("/{date}", 
+@main_router.get("/dashboard", 
                  response_class=HTMLResponse, 
                  dependencies=[Depends(allow_admin)],
                  status_code=status.HTTP_200_OK,
                  tags=["statistics"])
 def get_financial_dashboard(
-        date: date,
+        initial_date: date,
+        final_date: date,
         request: Request,
         financial_service: FinancialService=Depends(get_financial_service),
         current_user: dict = Depends(get_current_user_from_cookie)
 ):
     # retrieve data
-    data = financial_service.get_totals_per_date(date)
+    data = financial_service.get_totals_per_date(initial_date, final_date)
     return templates.TemplateResponse(
         request=request,
         name="main/financial_dashboard.html",
