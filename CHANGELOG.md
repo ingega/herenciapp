@@ -16,11 +16,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.1.0] 2026-06-19
+This subversion adds the financial dashborad entire creation
+
+### Added
+- Template for financial dahboard in `src/templates/main/financial_dashboard.html`
+- New app called main for address dashboards and statistics in `src/api/v1/apps/main/`
+- Service for financial statistics in `src/api/v1/`
+- Template for entry of date for stats dashboard `src/templates/main/statistics_entry.html`
+
+### Changed
+- Added date ranges for statisticas in:
+  - `src/api/v1/apps/main/services.py`
+  - `src/api/v1/apps/main/router.py`
+  - `src/templates/main/statistics_entry.html`
+- Added date information for service in `src/api/v1/apps/main/services.py`
+
+### Fixed
+- Changed the logic for empty pending orders in `src/templates/orders/waiter/cards.html`
+- Changed the icon for a checked clipboard in `src/templates/orders/waiter/cards.html`
+- hyperlinks and text in `src/templates/main/statistics_entry.html`
+- Correctly information for financial dashboard in `src/templates/main/financial_dashboard.html`
+
 ## [2.0.1] 2026-06-18
 This patch fix the total flow in the UI
 
 ### Added
-- N/A
+- Router get_financial_statistics for financial dashboard in `src/api/v1/apps/main/router.py`
+- Service for financial statistics in `src/api/v1/apps/main/services.py`
 
 ### Changed
 - Added logic for no pending waiter orders in `src/templates/orders/waiter/cards.html`
