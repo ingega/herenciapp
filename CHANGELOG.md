@@ -16,6 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+# [2.1.1] 2026-06-22
+This patch fixed the db session for avoid the error of too many open sessions
+
+### Added
+- N/A
+
+### Changed
+- Added a yiel in get_session function in `src/database.py`
+- Changed the parameters in SessionLocal for address more sessions in `src/database.py` 
+
+### Fixed
+- N/A
+
 ## [2.1.0] 2026-06-19
 This subversion adds the financial dashborad entire creation
 
