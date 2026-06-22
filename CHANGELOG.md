@@ -23,7 +23,8 @@ This patch fixed the db session for avoid the error of too many open sessions
 - N/A
 
 ### Changed
-- N/A
+- Added a yiel in get_session function in `src/database.py`
+- Changed the parameters in SessionLocal for address more sessions in `src/database.py` 
 
 ### Fixed
 - N/A

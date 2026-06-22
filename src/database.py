@@ -15,10 +15,11 @@ engine = create_engine(
     DATABASE_URL, 
     echo=settings.DEBUG,
     future=True,
-    pool_size=5,          # Máximo de conexiones persistentes abiertas simultáneamente
+    pool_size=20,         # Due that the actual refresh of dashboard, it needs more than 5
     max_overflow=10,      # Conexiones adicionales permitidas en picos altos de tráfico
     pool_timeout=30,      # Segundos de espera antes de lanzar un timeout si el pool está lleno
-    pool_recycle=1800     # Recicla las conexiones cada 30 minutos para evitar hilos zombis
+    pool_recycle=1800,    # Recicla las conexiones cada 30 minutos para evitar hilos zombis
+    pool_pre_ping=True    # Checks if a connection is dead before handing it to a request (prevents 502 errors)
 )
 
 # 3. Session Factory
@@ -37,13 +38,8 @@ def get_db():
     Generator function to provide a DB session.
     It automatically closes the session after the request is finished.
     """
-
-    ### debugging: adding flush=True to ensure logs are printed immediately in Docker
-    db = SessionLocal()
-    try:
+    with Session(engine) as db:
         yield db
-    finally:
-        db.close()
 
 # 5. Database Initialization
 def init_db():
@@ -59,7 +55,9 @@ def init_db():
 # get a session for direct use in services (not recommended for routes)
 def get_session() -> Session:
     """
-    Provides a new database session. 
-    This is for internal use in services, not for FastAPI routes.
+    Provides a managed database session instance.
+    Using a context manager ensures FastAPI safely releases the socket back 
+    to the QueuePool when the HTTP request finishes processing.
     """
-    return SessionLocal()
+    with SessionLocal() as session:
+        yield session
