@@ -44,7 +44,9 @@ class FinancialService:
                     "discount": row.discount, 
                     "tips": row.tips, 
                     "orders": row.orders,
-                    "avg_ticket": (row.sales / row.orders) if row.orders > 0 else 0
+                    "avg_ticket": (row.sales / row.orders) if row.orders > 0 else 0,
+                    "initial_date": initial_date,
+                    "final_date": final_date
                     }
             
         except Exception as e:
