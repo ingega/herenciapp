@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.1.2] 2026-06-23
+This version fix the agroupatoin of orders when two or more items contains notes.
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 # [2.1.1] 2026-06-22
 This patch fixed the db session for avoid the error of too many open sessions
 
