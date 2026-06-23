@@ -17,13 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ## [2.1.2] 2026-06-23
-This version fix the agroupatoin of orders when two or more items contains notes.
+This version fix the agroupation of orders when two or more items contains notes.
+Also we add more time to lifespan to avoid the close of session.
 
 ### Added
 - N/A
 
 ### Changed
-- N/A
+- Time for expired token
 
 ### Fixed
 - The flow of the function add_or_update_item in `src/api/v1/apps/orders/service.py`
