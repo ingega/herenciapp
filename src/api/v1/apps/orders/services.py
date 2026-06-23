@@ -197,9 +197,9 @@ class OrderService:
 
     def add_or_update_item(self, order_id: int, item_in: OrderDetailCreate) -> tuple[Order, bool]:
         """
-        Adds a product/variant combination to an open ticket. If the product/flavor/seat
-        combination already exists, it increments quantity instead.
-        Returns a tuple: (Updated Order, boolean indicating if a new row was created).
+        Appends an individual, independent item line row to an open ticket.
+        Guarantees unique database rows to preserve distinct seat notes, charges, and quantities.
+        Returns a tuple: (Updated Order, boolean indicating a new row was created).
         """
         db_order = self.get_order_by_id(order_id)
         
@@ -209,37 +209,25 @@ class OrderService:
                 detail="Cannot add items to a closed and checked-out order."
             )
 
-        statement = select(OrderDetail).where(
-            OrderDetail.order_id == order_id,
-            OrderDetail.product_id == item_in.product_id,
-            OrderDetail.flavor_id == item_in.flavor_id,
-            OrderDetail.person_number == item_in.person_number,
-            OrderDetail.prep_status == ItemPrepStatus.QUEUED 
+        # Clean & Direct: Always instantiate a brand-new row for the database
+        db_item = OrderDetail(
+            order_id=order_id,
+            person_number=item_in.person_number,
+            product_id=item_in.product_id,
+            flavor_id=item_in.flavor_id,
+            selection=item_in.selection,
+            quantity=item_in.quantity,
+            notes=item_in.notes,
+            extra_charge=item_in.extra_charge,
+            prep_status=ItemPrepStatus.QUEUED  # Explicit default configuration tracking
         )
-        existing_item = self.session.exec(statement).first()
+        
+        self.session.add(db_item)
+        is_new_item = True  # Flag marked as True permanently because a row is always added
 
-        is_new_item = False  # flag for code response
-
-        if existing_item:
-            existing_item.quantity = item_in.quantity
-            if item_in.notes:
-                existing_item.notes = f"{existing_item.notes} | {item_in.notes}" if existing_item.notes else item_in.notes
-            self.session.add(existing_item)
-        else:
-            db_item = OrderDetail(
-                order_id=order_id,
-                person_number=item_in.person_number,
-                product_id=item_in.product_id,
-                flavor_id=item_in.flavor_id,
-                selection=item_in.selection,
-                quantity=item_in.quantity,
-                notes=item_in.notes,
-                extra_charge=item_in.extra_charge
-            )
-            self.session.add(db_item)
-            is_new_item = True  # Flag marked as True because a row was added
-
+        # Re-calculate parent totals incorporating the fresh atomic row charges
         self.calculate_order_total(db_order)
+        
         self.session.commit()
         self.session.refresh(db_order)
         

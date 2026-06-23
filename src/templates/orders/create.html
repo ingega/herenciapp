@@ -5,47 +5,71 @@
 {% block content %}
 <div class="space-y-6">
     
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-200 pb-4">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between 
+        border-b border-gray-200 pb-4">
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-gray-900">Abrir comanda</h1>
             <p class="text-xs text-gray-500 mt-1">
                 Agrega los datos necesarios para enviarla a la cocina
             </p>
         </div>
-        <a href="/main" class="mt-3 sm:mt-0 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm">
+        <a href="/main" class="mt-3 sm:mt-0 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 
+            rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm">
             <i class="fa-solid fa-arrow-left"></i> <span>Regresar al tablero principal</span>
         </a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
         <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
             <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <h2 class="text-base font-bold text-gray-800 mb-4 flex items-center">
-                    <i class="fa-solid fa-clipboard-list text-amber-500 mr-2"></i> Llena los campos
+                    <i class="fa-solid fa-clipboard-list 
+                        text-amber-500 mr-2"></i> Llena los campos
                 </h2>
                 
                 <div class="space-y-4">
                     <div>
-                        <label for="table_no" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">mesa #:</label>
+                        <label for="table_no" class="block text-xs font-bold uppercase 
+                            tracking-wider text-gray-500 mb-1.5">mesa #:</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center 
+                                text-gray-400 pointer-events-none">
                                 <i class="fa-solid fa-chair"></i>
                             </span>
-                            <input type="number" id="table_no" name="table_no" min="1" required placeholder="e.g. 4"
-                                   class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 font-medium focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition text-sm">
+                            <input 
+                                type="number" 
+                                id="table_no" 
+                                name="table_no" 
+                                min="1" 
+                                required placeholder="e.g. 4"
+                                class="w-full bg-gray-50 border border-gray-300 rounded-lg 
+                                pl-10 pr-4 py-2.5 text-gray-900 font-medium focus:outline-none 
+                                focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 
+                                transition text-sm">
                         </div>
                     </div>
 
                     <div>
-                        <label for="number_of_persons" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5"># de comensales:</label>
+                        <label for="number_of_persons" class="block text-xs font-bold uppercase 
+                            tracking-wider text-gray-500 mb-1.5"># de comensales:</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center 
+                                text-gray-400 pointer-events-none">
                                 <i class="fa-solid fa-users"></i>
                             </span>
-                            <input type="number" id="number_of_persons" name="number_of_persons" min="1" max="20" value="1" required
-                                   class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 font-medium focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition text-sm"
-                                   onchange="regenerateSeatSections()">
+                            <input 
+                                type="number" 
+                                id="number_of_persons" 
+                                name="number_of_persons" 
+                                min="1" 
+                                max="20" 
+                                value="1" 
+                                required
+                                class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 
+                                pr-4 py-2.5 text-gray-900 font-medium focus:outline-none 
+                                focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 
+                                transition text-sm"
+                                onchange="regenerateSeatSections()">
                         </div>
                     </div>
                 </div>
@@ -59,7 +83,8 @@
                             <span>Enviar comanda a cocina</span>
                     </button>
                     <button type="button" onclick="resetWorkspace()"
-                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 text-xs font-medium py-2 rounded-lg transition">
+                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-500 
+                                hover:text-gray-700 text-xs font-medium py-2 rounded-lg transition">
                         Limpiar los campos
                     </button>
                 </div>
@@ -70,7 +95,6 @@
             <div id="seats-workspace-root" class="space-y-4">
                 </div>
         </div>
-
     </div>
 </div>
 {% endblock %}
@@ -123,26 +147,31 @@
             seatCard.id = `seat-card-block-${seatNum}`;
             
             seatCard.innerHTML = `
-                <div class="bg-slate-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                <div class="bg-slate-50 border-b border-gray-200 px-4 py-3 flex items-center 
+                    justify-between">
                     <div class="flex items-center space-x-2">
-                        <span class="flex items-center justify-center w-6 h-6 bg-amber-100 text-amber-800 rounded-md text-xs font-bold border border-amber-200">
+                        <span class="flex items-center justify-center w-6 h-6 bg-amber-100 
+                            text-amber-800 rounded-md text-xs font-bold border border-amber-200">
                             ${seatNum}
                         </span>
-                        <h3 class="font-bold text-gray-700 text-sm">order de persona #${seatNum}</h3>
+                        <h3 class="font-bold text-gray-700 text-sm">orden de persona #${seatNum}</h3>
                     </div>
                     <button type="button" onclick="appendItemRow(${seatNum})" 
-                            class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 shadow-sm">
+                            class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 py-1.5 
+                            rounded-lg text-xs font-bold transition flex items-center space-x-1 
+                            shadow-sm">
                         <i class="fa-solid fa-plus"></i> <span>Add Item</span>
                     </button>
                 </div>
                 <div class="p-3">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-gray-200 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                            <tr class="border-b border-gray-200 text-[10px] font-bold 
+                                tracking-wider text-gray-400 uppercase">
                                 <th class="pb-1.5 px-2 w-[25%]">Platillo</th>
                                 <th class="pb-1.5 px-2 w-[20%]">descripición</th>
                                 <th class="pb-1.5 px-2 w-[10%] text-center">Cant</th>
-                                <th class="pb-1.5 px-2 w-[35%]">Notas adicionals</th>
+                                <th class="pb-1.5 px-2 w-[35%]">Notas adicionales</th>
                                 <th class="pb-1.5 px-2 w-[10%] text-center">Extra ($)</th>
                                 <th class="pb-1.5 w-[30px] text-right"><i 
                                     class="fa-solid fa-trash-can text-gray-300"></i></th>
@@ -178,33 +207,44 @@
 
         tr.innerHTML = `
             <td class="py-2.5 pr-2">
-                <select id="product-select-${lineId}" onchange="handleProductChange(${lineId})" required
-                        class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-gray-900 focus:outline-none focus:border-amber-500 transition text-xs">
+                <select id="product-select-${lineId}" onchange="handleProductChange(${lineId})" 
+                    required
+                    class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 
+                    text-gray-900 focus:outline-none focus:border-amber-500 transition text-xs">
                     ${productOptionsHtml}
                 </select>
             </td>
             <td class="py-2.5 pr-2">
                 <select id="variant-select-${lineId}" required
-                        class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-gray-900 focus:outline-none focus:border-amber-500 transition text-xs">
+                        class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 
+                        text-gray-900 focus:outline-none focus:border-amber-500 
+                        transition text-xs">
                     <option value="">-- elige opcion --</option>
                 </select>
             </td>
             <td class="py-2.5 pr-2 flex justify-center">
                 <input type="number" id="quantity-input-${lineId}" min="1" value="1" required
-                       class="w-14 bg-white border border-gray-300 rounded-md px-1.5 py-1.5 text-gray-900 text-center focus:outline-none focus:border-amber-500 transition text-xs">
+                       class="w-14 bg-white border border-gray-300 rounded-md px-1.5 py-1.5 
+                       text-gray-900 text-center focus:outline-none focus:border-amber-500 
+                       transition text-xs">
             </td>
             <td class="py-2.5 pr-2">
                 <input type="text" id="notes-input-${lineId}" placeholder="ejemplo, sin cebolla"
-                   class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-amber-500 transition text-xs">
+                   class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 
+                   text-gray-900 placeholder-gray-400 focus:outline-none focus:border-amber-500 
+                   transition text-xs">
             </td>
             <td class="py-2.5 pr-2 flex justify-center">
                 <input type="number" id="extra-charge-input-${lineId}" min="0" value="0" required
-                       class="w-14 bg-white border border-gray-300 rounded-md px-1.5 py-1.5 text-gray-900 text-center focus:outline-none focus:border-amber-500 transition text-xs">
+                       class="w-14 bg-white border border-gray-300 rounded-md px-1.5 py-1.5 
+                       text-gray-900 text-center focus:outline-none focus:border-amber-500 
+                       transition text-xs">
             </td>
             </td>
             <td class="py-2.5 text-right">
                 <button type="button" onclick="removeItemRow(${lineId})"
-                        class="text-gray-400 hover:text-rose-500 p-1 transition rounded-md hover:bg-rose-50">
+                        class="text-gray-400 hover:text-rose-500 p-1 transition rounded-md 
+                        hover:bg-rose-50">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </td>
@@ -230,45 +270,45 @@
     const selectedProductId = parseInt(productSelect.value);
     const productMatch = PRODUCT_CATALOG.find(p => p.id === selectedProductId);
 
-    variantSelect.innerHTML = '<option value="">-- Choose Option --</option>';
+    variantSelect.innerHTML = '<option value="">-- Elige opción --</option>';
 
     if (!productMatch) {
-        variantSelect.innerHTML = '<option value="">-- Select Item First --</option>';
+        variantSelect.innerHTML = '<option value="">-- Selecciona una opción primero --</option>';
         return;
     }
 
-    // Filtrar los sabores correspondientes a este platillo del catálogo base
+    // Flavor filter for selection fill
     const filteredFlavors = FLAVOR_CATALOG.filter(f => f.product_id === selectedProductId);
 
-    // CASO 1: Si el producto no tiene configurado ningún sabor en absoluto (ej: una porción de papas sencilla)
+    // CASE 1: If flavor does not have an option (e.g. soda)
     if (filteredFlavors.length === 0) {
         let option = document.createElement("option");
-        option.value = "0"; // Flag numérico neutro o ID 0 estructural para evitar nulos
+        option.value = "0"; // Neutral value for null avoiding
         option.text = "Standard / No Options";
-        option.dataset.selectionText = "Standard"; // Asegura que nunca envíe un string vacío o nulo
+        option.dataset.selectionText = "Standard"; // Adding a value avoid NULL contraints
         variantSelect.appendChild(option);
         return;
     }
 
-    // Buscamos si existe la fila ancla "carne" para disparar el Meat Catalogue dinámico
+    // If carne is the flavor and option, then we need to fill woth meat catalogue
     const carnePlaceholderFlavor = filteredFlavors.find(f => f.description.toLowerCase() === "carne");
 
     if (carnePlaceholderFlavor) {
-        // CASO 2: Es un platillo basado en carnes (Tacos, Burritos, etc.)
+        // CASE 2: Meat based main dish
         MEAT_CATALOG.forEach(meat => {
             let option = document.createElement("option");
-            option.value = carnePlaceholderFlavor.id; // 🔑 SALVAMOS EL FLAVOR_ID: Mantiene el ID base estructural invariable
+            option.value = carnePlaceholderFlavor.id; // Saving ID, is the correct approach
             option.text = meat.description;
-            option.dataset.selectionText = meat.description; // Inyecta el nombre real (ej: 'maciza', 'lengua')
+            option.dataset.selectionText = meat.description; // Insert the real selection
             variantSelect.appendChild(option);
         });
     } else {
-        // CASO 3: Es un producto normal con sabores estándar (Refrescos -> Coca, Fanta, Sprite)
+        // CASE 3: Normal main dish with normal options (e.g. Soda: coke, sprite)
         filteredFlavors.forEach(flavor => {
             let option = document.createElement("option");
-            option.value = flavor.id;              // Envía el ID exacto de la opción de refresco
+            option.value = flavor.id;              // Exact id flavor
             option.text = flavor.description;
-            option.dataset.selectionText = flavor.description; // 🔑 SALVAMOS EL TEXTO: Protege la columna 'selection' en el backend
+            option.dataset.selectionText = flavor.description; // 🔑 Anyway the value is saved
             variantSelect.appendChild(option);
         });
         }
