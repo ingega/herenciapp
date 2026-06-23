@@ -26,7 +26,7 @@ This version fix the agroupatoin of orders when two or more items contains notes
 - N/A
 
 ### Fixed
-- N/A
+- The flow of the function add_or_update_item in `src/api/v1/apps/orders/service.py`
 
 # [2.1.1] 2026-06-22
 This patch fixed the db session for avoid the error of too many open sessions
