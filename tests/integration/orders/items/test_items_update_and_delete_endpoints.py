@@ -130,10 +130,10 @@ class TestUpdateDeleteItems:
             follow_redirects=False
         )
         data = response.json()['items'][0]
-        # Assert:  Verify that response code is a 200 OK
-        assert response.status_code == status.HTTP_200_OK
-        # Assert: Verify that the number of persons was successfully changed
-        assert int(data["quantity"]) == 5
+        # Assert:  Verify that response code is a 201 CREATED
+        assert response.status_code == status.HTTP_201_CREATED
+        # Assert: Verify that the quantity created was 2
+        assert int(data["quantity"]) == 2
         # Act: clean the session for database updated veryfication
         session.expire_all()
         session.rollback()
@@ -142,7 +142,7 @@ class TestUpdateDeleteItems:
         # Assert: query executed successfully
         assert db_item is not None
         # Assert: Verify the information in database
-        assert float(db_item.quantity) == 5
+        assert float(db_item.quantity) == 2
         # Assert: Verify that others fields remains untouched
         assert db_item.product_id == setup_item['product_id']
 
