@@ -23,7 +23,7 @@ This patch fix some errors related to the items in order detail
 - N/A
 
 ### Changed
-- N/A
+- Warning messages in `src/templates/orders/create.html`
 
 ### Fixed
 - Logic in create order to avoid send an order without items in `src/api/v1/apps/orders/service.py`
