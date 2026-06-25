@@ -26,7 +26,7 @@ This patch fix some errors related to the items in order detail
 - N/A
 
 ### Fixed
-- N/A
+- Logic in create order to avoid send an order without items in `src/api/v1/apps/orders/service.py`
 
 ## [2.1.2] 2026-06-23
 This version fix the agroupation of orders when two or more items contains notes.

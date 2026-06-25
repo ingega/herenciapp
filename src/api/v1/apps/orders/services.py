@@ -99,6 +99,11 @@ class OrderService:
                     prep_status=ItemPrepStatus.QUEUED
                 )
                 self.session.add(db_item)
+        else: # raise an error, because an order must contains items
+            raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot send an empty order. Please add at least one item."
+        )
         
         # Calculate initial totals dynamically before committing
         self.calculate_order_total(db_order)
