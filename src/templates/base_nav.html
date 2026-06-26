@@ -12,85 +12,87 @@
 </head>
 <body class="h-full flex flex-col font-sans text-gray-900 antialiased">
 
-    <nav class="bg-slate-800 text-white shadow-md">
+    <nav x-data="{ open: false }" class="bg-slate-900 border-b border-slate-800 text-white shadow-md relative z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 flex items-center space-x-2">
+                <div class="flex items-center flex-1">
+                    <div class="flex-shrink-0 flex items-center">
                         <a href="{{ url_for('read_root') }}" class="flex items-center space-x-2 hover:opacity-90 transition-opacity">
                             <i class="fa-solid fa-utensils text-amber-500 text-2xl"></i>
-                            <span class="font-bold text-xl tracking-tight text-white">Herenciapp<span class="text-amber-500">Restaurant</span></span>
+                            <span class="font-bold text-lg tracking-tight text-white">Herenciapp<span class="text-amber-500">Restaurant</span></span>
                         </a>
                     </div>
-                    <div class="hidden md:flex md:items-center md:space-x-4 ml-10 whitespace-nowrap">
-                        <a href="/main" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 
-                            transition">Principal</a>
-                        <a href="/orders/create-ticket" class="px-3 py-2 rounded-md text-sm font-medium 
-                            bg-slate-900 text-amber-400 font-semibold shadow-inner">Comandas</a>
-                        <a href="/orders/kitchen/dashboard" class="px-3 py-2 rounded-md text-sm font-medium 
-                            bg-slate-900 text-amber-400 font-semibold shadow-inner">Cocina</a>
-                        <a href="/orders/products/" class="px-3 py-2 rounded-md text-sm font-medium 
-                            bg-slate-900 text-amber-400 font-semibold shadow-inner">Platillos</a>
-                        <a href="/orders/flavors/list/" class="px-3 py-2 rounded-md text-sm font-medium 
-                            bg-slate-900 text-amber-400 font-semibold shadow-inner">opción por platillo</a>
-                        <a href="/orders/flavors/meat/list/" class="px-3 py-2 rounded-md text-sm font-medium 
-                            bg-slate-900 text-amber-400 font-semibold shadow-inner">opciones de carne</a>
+                    
+                    <div class="hidden xl:flex xl:items-center xl:space-x-2 ml-8">
+                        <a href="/main" class="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">Principal</a>
+                        <a href="/orders/create-ticket" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-950 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Comandas</a>
+                        <a href="/orders/kitchen/dashboard" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-950 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Cocina</a>
+                        <a href="/orders/products/" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-950 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Platillos</a>
+                        <a href="/orders/flavors/list/" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-950 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Opción por Platillo</a>
+                        <a href="/orders/flavors/meat/list/" class="px-3 py-2 rounded-md text-sm font-medium bg-slate-950 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Opciones de Carne</a>
                     </div>
                 </div>
 
-                <div class="hidden md:flex items-center space-x-4">
+                <div class="hidden xl:flex items-center space-x-4">
                     <div class="flex flex-col text-right">
-                        <span class="text-xs text-slate-400">usuario:</span>
-                        <span class="text-sm font-medium text-slate-200">{{ current_user['sub'] }}</span>
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Usuario</span>
+                        <span class="text-sm font-medium text-slate-300">{{ current_user['sub'] if current_user else 'Invitado' }}</span>
                     </div>
-                    <div class="h-8 w-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 uppercase shadow">
+                    <div class="h-9 w-9 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 uppercase shadow-md ring-2 ring-slate-800">
                         {{ current_user['sub'][:2].upper() if current_user else 'S' }}
                     </div>
                     
                     {% if current_user %}
-                    <a href="/logout" title="Cerrar sesión" class="p-2 text-slate-400 hover:text-rose-400 rounded-full hover:bg-slate-700/50 transition">
+                    <a href="/logout" title="Cerrar sesión" class="p-2 text-slate-400 hover:text-rose-400 rounded-full hover:bg-slate-800 transition">
                         <i class="fa-solid fa-right-from-bracket text-lg"></i>
                     </a>
                     {% endif %}
                 </div>
 
-                <div class="-mr-2 flex md:hidden">
-                    <button type="button" onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-white">
+                <div class="flex xl:hidden">
+                    <button type="button" 
+                            @click="open = !open" 
+                            class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors">
                         <span class="sr-only">Abrir menú principal</span>
-                        <i id="menu-icon" class="fa-solid fa-bars text-xl"></i>
+                        <i class="fa-solid text-xl transition-transform duration-200" :class="open ? 'fa-xmark rotate-90 text-amber-500' : 'fa-bars'"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="hidden md:hidden bg-slate-700 border-t border-slate-600" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="/main" class="px-3 py-2 rounded-md text-sm font-medium 
-                    hover:bg-slate-700 transition">Principal</a>
-                <a href="/orders/create-ticket" class="px-3 py-2 rounded-md text-sm font-medium 
-                    bg-slate-900 text-amber-400 font-semibold shadow-inner">Comandas</a>
-                <a href="/orders/kitchen/dashboard" class="px-3 py-2 rounded-md text-sm font-medium 
-                    bg-slate-900 text-amber-400 font-semibold shadow-inner">Cocina</a>
-                <a href="/orders/products/" class="px-3 py-2 rounded-md text-sm font-medium 
-                    bg-slate-900 text-amber-400 font-semibold shadow-inner">Platillos</a>
-                <a href="/orders/flavors/list/" class="px-3 py-2 rounded-md text-sm font-medium 
-                    bg-slate-900 text-amber-400 font-semibold shadow-inner">opción por platillo</a>
-                <a href="/orders/flavors/meat/list/" class="px-3 py-2 rounded-md text-sm font-medium 
-                    bg-slate-900 text-amber-400 font-semibold shadow-inner">opciones de carne</a>
+        <div x-show="open" 
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 -translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-2"
+            class="xl:hidden bg-slate-950 border-t border-slate-800 absolute w-full left-0 shadow-xl"
+            style="display: none;">
+            
+            <div class="px-3 pt-2 pb-4 space-y-1.5">
+                <a href="/main" class="block px-3 py-2.5 rounded-md text-base font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">Principal</a>
+                <a href="/orders/create-ticket" class="block px-3 py-2.5 rounded-md text-base font-medium bg-slate-900 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Comandas</a>
+                <a href="/orders/kitchen/dashboard" class="block px-3 py-2.5 rounded-md text-base font-medium bg-slate-900 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Cocina</a>
+                <a href="/orders/products/" class="block px-3 py-2.5 rounded-md text-base font-medium bg-slate-900 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Platillos</a>
+                <a href="/orders/flavors/list/" class="block px-3 py-2.5 rounded-md text-base font-medium bg-slate-900 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Opción por Platillo</a>
+                <a href="/orders/flavors/meat/list/" class="block px-3 py-2.5 rounded-md text-base font-medium bg-slate-900 text-amber-400 font-semibold border border-slate-800/40 shadow-inner">Opciones de Carne</a>
             </div>
-            <div class="pt-4 pb-3 border-t border-slate-600 px-5 flex items-center justify-between">
+            
+            <div class="pt-4 pb-4 border-t border-slate-800 px-6 flex items-center justify-between bg-slate-900/40">
                 <div class="flex items-center space-x-3">
-                    <div class="h-8 w-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 uppercase">
+                    <div class="h-9 w-9 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 uppercase shadow ring-2 ring-slate-800">
                         {{ current_user['sub'][:2].upper() if current_user else 'S' }}
                     </div>
                     <div class="flex flex-col">
+                        <span class="text-xs text-slate-500 font-sans uppercase tracking-wider font-bold">Usuario</span>
                         <span class="text-sm font-medium text-white">{{ current_user['sub'] if current_user else 'Staff' }}</span>
                     </div>
                 </div>
                 
                 {% if current_user %}
-                <a href="/logout" class="flex items-center space-x-2 text-rose-400 bg-slate-800/60 px-3 py-1.5 rounded-md text-sm border border-rose-500/20 active:bg-slate-900 transition">
+                <a href="/logout" class="flex items-center space-x-2 text-rose-400 bg-rose-950/20 border border-rose-900/40 px-3 py-2 rounded-md text-sm font-medium active:bg-rose-950/40 transition">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span>Salir</span>
                 </a>

@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This version add/fix nuances to some templates:
 - In close order, add an "ammount_payed" and "change" fields.
 - Increase text letter size in close order template.
-- Improve bar_nav elements agropation.
+- Improve bar_nav elements agroupation.
 - Add more responsive design to waiter's order template.
 
 ### Added
@@ -28,6 +28,7 @@ This version add/fix nuances to some templates:
 
 ### Changed
 - Increased the text font size in close order template
+- Added responsive design to nav bar code 
 
 ### Fixed
 - Added a change text for order close template in `src/templates/orders/check-out.html`
