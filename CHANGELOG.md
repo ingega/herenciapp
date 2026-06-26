@@ -30,7 +30,7 @@ This version add/fix nuances to some templates:
 - N/A
 
 ### Fixed
-- N/A
+- Added a change text for order close template in `src/templates/orders/check-out.html`
 
 ## [2.1.3] 2026-06-26
 This patch is for prevents in frontend to send an order without items
