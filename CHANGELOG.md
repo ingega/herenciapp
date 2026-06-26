@@ -33,6 +33,8 @@ This version add/fix nuances to some templates:
 ### Fixed
 - Added a change text for order close template in `src/templates/orders/check-out.html`
 - Added CSS responsive code for waiter's order template in `src/templates/orders/create.html`
+- Fixed test for templates in `src/tests/integration/flavors/test_flavor_template.py` and
+`src/tests/integration/orders/kitchen/test_dashboard_template.py`
 
 ## [2.1.3] 2026-06-26
 This patch is for prevents in frontend to send an order without items
