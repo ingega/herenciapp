@@ -11,26 +11,34 @@ from src.api.v1.apps.orders.models import Order
 @pytest.fixture(scope="function")
 def setup_order(client, authorized_client_cookies):
     """
-    Creates a baseline order in the catalogue to reuse across test cases.
-    Injects authorized cookies to safely bypass authentication during creation.
+    Creates baseline product, flavor, order, and nested item records.
+    Returns a unified mapping of IDs for seamless down-stream test consumption.
     """
-    
-    # Act: creates an authorized user
+    # Act: Inject authenticated session cookies
     client.cookies.update(authorized_client_cookies)
-
-    # Act: Add a new product uased as baseline for flavors
     
-    order_payload = {
-        "table_no": 1,
-        "number_of_persons": 2,
-        "items": [] # empty list, because we only want to create the order baseline.
+    # 1. Create a Baseline Product
+    product_payload = {
+        "main_dish": "taco",
+        "category": "food",
+        "price": 10.00
     }
-    
-    # Act: Create the order
-    order_response = client.post("/orders/create", json=order_payload)
-    
-    # Return the created order for use in other tests
-    return order_response.json()
+    product_response = client.post("/orders/products/", json=product_payload)
+    assert product_response.status_code == status.HTTP_201_CREATED
+    product_id = product_response.json()["id"]
+
+    # 2. Create a Baseline Flavor mapped to Product
+    flavor_payload = {
+        "product_id": product_id,
+        "description": "carne"
+    }
+    flavor_response = client.post("/orders/flavors/", json=flavor_payload)
+    assert flavor_response.status_code == status.HTTP_201_CREATED
+    flavor_id = flavor_response.json()["id"]
+
+    # return the product and flavor data
+    order_data = {"product_id": product_id, "flavor_id": flavor_id}
+    return order_data
 
 class TestOrdersEndpoints:
 
@@ -46,12 +54,24 @@ class TestOrdersEndpoints:
         # Act: clear the cookie (Unauthenticated state, because 
         # the setup_order fixture creates an order with authenticated client)
         client.cookies.clear()
-        
+        # retrieve data
+        product_id = setup_order["product_id"]
+        flavor_id = setup_order["flavor_id"]    
         # Act: Set the payload for order creation
         order_payload = {
         "table_no": 1,
         "number_of_persons": 2,
-        "items": []
+        "items": [
+        {
+            "person_number": 1,
+            "product_id": product_id,
+            "flavor_id": flavor_id,
+            "selection": "standar",
+            "quantity": 1,
+            "notes": "Test notes for item",
+            "extra_charge": 0
+            }
+        ]
     }
         # Act: Execute the post request
         response = client.post(
@@ -72,11 +92,25 @@ class TestOrdersEndpoints:
         """
         
         # Act: Set the payload for order creation, but omit required fields or provide invalid data
+        # retrieve data
+        product_id = setup_order["product_id"]
+        flavor_id = setup_order["flavor_id"]    
+        # Act: Set the payload for order creation
         order_payload = {
-            "table_no": "invalid_string_instead_of_int",
-            "number_of_persons": 2,
-            "items": []
-        }
+        "table_no": 1,
+        "number_of_persons": 2,
+        "items": [
+        {
+            "person_number": "not a number",
+            "product_id": product_id,
+            "flavor_id": flavor_id,
+            "selection": "standar",
+            "quantity": 1,
+            "notes": "Test notes for item",
+            "extra_charge": 0
+            }
+        ]
+    }
         # Act: Execute the post request
         response = client.post(
             f"/orders/create", 
@@ -97,10 +131,24 @@ class TestOrdersEndpoints:
         """
 
         # Act: Set the payload for order creation, but omit required fields or provide invalid data
+        # retrieve data
+        product_id = setup_order["product_id"]
+        flavor_id = setup_order["flavor_id"]    
+        # Act: Set the payload for order creation
         order_payload = {
-            "table_no": 1,
-            "number_of_persons": 2,
-            "items": []
+        "table_no": 1,
+        "number_of_persons": 2,
+        "items": [
+        {
+            "person_number": 1,
+            "product_id": product_id,
+            "flavor_id": flavor_id,
+            "selection": "standar",
+            "quantity": 1,
+            "notes": "Test notes for item",
+            "extra_charge": 0
+            }
+        ]
         }
         # Act: Execute the post request
         response = client.post(
@@ -140,8 +188,36 @@ class TestOrdersEndpoints:
         """
         Verify that the get order endpoint returns the correct data for an existing order.
         """
-        # act: retrieve the order id from the setup_order fixture
-        order_id = setup_order["id"]
+        # act: create an order
+        product_id = setup_order["product_id"]
+        flavor_id = setup_order["flavor_id"]    
+        # Act: Set the payload for order creation
+        order_payload = {
+        "table_no": 1,
+        "number_of_persons": 2,
+        "items": [
+        {
+            "person_number": 1,
+            "product_id": product_id,
+            "flavor_id": flavor_id,
+            "selection": "standar",
+            "quantity": 1,
+            "notes": "Test notes for item",
+            "extra_charge": 0
+            }
+        ]
+    }
+        # Act: Execute the post request
+        order_response = client.post(
+            f"/orders/create", 
+            json=order_payload,
+            follow_redirects=False
+        )
+        # Assert: Authentication blocks and redirects to login layout
+        assert order_response.status_code == status.HTTP_201_CREATED
+        # retrieve the order_id
+        data_order = order_response.json()
+        order_id = data_order["id"]
         # now we have the order id, we can test the get endpoint
         get_order_response = client.get(
             f"/orders/{order_id}",
@@ -160,6 +236,34 @@ class TestOrdersEndpoints:
         """
         Verify that the get all orders endpoint returns the correct data for existing orders.
         """
+        # act: create an order
+        product_id = setup_order["product_id"]
+        flavor_id = setup_order["flavor_id"]    
+        # Act: Set the payload for order creation
+        order_payload = {
+        "table_no": 1,
+        "number_of_persons": 2,
+        "items": [
+        {
+            "person_number": 1,
+            "product_id": product_id,
+            "flavor_id": flavor_id,
+            "selection": "standar",
+            "quantity": 1,
+            "notes": "Test notes for item",
+            "extra_charge": 0
+            }
+        ]
+    }
+        # Act: Execute the post request
+        order_response = client.post(
+            f"/orders/create", 
+            json=order_payload,
+            follow_redirects=False
+        )
+        # Assert: Authentication blocks and redirects to login layout
+        assert order_response.status_code == status.HTTP_201_CREATED
+
         # act: retrieve all the orders from the setup_order fixture
         get_order_response = client.get(
             f"/orders/all/",

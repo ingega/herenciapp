@@ -24,6 +24,7 @@ This patch fix some errors related to the items in order detail
 
 ### Changed
 - Warning messages in `src/templates/orders/create.html`
+- Many test related to items/orders due to data protection improvements
 
 ### Fixed
 - Logic in create order to avoid send an order without items in `src/api/v1/apps/orders/service.py`
