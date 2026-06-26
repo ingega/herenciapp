@@ -42,25 +42,22 @@ def setup_order(client, authorized_client_cookies):
     order_payload = {
         "table_no": 1,
         "number_of_persons": 2,
-        "items": []
-    }
-    order_response = client.post("/orders/create", json=order_payload)
-    assert order_response.status_code == status.HTTP_201_CREATED
-    order_id = order_response.json()["id"]
-
-    # 4. Append Item to Ticket (Endpoint returns updated Parent Order dict)
-    item_payload = {
+        "items": [
+        {
         "person_number": 1,
         "product_id": product_id,
         "flavor_id": flavor_id,
         "quantity": 2,
         "notes": "extra spicy",
         "extra_charge": 1.50
+            }
+        ]
     }
-    item_response = client.post(f"/orders/{order_id}/items", json=item_payload)
-    assert item_response.status_code == status.HTTP_201_CREATED
+    order_response = client.post("/orders/create", json=order_payload)
+    assert order_response.status_code == status.HTTP_201_CREATED
+    order_id = order_response.json()["id"]
     
-    order_data = item_response.json()
+    order_data = order_response.json()
 
     return order_data
 

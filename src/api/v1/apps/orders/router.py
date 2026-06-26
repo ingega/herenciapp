@@ -6,6 +6,7 @@ from fastapi.responses import Response, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from typing import List
+from time import time
 
 # schemas
 from src.api.v1.apps.orders.schemas import OrderDetailReadNested, ProductCreate, ProductRead, ProductUpdate
@@ -355,7 +356,7 @@ async def api_dispatch_kitchen_item(
     # Return a redirect to dashboard to refresh the values
     return RedirectResponse(url="/orders/kitchen/dashboard")
 
-@router.get("/items/all/", response_model=List[OrderDetailReadNested], tags=["Items"])
+@router.get("/items/all", response_model=List[OrderDetailReadNested], tags=["Items"])
 def api_get_all_items_for_order(
     order_id: int,
     service: OrderService = Depends(get_order_service),
@@ -384,6 +385,7 @@ def api_append_item_to_ticket(
     """
     # it is new item or updated item?
     db_order, is_new_item = service.add_or_update_item(order_id=order_id, item_in=item_payload)
+    
     if not is_new_item:
         response.status_code = status.HTTP_200_OK
     else: # mean new item
@@ -393,6 +395,8 @@ def api_append_item_to_ticket(
                 status_code=status.HTTP_404_NOT_FOUND, 
                 detail=f"Order ticket with ID {order_id} could not be found."
             )
+    # final clue: the return
+    print(f"{'@' * 30} The final value returned for the service:\n{db_order}")
     
     return db_order
 

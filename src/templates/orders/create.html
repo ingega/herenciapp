@@ -328,14 +328,14 @@
         const totalPersons = parseInt(document.getElementById('number_of_persons').value) || 1;
 
         if (!tableNo) {
-            alert("Please assign a valid Table Number before trying to send.");
+            alert("Por favor asigna un número válido de mesa (0 si se despacha en barra).");
             tableNoInput.focus();
             return;
         }
 
         const allRows = document.querySelectorAll('[id^="order-line-row-"]');
         if (allRows.length === 0) {
-            alert("Cannot dispatch an empty ticket. Please select at least one item line.");
+            alert("Para enviar una comanda debes agregar al menos un platillo.");
             return;
         }
 
