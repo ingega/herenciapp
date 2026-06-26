@@ -111,7 +111,7 @@ class TestOrdersEndpoints:
         assert "config" in response.context
         
         # Assert 3: Text content visual validation
-        assert "opción por platillo" in response.text
+        assert "Ordenes pendientes" in response.text
         assert "Platillos" in response.text
 
         # 3. Cleanup client session states for test isolation

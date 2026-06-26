@@ -16,6 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.1.4] 2026-06-26
+This version add/fix nuances to some templates:
+- In close order, add an "ammount_payed" and "change" fields.
+- Increase text letter size in close order template.
+- Improve bar_nav elements agroupation.
+- Add more responsive design to waiter's order template.
+
+### Added
+- N/A
+
+### Changed
+- Increased the text font size in close order template
+- Added responsive design to nav bar code 
+
+### Fixed
+- Added a change text for order close template in `src/templates/orders/check-out.html`
+- Added CSS responsive code for waiter's order template in `src/templates/orders/create.html`
+- Fixed test for templates in `src/tests/integration/flavors/test_flavor_template.py` and
+`src/tests/integration/orders/kitchen/test_dashboard_template.py`
+
 ## [2.1.3] 2026-06-26
 This patch is for prevents in frontend to send an order without items
 and the payload validation as well
