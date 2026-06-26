@@ -99,11 +99,6 @@ class OrderService:
                     prep_status=ItemPrepStatus.QUEUED
                 )
                 self.session.add(db_item)
-        else: # raise an error, because an order must contains items
-            raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot send an empty order. Please add at least one item."
-        )
         
         # Calculate initial totals dynamically before committing
         self.calculate_order_total(db_order)
@@ -213,8 +208,7 @@ class OrderService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot add items to a closed and checked-out order."
             )
-        # let's debug the item_in
-        print(f"{'*' * 30} ITEM_IN IN SERVICE:\n{item_in}")
+
         # Clean & Direct: Always instantiate a brand-new row for the database
         db_item = OrderDetail(
             order_id=order_id,
@@ -227,8 +221,7 @@ class OrderService:
             extra_charge=item_in.extra_charge,
             prep_status=ItemPrepStatus.QUEUED  # Explicit default configuration tracking
         )
-        # finally debug the final object
-        print(f"{'+' * 30} DB_ITEM IN SERVICE:\n{db_item}")
+        
         self.session.add(db_item)
         is_new_item = True  # Flag marked as True permanently because a row is always added
 

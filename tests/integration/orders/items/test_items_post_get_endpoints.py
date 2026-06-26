@@ -34,35 +34,39 @@ def setup_item(client, authorized_client_cookies):
     assert flavor_response.status_code == status.HTTP_201_CREATED
     flavor_id = flavor_response.json()["id"]
 
-    # 3. Create an Empty Parent Order, the function avoids that an empty items order
-    # was created, this way the items must contain at least one item
+    # 3. Create an Empty Parent Order
     order_payload = {
         "table_no": 1,
         "number_of_persons": 2,
-        "items": [
-        {
-            "person_number": 1,
-            "product_id": product_id,
-            "flavor_id": flavor_id,
-            "selection": "standar",
-            "quantity": 1,
-            "notes": "Test notes for item",
-            "extra_charge": 0
-            }
-        ]
+        "items": []
     }
     order_response = client.post("/orders/create", json=order_payload)
     assert order_response.status_code == status.HTTP_201_CREATED
-    order_data = order_response.json()
-    order_id = order_data["id"]
-    # normalize the return
-    data_out = {
+    order_id = order_response.json()["id"]
+
+    # 4. Append Item to Ticket (Endpoint returns updated Parent Order dict)
+    item_payload = {
+        "person_number": 1,
+        "product_id": product_id,
+        "flavor_id": flavor_id,
+        "quantity": 2,
+        "notes": "extra spicy",
+        "extra_charge": 1.50
+    }
+    item_response = client.post(f"/orders/{order_id}/items", json=item_payload)
+    assert item_response.status_code == status.HTTP_201_CREATED
+    
+    order_data = item_response.json()
+    nested_item = order_data["items"][0]
+
+    # Return a normalized dictionary so tests have simple access to all entity IDs
+    return {
         "order_id": order_id,
         "product_id": product_id,
         "flavor_id": flavor_id,
-        "order_data": order_data
+        "item_id": nested_item["id"],
+        "person_number": nested_item["person_number"]
     }
-    return data_out
 
 
 class TestItemsEndpoints:
@@ -82,10 +86,7 @@ class TestItemsEndpoints:
             "person_number": 1,
             "product_id": setup_item["product_id"],
             "flavor_id": setup_item["flavor_id"],
-            "selection": "selection test string",
-            "quantity": 1,
-            "notes": "Test item notes",
-            "extra_charge": 0
+            "quantity": 1
         }
 
         # Act: Pass payload along to trigger security interceptor before validation blocks it
@@ -109,12 +110,10 @@ class TestItemsEndpoints:
         # Act: Omit product_id and flavor_id completely
         item_payload = {
             "person_number": 1,
-            "flavor_id": setup_item["flavor_id"],
-            "selection": "selection test string",
-            "quantity": 1,
-            "notes": "Test item notes",
-            "extra_charge": 0
-        } # product id is missing
+            "quantity": 2,
+            "notes": "extra spicy",
+            "extra_charge": 1.50
+        }
         
         response = client.post(
             f"/orders/{order_id}/items",
@@ -139,13 +138,31 @@ class TestItemsEndpoints:
             "person_number": 2,  # Different seat number to append a clean new line
             "product_id": product_id,
             "flavor_id": flavor_id,
-            "selection": "selection test string",
             "quantity": 1,
-            "notes": "mild",
-            "extra_charge": 0.00
+            "notes": "mild"
         }
-        # this test raises troubles in fixture, in production there's no error at all
-        assert 1 == 1  # dummy assert
+        
+        response = client.post(
+            f"/orders/{order_id}/items",
+            json=item_payload,
+            follow_redirects=False
+        )
+
+        assert response.status_code == status.HTTP_201_CREATED
+        order_response_data = response.json()
+
+        # REMEMBER: The endpoint answers back with the Parent Order data schema!
+        assert order_response_data["id"] == order_id
+        # Our fixture inserted item 1, and this test inserted item 2 -> len must be 2
+        assert len(order_response_data["items"]) == 2 
+
+        # Direct DB session validation check on Item table model
+        session.expire_all()
+        session.rollback()
+        
+        # Verify both items exist in the database linked to this order
+        db_order_items = session.query(Item).filter(Item.order_id == order_id).all()
+        assert len(db_order_items) == 2
     
     # ==============================================================================
     # TEST 4: Get All Orders containing updated child items
@@ -157,5 +174,19 @@ class TestItemsEndpoints:
         client.cookies.update(authorized_client_cookies)
         order_id = setup_item['order_id']
 
-        # this test is raising troubles, let's goofy it, in production all works flawlesly
-        assert 1 == 1
+        get_order_response = client.get(
+            f"/orders/items/all/?order_id={order_id}",
+            follow_redirects=False
+        )
+        
+        # Assert: Serialization validation passes flawlessly!
+        assert get_order_response.status_code == status.HTTP_200_OK
+        items_list = get_order_response.json()
+        
+        assert isinstance(items_list, list)
+        assert len(items_list) >= 1
+        
+        # Extract item properties directly out of index position 0
+        target_item = items_list[0]
+        assert target_item["product_id"] == setup_item["product_id"]
+        assert target_item["person_number"] == setup_item["person_number"]
