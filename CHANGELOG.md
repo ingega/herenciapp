@@ -27,7 +27,7 @@ This version add/fix nuances to some templates:
 - N/A
 
 ### Changed
-- N/A
+- Increased the text font size in close order template
 
 ### Fixed
 - Added a change text for order close template in `src/templates/orders/check-out.html`
