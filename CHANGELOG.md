@@ -16,6 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.1.4] 2026-06-26
+This version add/fix nuances to some templates:
+- In close order, add an "ammount_payed" and "change" fields.
+- Increase text letter size in close order template.
+- Improve bar_nav elements agropation.
+- Add more responsive design to waiter's order template.
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [2.1.3] 2026-06-26
 This patch is for prevents in frontend to send an order without items
 and the payload validation as well
