@@ -16,6 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.1.3] 2026-06-26
+This patch is for prevents in frontend to send an order without items
+and the payload validation as well
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- Function for item and payload validation in `src/templates/orders/create.html`
+
 ## [2.1.2] 2026-06-23
 This version fix the agroupation of orders when two or more items contains notes.
 Also we add more time to lifespan to avoid the close of session.
