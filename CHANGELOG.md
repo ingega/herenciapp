@@ -27,7 +27,7 @@ and the payload validation as well
 - N/A
 
 ### Fixed
-- N/A
+- Function for item and payload validation in `src/templates/orders/create.html`
 
 ## [2.1.2] 2026-06-23
 This version fix the agroupation of orders when two or more items contains notes.

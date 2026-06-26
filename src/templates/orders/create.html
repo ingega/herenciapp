@@ -318,101 +318,135 @@
      * Loops over active rows and submits payload to backend REST endpoints
      */
     async function submitCompleteTicket(event) {
-
-        if (event) {
+    if (event) {
         event.preventDefault();
+    }
+
+    const tableNoInput = document.getElementById('table_no');
+    const tableNo = parseInt(tableNoInput.value);
+    const totalPersons = parseInt(document.getElementById('number_of_persons').value) || 1;
+
+    if (!tableNo) {
+        alert("Por favor asigna un número válido de mesa.");
+        tableNoInput.focus();
+        return;
+    }
+
+    // Step 1: Query all DOM element rows
+    const allRows = document.querySelectorAll('[id^="order-line-row-"]');
+    
+    // Step 2: Validate structural contents instead of raw row quantity counts
+    const validRows = [];
+    for (let row of allRows) {
+        const lineId = row.id.split('-').pop();
+        const productSelect = document.getElementById(`product-select-${lineId}`);
+        const variantSelect = document.getElementById(`variant-select-${lineId}`);
+        const quantityInput = document.getElementById(`quantity-input-${lineId}`);
+
+        // Extract and verify values safely
+        const productId = productSelect ? parseInt(productSelect.value) : NaN;
+        const quantity = quantityInput ? parseInt(quantityInput.value) : 0;
+
+        // Skip completely untouched baseline rows
+        if (isNaN(productId) || productId <= 0 || quantity < 1) {
+            continue;
         }
 
-        const tableNoInput = document.getElementById('table_no');
-        const tableNo = parseInt(tableNoInput.value);
-        const totalPersons = parseInt(document.getElementById('number_of_persons').value) || 1;
+        // STRICT SELECTION GUARD: If a product is selected, verify the flavor/variant selection
+        if (variantSelect) {
+            const chosenOption = variantSelect.options[variantSelect.selectedIndex];
+            const flavorIdVal = chosenOption ? chosenOption.value : "";
+            const selectionText = chosenOption ? (chosenOption.dataset.selectionText || chosenOption.text).trim() : "";
 
-        if (!tableNo) {
-            alert("Please assign a valid Table Number before trying to send.");
-            tableNoInput.focus();
-            return;
+            // If the flavor dropdown has options but the selected one is blank, "0", or explicitly "Standard"
+            if (!flavorIdVal || flavorIdVal === "0" || selectionText === "" || selectionText.toLowerCase() === "standard") {
+                alert(`Line #${lineId}: Selecciona una opción válida de platillo. Cocina no podrá saber cual es la selección.`);
+                variantSelect.focus();
+                return; // Halt execution immediately so no partial or empty tickets get created!
+            }
         }
 
-        const allRows = document.querySelectorAll('[id^="order-line-row-"]');
-        if (allRows.length === 0) {
-            alert("Cannot dispatch an empty ticket. Please select at least one item line.");
-            return;
+        // Row has passed both product, quantity, and selection requirements
+        validRows.push(row);
+    }
+
+    // Reject form if there are zero items configured
+    if (validRows.length === 0) {
+        alert("Selecciona un item para esta order, debe contener un platillo, una opción, cantidad al menos 1.");
+        return;
+    }
+
+    const orderPayload = {
+        table_no: tableNo,
+        number_of_persons: totalPersons,
+        items: []
+    };
+
+    try {
+        // Step 3: Open the Ticket (POST /orders/create)
+        const orderResponse = await fetch("/orders/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderPayload)
+        });
+
+        if (!orderResponse.ok) {
+            const errorData = await orderResponse.json();
+            throw new Error(errorData.detail || "Failed initializing base ticket state.");
         }
 
-        const orderPayload = {
-            table_no: tableNo,
-            number_of_persons: totalPersons,
-            items: []
-        };
+        const createdOrder = await orderResponse.json();
+        const orderId = createdOrder.id;
 
-        try {
-            // Step 1: Open the Ticket (POST /orders/create)
-            const orderResponse = await fetch("/orders/create", {
+        // Step 4: Loop exclusively through validated configurations
+        for (let row of validRows) {
+            const lineId = row.id.split('-').pop();
+            const productSelect = document.getElementById(`product-select-${lineId}`);
+            const variantSelect = document.getElementById(`variant-select-${lineId}`);
+            const quantityInput = document.getElementById(`quantity-input-${lineId}`);
+            const notesInput = document.getElementById(`notes-input-${lineId}`);
+            const extraChargeInput = document.getElementById(`extra-charge-input-${lineId}`);
+
+            const productId = parseInt(productSelect.value);
+            const quantity = parseInt(quantityInput.value) || 1;
+            const notes = notesInput ? notesInput.value.trim() : "";
+            const extra_charge = extraChargeInput ? parseFloat(extraChargeInput.value) : 0.00;
+            const seatNumber = parseInt(row.dataset.seatNumber) || 1;
+
+            const chosenOption = variantSelect ? variantSelect.options[variantSelect.selectedIndex] : null;
+            const flavorIdVal = chosenOption ? chosenOption.value : "";
+            const selectionText = chosenOption ? (chosenOption.dataset.selectionText || chosenOption.text).trim() : "Standard";
+
+            const itemPayload = {
+                person_number: seatNumber,
+                product_id: productId,
+                flavor_id: (flavorIdVal !== "" && flavorIdVal !== "0") ? parseInt(flavorIdVal) : null,
+                selection: selectionText,
+                quantity: quantity,
+                notes: notes,
+                extra_charge: !isNaN(extra_charge) && extra_charge >= 0 ? extra_charge : 0.00
+            };
+
+            const itemResponse = await fetch(`/orders/${orderId}/items`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(orderPayload)
+                body: JSON.stringify(itemPayload)
             });
 
-            if (!orderResponse.ok) {
-                const errorData = await orderResponse.json();
-                throw new Error(errorData.detail || "Failed initializing base ticket state.");
+            if (!itemResponse.ok) {
+                console.error(`Error processing item line allocation block index ${lineId}`);
+                alert(`Error 422 in line #${lineId}: Verify the exact error by inspecting the console (F12).`);
             }
-
-            const createdOrder = await orderResponse.json();
-            const orderId = createdOrder.id;
-
-            // Step 2: Append item configurations (POST /orders/{order_id}/items)
-            for (let row of allRows) {
-                const lineId = row.id.split('-').pop();
-                const productSelect = document.getElementById(`product-select-${lineId}`);
-                const variantSelect = document.getElementById(`variant-select-${lineId}`);
-                const quantityInput = document.getElementById(`quantity-input-${lineId}`);
-                const notesInput = document.getElementById(`notes-input-${lineId}`);
-                const extraChargeInput = document.getElementById(`extra-charge-input-${lineId}`);
-
-                const productId = parseInt(productSelect.value);
-                const quantity = parseInt(quantityInput.value) || 1;
-                const notes = notesInput ? notesInput.value.trim() : "";
-                const extra_charge = extraChargeInput ? parseFloat(extraChargeInput.value) : 0.00;
-                const seatNumber = parseInt(row.dataset.seatNumber);
-
-                if (!productId) continue;
-
-                const chosenOption = variantSelect.options[variantSelect.selectedIndex];
-                const flavorIdVal = chosenOption ? chosenOption.value : "";
-                const selectionText = chosenOption ? chosenOption.dataset.selectionText : "Standard";
-
-                const itemPayload = {
-                    person_number: seatNumber,
-                    product_id: productId,
-                    flavor_id: flavorIdVal !== "" ? parseInt(flavorIdVal) : null,
-                    selection: selectionText || "",
-                    quantity: quantity,
-                    notes: notes,
-                    extra_charge: extra_charge
-                };
-
-
-                const itemResponse = await fetch(`/orders/${orderId}/items`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(itemPayload)
-                });
-
-                if (!itemResponse.ok) {
-                    console.error(`Error processing item line allocation block index ${lineId}`);
-                    alert(`Error 422 in line #${lineId}: Verify the exact error by inspectin the console (F12).`);
-                }
-            }
-
-            alert(`¡Comanda enviada a la cocina con éxito para la Mesa ${tableNo}!`);
-            window.location.href = "/main";
-
-        } catch (err) {
-            console.error(err);
-            alert(`Ticket Processing Exception: ${err.message}`);
         }
+
+        alert(`¡Comanda enviada a la cocina con éxito para la Mesa ${tableNo}!`);
+        window.location.href = "/main";
+
+    } catch (err) {
+        console.error(err);
+        alert(`Ticket Processing Exception: ${err.message}`);
     }
+}
 
     function resetWorkspace() {
         document.getElementById('table_no').value = '';
