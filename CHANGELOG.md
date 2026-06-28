@@ -16,6 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.2.0] 2026-06-27
+This version add crud function for items:
+- Added a CRUD service.
+- Added test suite for CRUD service.
+- Added CRUD controls for items in waiter's order template.
+- Added a template for CRUD items.
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [2.1.4] 2026-06-26
 This version add/fix nuances to some templates:
 - In close order, add an "ammount_payed" and "change" fields.
