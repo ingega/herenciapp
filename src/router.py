@@ -1,11 +1,8 @@
 # src/router.py
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
-from datetime import date
-from src.api.v1.apps.orders.services import OrderService
-from src.api.v1.apps.orders.schemas import OrderDetailResponse
+from src.api.v1.apps.orders.services import ItemService
 from src.database import get_session
-from src.api.v1.apps.orders.models import get_mexico_time
 
 api_router = APIRouter()
 
@@ -14,10 +11,10 @@ async def health_check():
     return {"status": "ok"}
 
 @api_router.get("/playground", status_code=200)
-def get_playground():
+def get_playground(session:Session=Depends(get_session)):
     """
     This space is for test new endpoints or functions
     """
-    mx_time = get_mexico_time()
-
-    return mx_time
+    item_service = ItemService(session=session)
+    order_id = 12 # just for debug
+    return  item_service.get_order_items(order_id=order_id)

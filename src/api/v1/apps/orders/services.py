@@ -477,6 +477,22 @@ class OrderService:
             "day_tips": float(results.tips or 0.0)
         }
         
+### --- Items service class init ---  ####
+
+class ItemService:
+    def __init__(self, session:Session) -> None:
+        """
+        Inject the database session so every method operates on the same unit of work.
+        """
+        self.session = session
+
+    def get_order_items(self, order_id:int) -> List[OrderDetail]:
+        """
+        Retrieve all items for an specific order.
+        """
+        statement = select(OrderDetail).where(OrderDetail.order_id==order_id)
+        results = self.session.exec(statement)
+        return results.all()
 
 ### --- Products service class init ---  ####
 

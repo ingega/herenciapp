@@ -24,7 +24,7 @@ This version add crud function for items:
 - Added a template for CRUD items.
 
 ### Added
-- N/A
+- CRUD Service for items in `src/api/v1/apps/orders/service.py` 
 
 ### Changed
 - N/A
