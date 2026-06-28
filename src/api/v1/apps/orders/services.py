@@ -17,7 +17,7 @@ from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRea
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductUpdate
 # order schemas
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderUpdate, OrderClose, ItemPrepStatus
-from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus
+from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus, OrderDetailAddItem
 from src.api.v1.apps.orders.schemas import OrderDiscount
 # local datetime funcs
 from src.api.v1.apps.orders.models import get_mexico_time
@@ -493,6 +493,21 @@ class ItemService:
         statement = select(OrderDetail).where(OrderDetail.order_id==order_id)
         results = self.session.exec(statement)
         return results.all()
+    
+    def create_item(self, item_in: OrderDetailAddItem) -> OrderDetail:
+        """
+        Maps the inbound validation schema seamlessly into a database record,
+        persists it safely, and returns the tracking instance.
+        """
+        # Convert schema payload to database model entity
+        db_item = OrderDetail.model_validate(item_in)
+        
+        self.session.add(db_item)
+        self.session.commit()
+        self.session.refresh(db_item)
+        return db_item
+    
+    
 
 ### --- Products service class init ---  ####
 

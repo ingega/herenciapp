@@ -74,6 +74,10 @@ class OrderDetailCreate(OrderDetailBase):
     """Used when adding an item to an active or new order."""
     pass
 
+class OrderDetailAddItem(OrderDetailBase):
+    """Used when adding an item to an active order, not new."""
+    order_id: int
+
 
 class OrderDetailUpdateStatus(SQLModel):
     """Used by the Chef console to update items along the kitchen workflow."""
