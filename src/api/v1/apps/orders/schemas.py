@@ -78,6 +78,15 @@ class OrderDetailAddItem(OrderDetailBase):
     """Used when adding an item to an active order, not new."""
     order_id: int
 
+class OrderDetailUpdateItem(SQLModel):
+    order_id: Optional[int] = Field(foreign_key="orders.id", index=True)
+    person_number: Optional[int] = Field(sa_type=SmallInteger(), default=1, index=True)
+    product_id: Optional[int] = Field(foreign_key="products.id")
+    flavor_id: Optional[int] = Field(foreign_key="flavor_catalogue.id")
+    selection: Optional[str] = Field(max_length=50, default=None)
+    quantity: Optional[int] = Field(default=1, sa_type=SmallInteger())
+    notes: Optional[str] = Field(default=None, sa_type=Text())
+
 
 class OrderDetailUpdateStatus(SQLModel):
     """Used by the Chef console to update items along the kitchen workflow."""

@@ -2,7 +2,7 @@
 
 from datetime import datetime, time, date
 from decimal import Decimal
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
 from sqlmodel import Session, select, func
@@ -18,7 +18,7 @@ from src.api.v1.apps.orders.schemas import ProductCreate, ProductUpdate
 # order schemas
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderUpdate, OrderClose, ItemPrepStatus
 from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus, OrderDetailAddItem
-from src.api.v1.apps.orders.schemas import OrderDiscount
+from src.api.v1.apps.orders.schemas import OrderDiscount, OrderDetailUpdateItem
 # local datetime funcs
 from src.api.v1.apps.orders.models import get_mexico_time
 
@@ -494,6 +494,18 @@ class ItemService:
         results = self.session.exec(statement)
         return results.all()
     
+    def get_individual_item(self, item_id: int) -> Optional[OrderDetail]:
+        """
+        Retreive an individual item payload
+        """
+        statement = select(OrderDetail).where(OrderDetail.id==item_id)
+        db_item = self.session.exec(statement).one_or_none()
+        # 2. Defensive Guard Line: veryfing that record exists
+        if not db_item:
+            return None
+        return db_item
+
+    
     def create_item(self, item_in: OrderDetailAddItem) -> OrderDetail:
         """
         Maps the inbound validation schema seamlessly into a database record,
@@ -506,6 +518,57 @@ class ItemService:
         self.session.commit()
         self.session.refresh(db_item)
         return db_item
+    
+    def update_item(self, order_id: int, 
+                    item_id: int, 
+                    item: OrderDetailUpdateItem) -> Optional[OrderDetail]:
+        """
+        Fetches the target model, maps the payload updates dynamically using 
+        Pydantic's update rules, and persists changes safely.
+        """
+        # 1. Fetch the individual item instance
+        statement = select(OrderDetail).where(
+            OrderDetail.order_id == order_id,
+            OrderDetail.id == item_id
+        )
+        db_item = self.session.exec(statement).one_or_none()
+        
+        # 2. Defensive Guard Line: veryfing that record exists
+        if not db_item:
+            return None  # Or raise HTTPException(status_code=404, detail="Item not found")
+
+        # 3. Extract only the fields explicitly sent in the incoming JSON payload
+        update_data = item.model_dump(exclude_unset=True)
+        
+        # 4. Dynamically update the database record properties using setattr
+        for key, value in update_data.items():
+            setattr(db_item, key, value)
+            
+        # 5. Persist the changes atomically inside our SQLAlchemy transaction context
+        self.session.add(db_item)
+        self.session.commit()
+        self.session.refresh(db_item)
+        
+        return db_item
+
+    def delete_item(self, item_id: int) -> None:
+        """
+        Deletes an individual item from the database safely.
+        """
+        # 1. Fetch the item using your helper method
+        db_item = self.get_individual_item(item_id=item_id)
+        
+        # 2. Defensive check
+        if not db_item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Individual item does not exist"
+            )
+            
+        # 3. Perform the database deletion transaction
+        self.session.delete(db_item)
+        self.session.commit()
+
     
     
 
