@@ -8,7 +8,7 @@ from sqlmodel import Session
 from typing import List
 
 # schemas
-from src.api.v1.apps.orders.schemas import OrderDetailReadNested, ProductCreate, ProductRead, ProductUpdate
+from src.api.v1.apps.orders.schemas import OrderDetailAddItem, OrderDetailReadNested, ProductCreate, ProductRead, ProductUpdate
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
@@ -19,7 +19,7 @@ from src.api.v1.apps.orders.models import Product, Order, mexico_time_filter
 
 # services
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
-from src.api.v1.apps.orders.services import OrderService, MeatService
+from src.api.v1.apps.orders.services import OrderService, MeatService, ItemService
 
 # functions, database, auth
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -45,6 +45,9 @@ allow_user = RoleChecker(["admin", "user"])
 # dependencies for service injection
 def get_order_service(session: Session = Depends(get_session)) -> OrderService:
     return OrderService(session)
+
+def get_item_service(session: Session = Depends(get_session)) -> ItemService:
+    return ItemService(session)
 
 def get_product_service(session: Session = Depends(get_session)) -> ProductService:
     return ProductService(session)
@@ -410,6 +413,48 @@ def api_remove_item_from_ticket(
     """
     return service.delete_item(order_id=order_id, item_id=item_id)
 
+############### --- individual items service --- ###############
+
+# templates endpoints
+@router.get("/{order_id}/items/workspace", 
+            response_class=HTMLResponse, tags=["Items"])
+def get_order_items_workspace(
+    order_id: int, 
+    request: Request,
+    item_service: ItemService = Depends(get_item_service),
+    current_user: dict = Depends(get_current_user_from_cookie),
+    order_service: OrderRead = Depends(get_order_service)
+):
+    """
+    Renders exclusively the dynamic panel view inside an active order matrix card.
+    """
+    # Fetch all database rows for this specific order id context
+    items = item_service.get_order_items(order_id=order_id)
+    # due the nested htmx, order is needed as well
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/waiter/update_items.html",
+        context={"items": items, 
+                 "order": order_service,
+                 "order_id": order_id,
+                 "current_user": current_user
+                 }
+    )
+
+# for waiter dashboard we need all Add, Update and Delete items
+@router.post("/items/add/{order_id}", status_code=status.HTTP_201_CREATED, tags=["Items"])
+def waiter_dashboard_add_item(item: OrderDetailAddItem, 
+                              service: ItemService = Depends(get_item_service),
+                              current_user: dict = Depends(get_current_user_from_cookie)
+                              ):
+    item_service = service.create_item(item_in=item)
+    return item_service
+
+
+
+
+################################################################
+
 ########## --- products endpoints --- ###########################
 
 #################################################################
@@ -424,6 +469,8 @@ async def get_add_product_page(
     Renders the dedicated 'Add New Product' workspace form.
     Only allows access if valid auth tokens are found.
     """
+    # debug, delete  on production
+    print(f"current user value: {current_user}")
     return templates.TemplateResponse(
         request=request,
         name="products.html",

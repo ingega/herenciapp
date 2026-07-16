@@ -570,8 +570,6 @@ class ItemService:
         self.session.commit()
 
     
-    
-
 ### --- Products service class init ---  ####
 
 class ProductService:

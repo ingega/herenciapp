@@ -4,7 +4,7 @@ from typing import List, Optional
 from decimal import Decimal
 from fastapi import Form
 from pydantic import Field, condecimal
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, Field, SmallInteger, Text
 
 from src.api.v1.apps.orders.models import PayMethod, ItemPrepStatus
 

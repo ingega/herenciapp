@@ -35,10 +35,27 @@
                     <p></p>
                     <i class="fa-regular fa-clock"></i>  {{ order.created_at | mexico_time if order.created_at else '--:--' }}
                 </span>
+                <a href="/orders/{{ order.id }}/items/workspace"
+                    class="inline-flex items-center gap-2
+                    px-3 py-2
+                    rounded-lg
+                    bg-amber-600 hover:bg-amber-500
+                    text-white
+                    text-sm font-semibold
+                    shadow-md hover:shadow-lg
+                    transition-all duration-200
+                    hover:scale-105
+                    active:scale-95">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                        Modificar Orden
+                </a>
             </div>
         </div>
 
-        <div class="p-4 flex-1 space-y-4 overflow-y-auto max-h-[24rem] scrollbar-thin scrollbar-thumb-slate-700">
+        <div class="p-4 flex-1 space-y-4 overflow-y-auto max-h-[24rem] scrollbar-thin 
+            scrollbar-thumb-slate-700">
+            <div id="order-items-area-{{ order.id }}" class="transition-all duration-200">
+            </div>
             {% for seat_num in range(1, order.number_of_persons + 1) %}
                 <div class="bg-slate-950/40 border border-slate-800/80 rounded-lg p-3 space-y-2">
                     <div class="flex justify-between items-center border-b border-slate-800 pb-1">
