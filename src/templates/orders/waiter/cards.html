@@ -35,19 +35,10 @@
                     <p></p>
                     <i class="fa-regular fa-clock"></i>  {{ order.created_at | mexico_time if order.created_at else '--:--' }}
                 </span>
-                <a href="/orders/{{ order.id }}/items/workspace"
-                    class="inline-flex items-center gap-2
-                    px-3 py-2
-                    rounded-lg
-                    bg-amber-600 hover:bg-amber-500
-                    text-white
-                    text-sm font-semibold
-                    shadow-md hover:shadow-lg
-                    transition-all duration-200
-                    hover:scale-105
-                    active:scale-95">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                        Modificar Orden
+                <a href="/orders/{{ order.id }}/items/workspace" 
+                    class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 py-2 rounded-lg text-xs 
+                    font-bold flex items-center justify-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-pen-to-square"></i> Modificar Orden
                 </a>
             </div>
         </div>

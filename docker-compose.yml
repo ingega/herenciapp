@@ -9,6 +9,10 @@ services:
       - "8001:8001"
     env_file:
       - .env
+    environment:
+      # Overrides host.docker.internal / localhost for the container network
+      - MOCK_DB_HOST=db
+      - DATABASE_URL=postgresql://${MOCK_DB_USER}:${MOCK_DB_PASSWORD}@db:5432/${MOCK_DB_NAME}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/"]
       interval: 30s

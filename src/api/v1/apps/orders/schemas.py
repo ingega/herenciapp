@@ -185,6 +185,21 @@ class OrderDetailResponse(OrderRead):
 
 OrderDetailResponse.model_rebuild()
 
+# =========================================
+# Order batch schemas for items
+# =========================================
+
+class OrderItemBatchInput(SQLModel):
+    id: Optional[str] = None  # Existing ID or temporary client ID ('new_12345')
+    product_id: int
+    flavor_id: int
+    selection: Optional[str] = ""
+    quantity: int = 1
+    person_number: int = 1
+
+class OrderBatchUpdateSchema(SQLModel):
+    items: List[OrderItemBatchInput] = []
+
 # ==========================================
 # 1. MEAT CATALOGUE SCHEMAS
 # ==========================================

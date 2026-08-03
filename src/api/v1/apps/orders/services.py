@@ -18,7 +18,7 @@ from src.api.v1.apps.orders.schemas import ProductCreate, ProductUpdate
 # order schemas
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderUpdate, OrderClose, ItemPrepStatus
 from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus, OrderDetailAddItem
-from src.api.v1.apps.orders.schemas import OrderDiscount, OrderDetailUpdateItem
+from src.api.v1.apps.orders.schemas import OrderDiscount, OrderDetailUpdateItem, OrderItemBatchInput
 # local datetime funcs
 from src.api.v1.apps.orders.models import get_mexico_time
 
@@ -569,6 +569,62 @@ class ItemService:
         self.session.delete(db_item)
         self.session.commit()
 
+    # batch item service
+    def batch_replace_order_items(self, order_id: int, items_data: List[OrderItemBatchInput]) -> Order:
+        """
+        Atomically replaces all order items for a given order_id and recalculates the grand total.
+        """
+        # 1. Fetch order
+        db_order = self.session.get(Order, order_id)
+        if not db_order:
+            raise HTTPException(status_code=404, detail="Orden no encontrada")
+
+        if db_order.closed:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="No se puede modificar una orden ya cerrada"
+            )
+
+        # 2. Delete all existing items for this order_id
+        existing_items_stmt = select(OrderDetail).where(OrderDetail.order_id == order_id)
+        existing_items = self.session.exec(existing_items_stmt).all()
+        for old_item in existing_items:
+            self.session.delete(old_item)
+
+        # 3. Create new items & calculate total
+        new_total = 0.0
+
+        for input_item in items_data:
+            # Fetch product to get official unit price
+            product = self.session.get(Product, input_item.product_id)
+            if not product:
+                continue  # Or raise error if strict validation required
+
+            unit_price = float(product.price)
+            item_total = unit_price * input_item.quantity
+            new_total += item_total
+
+            # Construct fresh OrderDetail entity
+            new_detail = OrderDetail(
+                order_id=order_id,
+                product_id=input_item.product_id,
+                flavor_id=input_item.flavor_id,
+                selection=input_item.selection or "",
+                quantity=input_item.quantity,
+                person_number=input_item.person_number,
+                price=unit_price  # Lock price at moment of insertion
+            )
+            self.session.add(new_detail)
+
+        # 4. Update grand total on Order ticket
+        db_order.total = new_total
+
+        # 5. Commit atomic transaction
+        self.session.add(db_order)
+        self.session.commit()
+        self.session.refresh(db_order)
+
+        return db_order
     
 ### --- Products service class init ---  ####
 

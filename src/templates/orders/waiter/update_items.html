@@ -1,13 +1,15 @@
 {% extends "base_nav.html" %}
 
-{% block title %}Editar órden{% endblock %}
+{% block title %}Editar orden{% endblock %}
 
 {% block content %}
+<form id="batch-update-form"
+    action="/orders/{{ order_id }}/items/batch"
+    method="post"
+    class="space-y-4">
 
-
-<div class="space-y-4">
     <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <span class="text-xs font-bold uppercase text-amber-500 tracking-wider">
+        <span class="text-xs font-bold uppercase text-amber-500 tracking-wider flex items-center gap-1.5">
             <i class="fa-solid fa-sliders"></i> Panel de Edición Activa
         </span>
         
@@ -16,66 +18,366 @@
                 hx-target="#order-items-area-{{ order.id }}"
                 hx-swap="innerHTML"
                 class="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer">
-            <i class="fa-solid fa-circle-chevron-left"></i> Volver a Vista General
+            <i class="fa-solid fa-circle-chevron-left"></i> Volver sin guardar
         </button>
     </div>
 
-    <ul class="space-y-2 text-sm text-slate-300">
+    <ul id="order-items-list" class="space-y-2 text-sm text-slate-300">
         {% for item in items %}
-        <li class="flex justify-between items-center bg-slate-950/60 p-2 rounded border border-slate-800/60">
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1 font-medium text-slate-200 truncate">
-                    <span class="text-amber-400 font-bold font-mono">{{ item.quantity }}x</span>
-                    <span>{{ item.product.main_dish }}</span>
+        <li id="item-row-{{ item.id }}" class="item-row flex justify-between items-center bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/80 hover:border-slate-700/60 transition-all">
+            <input type="hidden" class="item-id-input" name="items[{{ loop.index0 }}][id]" value="{{ item.id }}">
+            <input type="hidden" class="product-id-input" name="items[{{ loop.index0 }}][product_id]" value="{{ item.product_id }}">
+            <input type="hidden" class="selection-input" name="items[{{ loop.index0 }}][selection]" value="{{ item.selection | default('') }}">
+            <input type="hidden" class="qty-input" name="items[{{ loop.index0 }}][quantity]" value="{{ item.quantity }}">
+            <input type="hidden" class="flavor-id-input" name="items[{{ loop.index0 }}][flavor_id]" 
+                value="{{ item.flavor_id }}">
+            <div class="flex-1 min-w-0 pr-2">
+                <div class="flex items-center gap-1.5 font-medium text-slate-200 truncate">
+                    <span class="qty-display text-amber-400 font-bold font-mono">{{ item.quantity }}x</span>
+                    <span class="product-display truncate">{{ item.product.main_dish }}</span>
                 </div>
-                <span class="text-[11px] text-slate-400 block italic pl-1 text-slate-500">
-                    Silla #{{ item.person_number }} • {{ item.selection | default('Estándar') }}
-                </span>
+                
+                <div class="flex items-center gap-1 text-[11px] text-slate-400 mt-0.5">
+                    <span class="person-display text-slate-500">Silla #{{ item.person_number }}</span>
+                    <span>•</span>
+                    <span class="selection-display text-amber-300/90 font-medium italic truncate">
+                        {{ item.selection | default('Estándar') }}
+                    </span>
+                </div>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
                 <button type="button"
-                        hx-patch="/main/orders/{{ order_id }}/items/{{ item.id }}/decrement"
-                        hx-target="#order-card-{{ order_id }}"
-                        hx-swap="outerHTML"
-                        class="h-6 w-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs transition-colors cursor-pointer">
+                        onclick="decrementQty(this)"
+                        title="Reducir cantidad"
+                        class="h-7 w-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex 
+                        items-center justify-center text-xs transition-colors cursor-pointer active:scale-95">
                     -
                 </button>
 
                 <button type="button"
-                        hx-patch="/main/orders/{{ order_id }}/items/{{ item.id }}/increment"
-                        hx-target="#order-card-{{ order_id }}"
-                        hx-swap="outerHTML"
-                        class="h-6 w-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs transition-colors cursor-pointer">
+                        onclick="incrementQty(this)"
+                        title="Aumentar cantidad"
+                        class="h-7 w-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center 
+                        justify-center text-xs transition-colors cursor-pointer active:scale-95">
                     +
                 </button>
 
                 <button type="button"
-                        hx-delete="/main/orders/{{ order_id }}/items/{{ item.id }}"
-                        hx-target="#order-card-{{ order_id }}"
-                        hx-swap="outerHTML"
-                        hx-confirm="¿Eliminar por completo este platillo de la Mesa?"
-                        class="h-6 w-6 rounded bg-rose-950/40 hover:bg-rose-600 text-rose-400 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer ml-1">
+                        onclick="openEditModal(this)"
+                        title="Cambiar platillo o preparación"
+                        class="h-7 w-7 rounded bg-slate-800 hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 
+                        border border-slate-700/50 hover:border-amber-500/40 flex items-center justify-center 
+                        text-xs transition-all cursor-pointer ml-1 active:scale-95">
+                    <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+                </button>
+
+                <button type="button"
+                        onclick="removeRow(this)"
+                        title="Quitar platillo"
+                        class="h-7 w-7 rounded bg-rose-950/30 hover:bg-rose-600 border border-rose-900/40 text-rose-400 
+                        hover:text-white flex items-center justify-center text-xs transition-all 
+                        cursor-pointer active:scale-95">
                     <i class="fa-solid fa-trash-can text-[11px]"></i>
                 </button>
             </div>
         </li>
-        {% else %}
-        <li class="text-center py-6 text-xs text-slate-500 font-sans">
-            No hay platillos registrados en esta comanda.
-        </li>
         {% endfor %}
     </ul>
-    
-    <div class="pt-2 border-t border-slate-800/40">
+
+    <div class="pt-3 border-t border-slate-800/60 space-y-2">
         <button type="button"
-                hx-get="/orders/{{ order_id }}/append-item-form" 
-                hx-target="#global-modal-container"
-                hx-swap="innerHTML"
-                class="w-full bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 py-1.5 rounded text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer">
-            <i class="fa-solid fa-circle-plus text-amber-500"></i> Agregar Nuevo Platillo
+                onclick="openAddModal()"
+                class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 
+                hover:border-slate-700 text-slate-300 py-2 rounded-lg text-xs font-bold transition-all flex 
+                items-center justify-center gap-1.5 cursor-pointer shadow-sm">
+            <i class="fa-solid fa-circle-plus text-amber-500 text-sm"></i> Agregar Nuevo Platillo
         </button>
+        
+        <button type="submit" 
+                class="bg-amber-500 hover:bg-amber-400 active:scale-[0.99] text-slate-950 font-bold px-6 py-2.5 
+                rounded-lg text-sm transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-floppy-disk text-base"></i>
+            Guardar Cambios de la Orden
+        </button>
+    </div>
+</form>
+
+<div id="item-edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+            <h3 id="modal-title" class="text-sm font-bold text-amber-400 flex items-center gap-2">
+                <i class="fa-solid fa-utensils"></i> Modificar Platillo
+            </h3>
+            <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-white text-xs cursor-pointer">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+            <div>
+                <label class="block text-slate-400 mb-1 font-medium">Platillo Principal</label>
+                <select id="modal-product-select" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-200 font-sans focus:border-amber-500 focus:outline-none">
+                    {% for product in products %}
+                    <option value="{{ product.id }}" data-name="{{ product.main_dish }}">
+                        {{ product.main_dish }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-slate-400 mb-1 font-medium">Selección / Preparación (Sabor)</label>
+                <select id="modal-selection-select" class="w-full bg-slate-950 border border-slate-800 
+                    rounded p-2 text-slate-200 font-sans focus:border-amber-500 focus:outline-none">
+                    <option value="" data-product-id="all">-- Estándar / Sin especificar --</option>
+                    
+                    {% for flavor in flavors %}
+                        {% if flavor.description | lower == 'carne' and meats %}
+                            {% for meat in meats %}
+                            <option
+                                value="{{ meat.description }}"
+                                data-product-id="{{ flavor.product_id }}"
+                                data-flavor-id="{{ flavor.id }}">
+                                {{ meat.description }}
+                            </option>
+                            {% endfor %}
+                        {% else %}
+                            <option
+                                value="{{ flavor.description }}"
+                                data-product-id="{{ flavor.product_id }}"
+                                data-flavor-id="{{ flavor.id }}">
+                                {{ flavor.description }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-slate-400 mb-1 font-medium">Silla / Comensal #</label>
+                <input type="number" 
+                       id="modal-person-input" 
+                       value="1" 
+                       min="1"
+                       class="w-24 bg-slate-950 border border-slate-800 rounded p-2 text-slate-200 focus:border-amber-500 focus:outline-none">
+            </div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeModal()" class="px-3 py-1.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 cursor-pointer">
+                    Cancelar
+                </button>
+                <button type="button" onclick="saveModalChanges()" class="px-4 py-1.5 rounded bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 cursor-pointer">
+                    Aplicar
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
+<script>
+    let activeEditingRow = null;
+
+    function incrementQty(btn) {
+        const row = btn.closest('.item-row');
+        const input = row.querySelector('.qty-input');
+        const display = row.querySelector('.qty-display');
+        let current = parseInt(input.value) || 0;
+        current++;
+        input.value = current;
+        display.innerText = `${current}x`;
+    }
+
+    function decrementQty(btn) {
+        const row = btn.closest('.item-row');
+        const input = row.querySelector('.qty-input');
+        const display = row.querySelector('.qty-display');
+        let current = parseInt(input.value) || 0;
+        if (current > 1) {
+            current--;
+            input.value = current;
+            display.innerText = `${current}x`;
+        }
+    }
+
+    function removeRow(btn) {
+        const row = btn.closest('.item-row');
+        if (row) {
+            row.remove();
+            reindexFormInputs();
+        }
+    }
+
+    document.getElementById('modal-product-select').addEventListener('change', function() {
+        const selectedProductId = this.value;
+        filterFlavorsByProduct(selectedProductId, '', true);
+    });
+
+    function filterFlavorsByProduct(productId, currentSelection = '', isProductChanged = false) {
+        const flavorSelect = document.getElementById('modal-selection-select');
+        if (!flavorSelect) return;
+
+        const options = flavorSelect.querySelectorAll('option');
+        let hasMatchingOption = false;
+
+        options.forEach(option => {
+            const optionProductId = option.getAttribute('data-product-id');
+
+            if (optionProductId === 'all' || !optionProductId) {
+                option.style.display = 'block';
+                return;
+            }
+
+            if (optionProductId == productId) {
+                option.style.display = 'block';
+                option.disabled = false;
+                
+                if (!isProductChanged && currentSelection && option.value.toLowerCase() === currentSelection.toLowerCase()) {
+                    option.selected = true;
+                    hasMatchingOption = true;
+                }
+            } else {
+                option.style.display = 'none';
+                option.disabled = true;
+            }
+        });
+
+        if (isProductChanged || !hasMatchingOption) {
+            flavorSelect.selectedIndex = 0;
+        }
+    }
+
+    function openEditModal(btn) {
+        activeEditingRow = btn.closest('.item-row');
+        
+        document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Modificar Platillo';
+        
+        const currentProductId = activeEditingRow.querySelector('.product-id-input').value;
+        const currentSelection = activeEditingRow.querySelector('.selection-input').value;
+        const currentPerson = activeEditingRow.querySelector('.person-input').value;
+
+        const productSelect = document.getElementById('modal-product-select');
+        if (productSelect) {
+            productSelect.value = currentProductId;
+        }
+
+        filterFlavorsByProduct(currentProductId, currentSelection, false);
+
+        const personInput = document.getElementById('modal-person-input');
+        if (personInput) {
+            personInput.value = currentPerson || 1;
+        }
+
+        document.getElementById('item-edit-modal').classList.remove('hidden');
+    }
+
+    function openAddModal() {
+        activeEditingRow = null;
+        
+        document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-circle-plus"></i> Agregar Nuevo Platillo';
+        document.getElementById('modal-person-input').value = '1';
+
+        const productSelect = document.getElementById('modal-product-select');
+        if (productSelect && productSelect.options.length > 0) {
+            productSelect.selectedIndex = 0;
+            const initialProductId = productSelect.value;
+            filterFlavorsByProduct(initialProductId, '', true);
+        }
+
+        document.getElementById('item-edit-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('item-edit-modal').classList.add('hidden');
+        activeEditingRow = null;
+    }
+
+    function saveModalChanges() {
+        const select = document.getElementById('modal-product-select');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        const productId = select.value;
+        const productName = selectedOption.getAttribute('data-name');
+        
+        const flavorSelect = document.getElementById('modal-selection-select');
+
+        let selection = '';
+        let flavorId = '';
+
+        if (flavorSelect) {
+            const selectedFlavor =
+            flavorSelect.options[flavorSelect.selectedIndex];
+
+        selection = selectedFlavor.value.trim();
+        flavorId = selectedFlavor.dataset.flavorId;
+        }
+        const person = document.getElementById('modal-person-input').value || '1';
+
+        if (activeEditingRow) {
+            activeEditingRow.querySelector('.product-id-input').value = productId;
+            activeEditingRow.querySelector('.product-display').innerText = productName;
+            activeEditingRow.querySelector('.selection-input').value = selection;
+            activeEditingRow.querySelector('.flavor-id-input').value = flavorId;
+            activeEditingRow.querySelector('.selection-display').innerText = selection || 'Estándar';
+            activeEditingRow.querySelector('.person-input').value = person;
+            activeEditingRow.querySelector('.person-display').innerText = `Silla #${person}`;
+        } else {
+            addNewRowToDOM(productId, productName, flavorId, selection, person);
+        }
+
+        closeModal();
+    }
+
+    function addNewRowToDOM(productId, productName, flavorId, selection, person) {
+        const list = document.getElementById('order-items-list');
+        const tempId = 'new_' + Date.now();
+
+        const li = document.createElement('li');
+        li.className = 'item-row flex justify-between items-center bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/80 hover:border-slate-700/60 transition-all';
+        li.id = `item-row-${tempId}`;
+
+        li.innerHTML = `
+            <input type="hidden" class="item-id-input" name="items[0][id]" value="${tempId}">
+            <input type="hidden" class="product-id-input" name="items[0][product_id]" value="${productId}">
+            <input type="hidden" class="selection-input" name="items[0][selection]" value="${selection}">
+            <input type="hidden" class="qty-input" name="items[0][quantity]" value="1">
+            <input type="hidden" class="person-input" name="items[0][person_number]" value="${person}">
+            <input type="hidden" class="flavor-id-input" name="items[0][flavor_id]" value="${flavorId}">
+
+            <div class="flex-1 min-w-0 pr-2">
+                <div class="flex items-center gap-1.5 font-medium text-slate-200 truncate">
+                    <span class="qty-display text-amber-400 font-bold font-mono">1x</span>
+                    <span class="product-display truncate">${productName}</span>
+                </div>
+                <div class="flex items-center gap-1 text-[11px] text-slate-400 mt-0.5">
+                    <span class="person-display text-slate-500">Silla #${person}</span>
+                    <span>•</span>
+                    <span class="selection-display text-amber-300/90 font-medium italic truncate">${selection || 'Estándar'}</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <button type="button" onclick="decrementQty(this)" class="h-7 w-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer">-</button>
+                <button type="button" onclick="incrementQty(this)" class="h-7 w-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer">+</button>
+                <button type="button" onclick="openEditModal(this)" class="h-7 w-7 rounded bg-slate-800 hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 border border-slate-700/50 flex items-center justify-center text-xs cursor-pointer ml-1"><i class="fa-solid fa-pen-to-square text-[11px]"></i></button>
+                <button type="button" onclick="removeRow(this)" class="h-7 w-7 rounded bg-rose-950/30 hover:bg-rose-600 border border-rose-900/40 text-rose-400 hover:text-white flex items-center justify-center text-xs cursor-pointer"><i class="fa-solid fa-trash-can text-[11px]"></i></button>
+            </div>
+        `;
+
+        list.appendChild(li);
+        reindexFormInputs();
+    }
+
+    function reindexFormInputs() {
+        const rows = document.querySelectorAll('.item-row');
+        rows.forEach((row, index) => {
+            row.querySelector('.item-id-input').name = `items[${index}][id]`;
+            row.querySelector('.product-id-input').name = `items[${index}][product_id]`;
+            row.querySelector('.selection-input').name = `items[${index}][selection]`;
+            row.querySelector('.qty-input').name = `items[${index}][quantity]`;
+            row.querySelector('.person-input').name = `items[${index}][person_number]`;
+            row.querySelector('.flavor-id-input').name = `items[${index}][flavor_id]`;
+        });
+    }
+</script>
 {% endblock %}

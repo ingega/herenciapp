@@ -12,7 +12,7 @@ from src.api.v1.apps.orders.schemas import OrderDetailAddItem, OrderDetailReadNe
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
-from src.api.v1.apps.orders.schemas import OrderDetailResponse, OrderDiscount, OrderClose
+from src.api.v1.apps.orders.schemas import OrderDetailResponse, OrderDiscount, OrderClose, OrderItemBatchInput
 
 # models
 from src.api.v1.apps.orders.models import Product, Order, mexico_time_filter
@@ -423,19 +423,29 @@ def get_order_items_workspace(
     request: Request,
     item_service: ItemService = Depends(get_item_service),
     current_user: dict = Depends(get_current_user_from_cookie),
-    order_service: OrderRead = Depends(get_order_service)
+    order_service: OrderRead = Depends(get_order_service),
+    product_service: ProductRead = Depends(get_product_service),
+    flavor_service: FlavorCatalogueRead = Depends(get_flavor_service),
+    meat_service: MeatCatalogueRead = Depends(get_meat_service)
 ):
     """
     Renders exclusively the dynamic panel view inside an active order matrix card.
     """
     # Fetch all database rows for this specific order id context
     items = item_service.get_order_items(order_id=order_id)
+    # modify orders requires products, flavors and meat_catalogue services
+    products = product_service.get_products()
+    flavors = flavor_service.get_flavors()
+    meat = meat_service.get_meat_catalogue()
     # due the nested htmx, order is needed as well
     return templates.TemplateResponse(
         request=request,
         name="orders/waiter/update_items.html",
         context={"items": items, 
                  "order": order_service,
+                 "products": products,
+                 "flavors": flavors,
+                 "meats": meat,
                  "order_id": order_id,
                  "current_user": current_user
                  }
@@ -449,6 +459,58 @@ def waiter_dashboard_add_item(item: OrderDetailAddItem,
                               ):
     item_service = service.create_item(item_in=item)
     return item_service
+
+# atomic update of items
+@router.post("/{order_id}/items/batch", response_class=HTMLResponse)
+async def update_order_items_batch(
+    order_id: int,
+    request: Request,
+    item_service: ItemService = Depends(get_item_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    Receives form data from update_items.html, performs atomic batch replacement,
+    and returns the updated card HTML fragment for HTMX outerHTML swap.
+    """
+    # Parse form payload (from HTML form submission)
+    form_data = await request.form()
+    
+    # Extract items array dynamically from form fields: items[0][product_id], etc.
+    items_list = []
+    index = 0
+    print("\n===== FORM DATA =====")
+    for k, v in form_data.items():
+        print(k, "=", v)
+    print("=====================\n")
+    while True:
+        prod_key = f"items[{index}][product_id]"
+        if prod_key not in form_data:
+            break
+            
+        items_list.append(
+            OrderItemBatchInput(
+                id=form_data.get(f"items[{index}][id]"),
+                product_id=int(form_data.get(prod_key)),
+                flavor_id=int(form_data.get(f"items[{index}][flavor_id]")),
+                selection=form_data.get(f"items[{index}][selection]", ""),
+                quantity=int(form_data.get(f"items[{index}][quantity]", 1)),
+                person_number=int(form_data.get(f"items[{index}][person_number]", 1))
+            )
+        )
+        index += 1
+
+    # Execute atomic batch replacement
+    updated_order = item_service.batch_replace_order_items(order_id, items_list)
+
+    # Return refreshed card fragment to update UI seamlessly in place
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/waiter/dashboard.html",  # Or your single order card template fragment
+        context={
+            "order": updated_order,
+            "current_user": current_user
+        }
+    )
 
 
 
