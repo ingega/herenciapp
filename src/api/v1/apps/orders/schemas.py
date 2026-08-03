@@ -4,7 +4,7 @@ from typing import List, Optional
 from decimal import Decimal
 from fastapi import Form
 from pydantic import Field, condecimal
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, Field, SmallInteger, Text
 
 from src.api.v1.apps.orders.models import PayMethod, ItemPrepStatus
 
@@ -73,6 +73,19 @@ class OrderDetailBase(SQLModel):
 class OrderDetailCreate(OrderDetailBase):
     """Used when adding an item to an active or new order."""
     pass
+
+class OrderDetailAddItem(OrderDetailBase):
+    """Used when adding an item to an active order, not new."""
+    order_id: int
+
+class OrderDetailUpdateItem(SQLModel):
+    order_id: Optional[int] = Field(foreign_key="orders.id", index=True)
+    person_number: Optional[int] = Field(sa_type=SmallInteger(), default=1, index=True)
+    product_id: Optional[int] = Field(foreign_key="products.id")
+    flavor_id: Optional[int] = Field(foreign_key="flavor_catalogue.id")
+    selection: Optional[str] = Field(max_length=50, default=None)
+    quantity: Optional[int] = Field(default=1, sa_type=SmallInteger())
+    notes: Optional[str] = Field(default=None, sa_type=Text())
 
 
 class OrderDetailUpdateStatus(SQLModel):
@@ -171,6 +184,21 @@ class OrderDetailResponse(OrderRead):
 
 
 OrderDetailResponse.model_rebuild()
+
+# =========================================
+# Order batch schemas for items
+# =========================================
+
+class OrderItemBatchInput(SQLModel):
+    id: Optional[str] = None  # Existing ID or temporary client ID ('new_12345')
+    product_id: int
+    flavor_id: int
+    selection: Optional[str] = ""
+    quantity: int = 1
+    person_number: int = 1
+
+class OrderBatchUpdateSchema(SQLModel):
+    items: List[OrderItemBatchInput] = []
 
 # ==========================================
 # 1. MEAT CATALOGUE SCHEMAS

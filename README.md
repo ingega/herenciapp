@@ -50,6 +50,12 @@ poetry install
 ```
 - Environment Setup: Create a .env file with DATABASE_URL, SECRET_KEY, and MAIL_ configurations.
 
+- Start you Docker app
+- Start database locally
+```
+Bash
+docker compose up -d db
+```
 - Run Development Server:
 ```
 Bash

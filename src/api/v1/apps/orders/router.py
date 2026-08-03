@@ -8,18 +8,18 @@ from sqlmodel import Session
 from typing import List
 
 # schemas
-from src.api.v1.apps.orders.schemas import OrderDetailReadNested, ProductCreate, ProductRead, ProductUpdate
+from src.api.v1.apps.orders.schemas import OrderDetailAddItem, OrderDetailReadNested, ProductCreate, ProductRead, ProductUpdate
 from src.api.v1.apps.orders.schemas import FlavorCatalogueCreate, FlavorCatalogueRead, FlavorCatalogueUpdate
 from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRead, MeatCatalogueUpdate
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderRead, OrderUpdate, OrderDetailCreate
-from src.api.v1.apps.orders.schemas import OrderDetailResponse, OrderDiscount, OrderClose
+from src.api.v1.apps.orders.schemas import OrderDetailResponse, OrderDiscount, OrderClose, OrderItemBatchInput
 
 # models
 from src.api.v1.apps.orders.models import Product, Order, mexico_time_filter
 
 # services
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
-from src.api.v1.apps.orders.services import OrderService, MeatService
+from src.api.v1.apps.orders.services import OrderService, MeatService, ItemService
 
 # functions, database, auth
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -45,6 +45,9 @@ allow_user = RoleChecker(["admin", "user"])
 # dependencies for service injection
 def get_order_service(session: Session = Depends(get_session)) -> OrderService:
     return OrderService(session)
+
+def get_item_service(session: Session = Depends(get_session)) -> ItemService:
+    return ItemService(session)
 
 def get_product_service(session: Session = Depends(get_session)) -> ProductService:
     return ProductService(session)
@@ -410,6 +413,110 @@ def api_remove_item_from_ticket(
     """
     return service.delete_item(order_id=order_id, item_id=item_id)
 
+############### --- individual items service --- ###############
+
+# templates endpoints
+@router.get("/{order_id}/items/workspace", 
+            response_class=HTMLResponse, tags=["Items"])
+def get_order_items_workspace(
+    order_id: int, 
+    request: Request,
+    item_service: ItemService = Depends(get_item_service),
+    current_user: dict = Depends(get_current_user_from_cookie),
+    order_service: OrderRead = Depends(get_order_service),
+    product_service: ProductRead = Depends(get_product_service),
+    flavor_service: FlavorCatalogueRead = Depends(get_flavor_service),
+    meat_service: MeatCatalogueRead = Depends(get_meat_service)
+):
+    """
+    Renders exclusively the dynamic panel view inside an active order matrix card.
+    """
+    # Fetch all database rows for this specific order id context
+    items = item_service.get_order_items(order_id=order_id)
+    # modify orders requires products, flavors and meat_catalogue services
+    products = product_service.get_products()
+    flavors = flavor_service.get_flavors()
+    meat = meat_service.get_meat_catalogue()
+    # due the nested htmx, order is needed as well
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/waiter/update_items.html",
+        context={"items": items, 
+                 "order": order_service,
+                 "products": products,
+                 "flavors": flavors,
+                 "meats": meat,
+                 "order_id": order_id,
+                 "current_user": current_user
+                 }
+    )
+
+# for waiter dashboard we need all Add, Update and Delete items
+@router.post("/items/add/{order_id}", status_code=status.HTTP_201_CREATED, tags=["Items"])
+def waiter_dashboard_add_item(item: OrderDetailAddItem, 
+                              service: ItemService = Depends(get_item_service),
+                              current_user: dict = Depends(get_current_user_from_cookie)
+                              ):
+    item_service = service.create_item(item_in=item)
+    return item_service
+
+# atomic update of items
+@router.post("/{order_id}/items/batch", response_class=HTMLResponse)
+async def update_order_items_batch(
+    order_id: int,
+    request: Request,
+    item_service: ItemService = Depends(get_item_service),
+    current_user: dict = Depends(get_current_user_from_cookie)
+):
+    """
+    Receives form data from update_items.html, performs atomic batch replacement,
+    and returns the updated card HTML fragment for HTMX outerHTML swap.
+    """
+    # Parse form payload (from HTML form submission)
+    form_data = await request.form()
+    
+    # Extract items array dynamically from form fields: items[0][product_id], etc.
+    items_list = []
+    index = 0
+    print("\n===== FORM DATA =====")
+    for k, v in form_data.items():
+        print(k, "=", v)
+    print("=====================\n")
+    while True:
+        prod_key = f"items[{index}][product_id]"
+        if prod_key not in form_data:
+            break
+            
+        items_list.append(
+            OrderItemBatchInput(
+                id=form_data.get(f"items[{index}][id]"),
+                product_id=int(form_data.get(prod_key)),
+                flavor_id=int(form_data.get(f"items[{index}][flavor_id]")),
+                selection=form_data.get(f"items[{index}][selection]", ""),
+                quantity=int(form_data.get(f"items[{index}][quantity]", 1)),
+                person_number=int(form_data.get(f"items[{index}][person_number]", 1))
+            )
+        )
+        index += 1
+
+    # Execute atomic batch replacement
+    updated_order = item_service.batch_replace_order_items(order_id, items_list)
+
+    # Return refreshed card fragment to update UI seamlessly in place
+    return templates.TemplateResponse(
+        request=request,
+        name="orders/waiter/dashboard.html",  # Or your single order card template fragment
+        context={
+            "order": updated_order,
+            "current_user": current_user
+        }
+    )
+
+
+
+
+################################################################
+
 ########## --- products endpoints --- ###########################
 
 #################################################################
@@ -424,6 +531,8 @@ async def get_add_product_page(
     Renders the dedicated 'Add New Product' workspace form.
     Only allows access if valid auth tokens are found.
     """
+    # debug, delete  on production
+    print(f"current user value: {current_user}")
     return templates.TemplateResponse(
         request=request,
         name="products.html",

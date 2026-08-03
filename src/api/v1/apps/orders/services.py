@@ -2,7 +2,7 @@
 
 from datetime import datetime, time, date
 from decimal import Decimal
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
 from sqlmodel import Session, select, func
@@ -17,8 +17,8 @@ from src.api.v1.apps.orders.schemas import MeatCatalogueCreate, MeatCatalogueRea
 from src.api.v1.apps.orders.schemas import ProductCreate, ProductUpdate
 # order schemas
 from src.api.v1.apps.orders.schemas import OrderCreate, OrderUpdate, OrderClose, ItemPrepStatus
-from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus
-from src.api.v1.apps.orders.schemas import OrderDiscount
+from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateStatus, OrderDetailAddItem
+from src.api.v1.apps.orders.schemas import OrderDiscount, OrderDetailUpdateItem, OrderItemBatchInput
 # local datetime funcs
 from src.api.v1.apps.orders.models import get_mexico_time
 
@@ -477,7 +477,155 @@ class OrderService:
             "day_tips": float(results.tips or 0.0)
         }
         
+### --- Items service class init ---  ####
 
+class ItemService:
+    def __init__(self, session:Session) -> None:
+        """
+        Inject the database session so every method operates on the same unit of work.
+        """
+        self.session = session
+
+    def get_order_items(self, order_id:int) -> List[OrderDetail]:
+        """
+        Retrieve all items for an specific order.
+        """
+        statement = select(OrderDetail).where(OrderDetail.order_id==order_id)
+        results = self.session.exec(statement)
+        return results.all()
+    
+    def get_individual_item(self, item_id: int) -> Optional[OrderDetail]:
+        """
+        Retreive an individual item payload
+        """
+        statement = select(OrderDetail).where(OrderDetail.id==item_id)
+        db_item = self.session.exec(statement).one_or_none()
+        # 2. Defensive Guard Line: veryfing that record exists
+        if not db_item:
+            return None
+        return db_item
+
+    
+    def create_item(self, item_in: OrderDetailAddItem) -> OrderDetail:
+        """
+        Maps the inbound validation schema seamlessly into a database record,
+        persists it safely, and returns the tracking instance.
+        """
+        # Convert schema payload to database model entity
+        db_item = OrderDetail.model_validate(item_in)
+        
+        self.session.add(db_item)
+        self.session.commit()
+        self.session.refresh(db_item)
+        return db_item
+    
+    def update_item(self, order_id: int, 
+                    item_id: int, 
+                    item: OrderDetailUpdateItem) -> Optional[OrderDetail]:
+        """
+        Fetches the target model, maps the payload updates dynamically using 
+        Pydantic's update rules, and persists changes safely.
+        """
+        # 1. Fetch the individual item instance
+        statement = select(OrderDetail).where(
+            OrderDetail.order_id == order_id,
+            OrderDetail.id == item_id
+        )
+        db_item = self.session.exec(statement).one_or_none()
+        
+        # 2. Defensive Guard Line: veryfing that record exists
+        if not db_item:
+            return None  # Or raise HTTPException(status_code=404, detail="Item not found")
+
+        # 3. Extract only the fields explicitly sent in the incoming JSON payload
+        update_data = item.model_dump(exclude_unset=True)
+        
+        # 4. Dynamically update the database record properties using setattr
+        for key, value in update_data.items():
+            setattr(db_item, key, value)
+            
+        # 5. Persist the changes atomically inside our SQLAlchemy transaction context
+        self.session.add(db_item)
+        self.session.commit()
+        self.session.refresh(db_item)
+        
+        return db_item
+
+    def delete_item(self, item_id: int) -> None:
+        """
+        Deletes an individual item from the database safely.
+        """
+        # 1. Fetch the item using your helper method
+        db_item = self.get_individual_item(item_id=item_id)
+        
+        # 2. Defensive check
+        if not db_item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Individual item does not exist"
+            )
+            
+        # 3. Perform the database deletion transaction
+        self.session.delete(db_item)
+        self.session.commit()
+
+    # batch item service
+    def batch_replace_order_items(self, order_id: int, items_data: List[OrderItemBatchInput]) -> Order:
+        """
+        Atomically replaces all order items for a given order_id and recalculates the grand total.
+        """
+        # 1. Fetch order
+        db_order = self.session.get(Order, order_id)
+        if not db_order:
+            raise HTTPException(status_code=404, detail="Orden no encontrada")
+
+        if db_order.closed:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="No se puede modificar una orden ya cerrada"
+            )
+
+        # 2. Delete all existing items for this order_id
+        existing_items_stmt = select(OrderDetail).where(OrderDetail.order_id == order_id)
+        existing_items = self.session.exec(existing_items_stmt).all()
+        for old_item in existing_items:
+            self.session.delete(old_item)
+
+        # 3. Create new items & calculate total
+        new_total = 0.0
+
+        for input_item in items_data:
+            # Fetch product to get official unit price
+            product = self.session.get(Product, input_item.product_id)
+            if not product:
+                continue  # Or raise error if strict validation required
+
+            unit_price = float(product.price)
+            item_total = unit_price * input_item.quantity
+            new_total += item_total
+
+            # Construct fresh OrderDetail entity
+            new_detail = OrderDetail(
+                order_id=order_id,
+                product_id=input_item.product_id,
+                flavor_id=input_item.flavor_id,
+                selection=input_item.selection or "",
+                quantity=input_item.quantity,
+                person_number=input_item.person_number,
+                price=unit_price  # Lock price at moment of insertion
+            )
+            self.session.add(new_detail)
+
+        # 4. Update grand total on Order ticket
+        db_order.total = new_total
+
+        # 5. Commit atomic transaction
+        self.session.add(db_order)
+        self.session.commit()
+        self.session.refresh(db_order)
+
+        return db_order
+    
 ### --- Products service class init ---  ####
 
 class ProductService:

@@ -9,6 +9,10 @@ services:
       - "8001:8001"
     env_file:
       - .env
+    environment:
+      # Overrides host.docker.internal / localhost for the container network
+      - MOCK_DB_HOST=db
+      - DATABASE_URL=postgresql://${MOCK_DB_USER}:${MOCK_DB_PASSWORD}@db:5432/${MOCK_DB_NAME}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/"]
       interval: 30s
@@ -19,6 +23,7 @@ services:
         condition: service_healthy # Wait for the database to be healthy before starting the web service
   db:
     image: postgres:15-alpine # Alpine is small version, saving disk space
+    restart: unless-stopped # restart the service in case of instance reboot
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
