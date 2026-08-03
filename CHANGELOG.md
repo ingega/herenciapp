@@ -16,6 +16,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.3.0] 2026-08-03
+This version adds the expenses app, with all neccessary for it:
+- Models
+- Schemas
+- Services
+- Router
+- Templates
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [2.2.0] 2026-06-27
 This version add crud function for items:
 - Added a CRUD service.
@@ -24,7 +41,8 @@ This version add crud function for items:
 - Added a template for CRUD items.
 
 ### Added
-- CRUD Service for items in `src/api/v1/apps/orders/service.py` 
+- CRUD Service for items in `src/api/v1/apps/orders/service.py`
+- Template for CRUD dashboard in `src/templates/orders/waiter/update_items.html`
 
 ### Changed
 - N/A
