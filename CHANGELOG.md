@@ -16,6 +16,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.3.0] 2026-08-18
+This version adds the expenses app and introduces expenses tracking with a new model and migration.
+
+### Added
+- Expenses application scaffolding (models, schemas, services, router, templates).
+- New Expenses SQLModel at `src/api/v1/apps/expenses/models.py` (includes ExpenseCategory enum and Expenses table model).
+- Alembic migration file `alembic/versions/d4f1a2b3c4e5_create_expenses_table.py` to create the `expenses` table.
+- Moved the expenses package from `src/expenses` to `src/api/v1/apps/expenses` and added `__init__.py`.
+- Updated `alembic/env.py` to import the Expenses model so autogenerate can detect schema changes.
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
+### Notes
+- To apply the migration locally: ensure Docker Desktop is running, then run:
+  - `docker compose up -d db`
+  - `poetry run alembic upgrade head`
+- If you'd rather generate the migration via autogenerate, start the DB and run:
+  - `poetry run alembic revision --autogenerate -m "create expenses table"` then `poetry run alembic upgrade head`
+
 ## [2.2.0] 2026-06-27
 This version add crud function for items:
 - Added a CRUD service.
@@ -24,7 +47,8 @@ This version add crud function for items:
 - Added a template for CRUD items.
 
 ### Added
-- CRUD Service for items in `src/api/v1/apps/orders/service.py` 
+- CRUD Service for items in `src/api/v1/apps/orders/service.py`
+- Template for CRUD dashboard in `src/templates/orders/waiter/update_items.html`
 
 ### Changed
 - N/A
