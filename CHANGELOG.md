@@ -27,7 +27,7 @@ This version adds the expenses app and introduces expenses tracking with a new m
 - Updated `alembic/env.py` to import the Expenses model so autogenerate can detect schema changes.
 
 ### Changed
-- N/A
+- moved expenses model within apps/expenses/models/
 
 ### Fixed
 - N/A
