@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -33,6 +33,7 @@ This version adds the expenses app and introduces expenses tracking with a new m
 - N/A
 
 ### Notes
+- <!-- CI: Expenses import issue fixed; CI re-run triggered on main -->
 - To apply the migration locally: ensure Docker Desktop is running, then run:
   - `docker compose up -d db`
   - `poetry run alembic upgrade head`
