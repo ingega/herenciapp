@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.3.2] 2026-08-19
+
+### Added
+- Added ExpenseService with CRUD methods at `src/api/v1/apps/expenses/services.py`.
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [3.0.1] 2026-08-19
 This release adds the expenses schemas for CRUD operations and bumps package version.
 
