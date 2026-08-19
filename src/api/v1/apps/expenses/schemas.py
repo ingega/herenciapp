@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from sqlmodel import SQLModel, Field
 
-from src.api.v1.apps.expenses.models.models import ExpenseCategory
+from src.api.v1.apps.expenses.models import ExpenseCategory
 
 
 class ExpenseBase(SQLModel):
