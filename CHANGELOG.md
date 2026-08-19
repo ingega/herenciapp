@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [3.0.1] 2026-08-19
+This release adds the expenses schemas for CRUD operations and bumps package version.
+
+### Added
+- Expenses CRUD schemas at `src/api/v1/apps/expenses/schemas.py`.
+
+### Changed
+- Bumped package version to 3.0.1 in `src/__init__.py`.
+
+### Fixed
+- N/A
+
 ## [2.3.0] 2026-08-18
 This version adds the expenses app and introduces expenses tracking with a new model and migration.
 
