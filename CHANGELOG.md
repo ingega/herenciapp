@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.3.4] 2026-08-20
+
+### Added
+- Jinja2 template for expenses UI at `src/templates/expenses/expenses.html` with inline add/edit/delete and a single "Save all" action.
+- New server-side route to render the expenses template: `GET /expenses/add/add_expenses` (returns HTML, status 201).
+
+### Changed
+- Bumped package version to 2.3.4 in `src/__init__.py`.
+
+### Fixed
+- N/A
+
 ## [2.3.3] 2026-08-20
 
 ### Added
