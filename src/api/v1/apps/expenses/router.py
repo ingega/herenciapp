@@ -2,14 +2,23 @@
 from typing import List
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
 from src.database import get_session
 from src.api.v1.apps.expenses.schemas import ExpenseCreate, ExpenseRead, ExpenseUpdate
 from src.api.v1.apps.expenses.services import ExpenseService
+from src.api.v1.apps.expenses.models import ExpenseCategory
+from src.api.v1.auth.auth import get_current_user_from_cookie
+from src.config import settings
+from src.__init__ import __version__ as version
 
 router = APIRouter(prefix="/expenses", tags=["expenses"], redirect_slashes=False)
+
+# Jinja templates for this router
+templates = Jinja2Templates(directory="src/templates")
 
 
 def get_expense_service(session: Session = Depends(get_session)) -> ExpenseService:
@@ -64,3 +73,24 @@ def delete_expense(expense_id: int, service: ExpenseService = Depends(get_expens
     if not ok:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expense not found")
     return None
+
+
+@router.get('/add/add_expenses', response_class=HTMLResponse, status_code=status.HTTP_201_CREATED)
+def add_expenses_view(request: Request, current_user: dict = Depends(get_current_user_from_cookie)):
+    """Render the expenses template allowing the user to add/edit/delete multiple expense rows.
+
+    Returns a 201 Created response with the rendered HTML for consistency with the UI flow.
+    """
+    # metadata to help the template (categories, app version, config, current user)
+    categories = [c.value for c in ExpenseCategory]
+    return templates.TemplateResponse(
+        name='expenses/expenses.html',
+        request=request,
+        context={
+            'config': settings,
+            'current_user': current_user,
+            'version': version,
+            'categories': categories
+        },
+        status_code=status.HTTP_201_CREATED
+    )
