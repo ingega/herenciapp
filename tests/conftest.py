@@ -8,15 +8,54 @@ from fastapi.testclient import TestClient
 from src.api.v1.apps.users.models import User
 from src.api.v1.auth.auth import create_access_token
 
+import os
+# Ensure env vars for mail so ConnectionConfig validation does not fail during imports
+os.environ.setdefault('MAIL_USERNAME', 'test')
+os.environ.setdefault('MAIL_PASSWORD', 'test')
+os.environ.setdefault('MAIL_FROM', 'test@local')
+
+# Patch the mail client factory to avoid ConnectionConfig validation during tests.
+# This ensures send_verification_email can be called and the test-level patch of
+# FastMail.send_message will correctly intercept or we provide a harmless default.
+from src.api.v1.apps.users import email_service as _email_service
+
+class _DummyMailClient:
+    async def send_message(self, message):
+        return True
+
+# Replace the factory with one that returns a dummy client when env is not configured
+try:
+    _email_service.get_mail_client = lambda: _DummyMailClient()
+except Exception:
+    pass
+
 from src.main import app
 from src.database import get_db, get_session
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# debug routes
+# Ensure mail config is available during tests so ConnectionConfig validation succeeds
+import pytest as _pytest
+
+@_pytest.fixture(scope="session", autouse=True)
+def _ensure_mail_settings():
+    try:
+        import src.config as _config
+        _config.settings.MAIL_USERNAME = _config.settings.MAIL_USERNAME or "test"
+        _config.settings.MAIL_PASSWORD = _config.settings.MAIL_PASSWORD or "test"
+        _config.settings.MAIL_FROM = _config.settings.MAIL_FROM or "test@local"
+    except Exception:
+        pass
+    yield
+
+# debug routes (safely attempt to log route path or prefix)
 for route in app.routes:
-    logger.info(f'valid route: {route.path}')
+    try:
+        route_id = getattr(route, 'path', None) or getattr(route, 'prefix', None) or repr(route)
+    except Exception:
+        route_id = repr(route)
+    logger.info(f'valid route: {route_id}')
 
 # 1. Setup an in-memory SQLite database for testing
 sqlite_url = "sqlite://"
@@ -44,7 +83,9 @@ def client_fixture(session: Session) -> Generator[TestClient, None, None]:
     testing session instead of the real production database.
     """
     def get_session_override():
-        return session
+        # Provide a fresh session for each request (avoids long-lived identity-map issues)
+        with Session(engine) as s:
+            yield s
 
     app.dependency_overrides[get_db] = get_session_override
     app.dependency_overrides[get_session] = get_session_override

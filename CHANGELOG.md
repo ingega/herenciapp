@@ -16,16 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
-## [2.3.3] 2026-08-19
+## [2.3.3] 2026-08-20
 
 ### Added
 - Router endpoints for Expenses at `src/api/v1/apps/expenses/router.py` (list by date, list by range, get by id, create, update, delete).
+- Service and endpoint test coverage for the expenses feature, using in-memory SQLite and TestClient-based fixtures.
 
 ### Changed
 - Registered expenses router in `src/main.py`.
+- Updated the project pytest fixtures to isolate database state and mock email delivery reliably during automated tests.
 
 ### Fixed
-- N/A
+- Resolved verification-test reliability issues by mocking the mail client factory (`get_mail_client`) instead of the downstream `FastMail.send_message` call.
+- Ensured the in-memory test database setup for expenses and verification tests does not leak session state across requests.
 
 ## [2.3.0] 2026-08-18
 This version adds the expenses app and introduces expenses tracking with a new model and migration.

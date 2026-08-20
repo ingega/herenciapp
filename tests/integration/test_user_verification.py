@@ -1,15 +1,19 @@
 # tests/integration/test_using_verification.py
-import pytest
-from fastapi import status
 from unittest.mock import patch, AsyncMock
+from fastapi import status
 from sqlmodel import select
 from src.api.v1.apps.users.models import VerificationToken
 
-@patch("src.api.v1.apps.users.email_service.FastMail.send_message", new_callable=AsyncMock)
+@patch("src.api.v1.apps.users.email_service.get_mail_client")
 class TestUserVerificationEndpoints:
 
-    def test_user_verification_flow_success(self, mock_send, client, session):
+    def test_user_verification_flow_success(self, mock_get_mail_client, client, session):
         """Tests the full register -> verify API flow without sending real emails."""
+        # Configure the get_mail_client mock to return an object with an AsyncMock send_message
+        send_mock = AsyncMock()
+        dummy_client = type("_Dummy", (), {"send_message": send_mock})()
+        mock_get_mail_client.return_value = dummy_client
+
         user_data = {
             "email": "partner_test@herenciapp.com",
             "password": "SecurePassword123!"
@@ -20,8 +24,8 @@ class TestUserVerificationEndpoints:
         assert register_response.status_code == status.HTTP_201_CREATED
         
         # Verify the mock intercepted the call!
-        assert mock_send.called is True
-        
+        assert send_mock.called is True
+
         # 2. Extract Token from DB using the sync session
         db_token = session.exec(select(VerificationToken)).first()
         assert db_token is not None
@@ -34,13 +38,17 @@ class TestUserVerificationEndpoints:
         verify_response = client.post("/users/verify", json=verify_payload)
         assert verify_response.status_code == status.HTTP_200_OK
 
-    def test_verification_fails_with_wrong_token(self, mock_send, client, session):
+    def test_verification_fails_with_wrong_token(self, mock_get_mail_client, client, session):
         """Ensures endpoint rejects bad verification input codes."""
+        send_mock = AsyncMock()
+        dummy_client = type("_Dummy", (), {"send_message": send_mock})()
+        mock_get_mail_client.return_value = dummy_client
+
         user_data = {"email": "security@test.com", "password": "Password123!"}
         
         # Registration triggers email mock
         client.post("/users/register", json=user_data)
-        assert mock_send.called is True
+        assert send_mock.called is True
         
         verify_payload = {
             "email": "security@test.com",
@@ -49,8 +57,13 @@ class TestUserVerificationEndpoints:
         response = client.post("/users/verify", json=verify_payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_verification_fails_for_missing_user(self, mock_send, client):
+    def test_verification_fails_for_missing_user(self, mock_get_mail_client, client):
         """Identity check: Reject verification for emails not in the system."""
+        # In this test we don't need the mail client, but ensure mock exists
+        send_mock = AsyncMock()
+        dummy_client = type("_Dummy", (), {"send_message": send_mock})()
+        mock_get_mail_client.return_value = dummy_client
+
         verify_payload = {
             "email": "ghost@herenciapp.com",
             "token": "000000"
