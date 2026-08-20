@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.3.3] 2026-08-19
+
+### Added
+- Router endpoints for Expenses at `src/api/v1/apps/expenses/router.py` (list by date, list by range, get by id, create, update, delete).
+
+### Changed
+- Registered expenses router in `src/main.py`.
+
+### Fixed
+- N/A
+
 ## [2.3.0] 2026-08-18
 This version adds the expenses app and introduces expenses tracking with a new model and migration.
 
