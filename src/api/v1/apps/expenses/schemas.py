@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import Optional
-from decimal import Decimal
 
 from sqlmodel import SQLModel, Field
 
-from src.api.v1.apps.expenses.models import ExpenseCategory
+from src.api.v1.apps.expenses.models.models import ExpenseCategory
 
 
 class ExpenseBase(SQLModel):
@@ -35,7 +34,7 @@ class ExpenseUpdate(SQLModel):
     total: Optional[float] = None
 
 
-# Ensure any SQLModel internals are rebuilt for Pydantic/SQLModel 0.0.x compatibility
+# Ensure Pydantic/SQLModel internals are rebuilt (compat)
 ExpenseRead.model_rebuild()
 ExpenseCreate.model_rebuild()
 ExpenseUpdate.model_rebuild()
