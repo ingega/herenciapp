@@ -84,8 +84,7 @@ def delete_expense(expense_id: int, service: ExpenseService = Depends(get_expens
     return None
 
 
-@router.get('/add/add_expenses', response_class=HTMLResponse, 
-            status_code=status.HTTP_200_OK)
+@router.get('/add/add_expenses', response_class=HTMLResponse)
 def add_expenses_view(request: Request, 
                       current_user: dict = Depends(get_current_user_from_cookie),
                       session: Session = Depends(get_session)):
@@ -108,5 +107,5 @@ def add_expenses_view(request: Request,
             'version': version,
             'categories': [category.name for category in categories],
         },
-        status_code=status.HTTP_201_CREATED
+        status_code=status.HTTP_200_OK
     )
