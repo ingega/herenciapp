@@ -1,16 +1,28 @@
-from enum import Enum
 from datetime import datetime
 from typing import Optional
 
 from sqlmodel import SQLModel, Field, Column
-from sqlalchemy import Enum as SAEnum, Float, DateTime, String
+from sqlalchemy import Float, DateTime, String
 
 
-class ExpenseCategory(str, Enum):
-    FOOD = "food"
-    BEVERAGES = "beverages"
-    DESSERTS = "desserts"
-    OPERATION = "operation"
+class ExpensesCategory(SQLModel, table=True):
+    __tablename__ = "expenses_category"
+
+    id: Optional[int] = Field(
+        default=None,
+        primary_key=True,
+    )
+
+    name: str = Field(
+        max_length=100,
+        nullable=False,
+        unique=True,
+    )
+
+    active: bool = Field(
+        default=True,
+        nullable=False,
+    )
 
 
 class Expenses(SQLModel, table=True):
@@ -37,15 +49,10 @@ class Expenses(SQLModel, table=True):
         )
     )
 
-    category: Optional[ExpenseCategory] = Field(
+    category: Optional[str] = Field(
+        default=None,
         sa_column=Column(
-            SAEnum(
-                ExpenseCategory,
-                name="expensecategory",
-                values_callable=lambda enum: [
-                    item.value for item in enum
-                ],
-            ),
+            String(length=100),
             nullable=True,
         )
     )

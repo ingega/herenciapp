@@ -7,7 +7,7 @@ def test_expenses_endpoints_crud(client):
         "expense": "Test Coffee",
         "total": 2.75,
         "category": "beverages",
-        "date": datetime.utcnow().isoformat()
+        "date": datetime.now().isoformat()
     }
 
     post_resp = client.post("/expenses/", json=payload)
@@ -18,7 +18,7 @@ def test_expenses_endpoints_crud(client):
 
     # the API accepts uppercase enum names and normalizes them to the database enum values
     uppercase_payload = {
-        "expense": "Uppercase category", "total": 18.50, "category": "FOOD", "date": datetime.utcnow().isoformat()
+        "expense": "Uppercase category", "total": 18.50, "category": "food", "date": datetime.now().isoformat()
     }
     uppercase_resp = client.post("/expenses/", json=uppercase_payload)
     assert uppercase_resp.status_code == 201
