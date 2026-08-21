@@ -1,37 +1,72 @@
-from enum import Enum
 from datetime import datetime
 from typing import Optional
 
 from sqlmodel import SQLModel, Field, Column
-from sqlalchemy import Enum as SAEnum, Float, DateTime, String
+from sqlalchemy import Float, DateTime, String
 
 
-class ExpenseCategory(str, Enum):
-    FOOD = "food"
-    BEVERAGES = "beverages"
-    DESSERTS = "desserts"
-    OPERATION = "operation"
+class ExpensesCategory(SQLModel, table=True):
+    __tablename__ = "expenses_category"
+
+    id: Optional[int] = Field(
+        default=None,
+        primary_key=True,
+    )
+
+    name: str = Field(
+        max_length=100,
+        nullable=False,
+        unique=True,
+    )
+
+    active: bool = Field(
+        default=True,
+        nullable=False,
+    )
 
 
 class Expenses(SQLModel, table=True):
+
     __tablename__ = "expenses"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(
+        default=None,
+        primary_key=True,
+    )
 
-    # the date of the expense (not nullable)
     date: datetime = Field(
-        sa_column=Column(DateTime, nullable=False),
+        sa_column=Column(
+            DateTime,
+            nullable=False,
+        ),
         default_factory=datetime.utcnow,
     )
 
-    # short description of the expense (not nullable)
-    expense: str = Field(sa_column=Column(String(length=255), nullable=False))
-
-    # category stored as a PostgreSQL/SQLAlchemy Enum
-    category: Optional[ExpenseCategory] = Field(
-        sa_column=Column(SAEnum(ExpenseCategory), nullable=True)
+    expense: str = Field(
+        sa_column=Column(
+            String(length=255),
+            nullable=False,
+        )
     )
 
-    quantity: Optional[float] = Field(sa_column=Column(Float, nullable=True))
+    category: Optional[str] = Field(
+        default=None,
+        sa_column=Column(
+            String(length=100),
+            nullable=True,
+        )
+    )
 
-    total: Optional[float] = Field(sa_column=Column(Float, nullable=True))
+    quantity: Optional[float] = Field(
+        sa_column=Column(
+            Float,
+            nullable=True,
+        )
+    )
+
+    total: Optional[float] = Field(
+        sa_column=Column(
+            Float,
+            nullable=True,
+        )
+    )

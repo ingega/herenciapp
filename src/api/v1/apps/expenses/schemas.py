@@ -1,38 +1,22 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import field_validator
 from sqlmodel import SQLModel, Field
-
-from src.api.v1.apps.expenses.models import ExpenseCategory
-
-
-def normalize_expense_category(value):
-    if value is None:
-        return None
-    if isinstance(value, ExpenseCategory):
-        return value
-    text = str(value).strip()
-    if not text:
-        return None
-    lowered = text.lower()
-    if lowered in {item.value for item in ExpenseCategory}:
-        return ExpenseCategory(lowered)
-    return ExpenseCategory[text.upper()]
 
 
 class ExpenseBase(SQLModel):
     """Base schema shared by create/read/update representations."""
-    date: datetime = Field(default_factory=datetime.utcnow)
-    expense: str = Field(max_length=255, description="Short description of the expense")
-    category: Optional[ExpenseCategory] = None
+    date: datetime = Field(default_factory=datetime.now)
+    expense: str = Field(
+        max_length=255,
+        description="nombre del o los artículos o servicio",
+    )
+    category: Optional[str] = Field(
+        default=None,
+        max_length=100,
+    )
     quantity: Optional[float] = None
     total: Optional[float] = None
-
-    @field_validator("category", mode="before")
-    @classmethod
-    def normalize_category(cls, value):
-        return normalize_expense_category(value)
 
 
 class ExpenseCreate(ExpenseBase):
@@ -44,19 +28,16 @@ class ExpenseRead(ExpenseBase):
     """Schema used when returning expense data from the API."""
     id: int
 
-
 class ExpenseUpdate(SQLModel):
     """Schema used for partial updates (PATCH). All fields optional."""
     date: Optional[datetime] = None
     expense: Optional[str] = Field(default=None, max_length=255)
-    category: Optional[ExpenseCategory] = None
+    category: Optional[str] = Field(
+            default=None,
+            max_length=100,
+        )
     quantity: Optional[float] = None
     total: Optional[float] = None
-
-    @field_validator("category", mode="before")
-    @classmethod
-    def normalize_category(cls, value):
-        return normalize_expense_category(value)
 
 
 class ExpenseBatchCreate(SQLModel):

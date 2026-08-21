@@ -5,12 +5,12 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from src.database import get_session
+from src.api.v1.apps.expenses.models import ExpensesCategory
 from src.api.v1.apps.expenses.schemas import ExpenseBatchCreate, ExpenseCreate, ExpenseRead, ExpenseUpdate
 from src.api.v1.apps.expenses.services import ExpenseService
-from src.api.v1.apps.expenses.models import ExpenseCategory
 from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
 from src.__init__ import __version__ as version
@@ -84,14 +84,21 @@ def delete_expense(expense_id: int, service: ExpenseService = Depends(get_expens
     return None
 
 
-@router.get('/add/add_expenses', response_class=HTMLResponse, status_code=status.HTTP_201_CREATED)
-def add_expenses_view(request: Request, current_user: dict = Depends(get_current_user_from_cookie)):
+@router.get('/add/add_expenses', response_class=HTMLResponse, 
+            status_code=status.HTTP_200_OK)
+def add_expenses_view(request: Request, 
+                      current_user: dict = Depends(get_current_user_from_cookie),
+                      session: Session = Depends(get_session)):
     """Render the expenses template allowing the user to add/edit/delete multiple expense rows.
 
     Returns a 201 Created response with the rendered HTML for consistency with the UI flow.
     """
     # metadata to help the template (categories, app version, config, current user)
-    categories = [c.value for c in ExpenseCategory]
+    categories = session.exec(
+        select(ExpensesCategory)
+        .where(ExpensesCategory.active == True)
+        .order_by(ExpensesCategory.name)
+    ).all()
     return templates.TemplateResponse(
         name='expenses/expenses.html',
         request=request,
@@ -99,7 +106,7 @@ def add_expenses_view(request: Request, current_user: dict = Depends(get_current
             'config': settings,
             'current_user': current_user,
             'version': version,
-            'categories': categories
+            'categories': [category.name for category in categories],
         },
         status_code=status.HTTP_201_CREATED
     )

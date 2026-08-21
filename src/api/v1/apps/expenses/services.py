@@ -6,7 +6,7 @@ from typing import Optional, List
 from sqlmodel import Session, select
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.api.v1.apps.expenses.models import ExpenseCategory, Expenses
+from src.api.v1.apps.expenses.models import Expenses
 from src.api.v1.apps.expenses.schemas import ExpenseCreate, ExpenseUpdate
 
 logger = logging.getLogger(__name__)
@@ -53,28 +53,10 @@ class ExpenseService:
             logger.error(f"DB error fetching expenses range {start_date} - {end_date}: {e}")
             return []
 
-    @staticmethod
-    def _normalize_category(value):
-        if value is None:
-            return None
-        if isinstance(value, ExpenseCategory):
-            return value.value
-        text = str(value).strip()
-        if not text:
-            return None
-        lowered = text.lower()
-        if lowered in {item.value for item in ExpenseCategory}:
-            return lowered
-        if lowered in {item.name.lower() for item in ExpenseCategory}:
-            return lowered
-        return lowered
-
     def add_expense(self, expense_in: ExpenseCreate) -> Optional[Expenses]:
         """Create and persist a new Expenses row. Returns the created Expenses or None on failure."""
         try:
             payload = expense_in.model_dump()
-            if payload.get("category") is not None:
-                payload["category"] = self._normalize_category(payload["category"])
             new_expense = Expenses(**payload)
             self.session.add(new_expense)
             self.session.commit()
@@ -91,8 +73,6 @@ class ExpenseService:
             created: list[Expenses] = []
             for item in expense_items:
                 payload = item.model_dump()
-                if payload.get("category") is not None:
-                    payload["category"] = self._normalize_category(payload["category"])
                 new_expense = Expenses(**payload)
                 self.session.add(new_expense)
                 created.append(new_expense)
