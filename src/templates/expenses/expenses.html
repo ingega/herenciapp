@@ -3,7 +3,7 @@
 {% block title %}Expenses - {{ config.APP_NAME }}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto" x-data="expensesApp()" x-init="init()">
+<div class="max-w-4xl mx-auto" x-data="expensesApp({{ categories|tojson }})" x-init="init()">
     <div class="bg-white shadow sm:rounded-lg p-4">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold">Expenses</h2>
@@ -41,10 +41,9 @@
                             <td class="px-3 py-2 align-middle">
                                 <select x-model="row.category" class="border rounded px-2 py-1 text-sm">
                                     <option value="">Select</option>
-                                    <option value="food">Food</option>
-                                    <option value="beverages">Beverages</option>
-                                    <option value="desserts">Desserts</option>
-                                    <option value="operation">Operation</option>
+                                    <template x-for="category in categories" :key="category">
+                                        <option :value="category" x-text="category"></option>
+                                    </template>
                                 </select>
                             </td>
                             <td class="px-3 py-2 text-right align-middle">
@@ -78,8 +77,9 @@
 
 {% block scripts %}
 <script>
-function expensesApp() {
+function expensesApp(categories) {
     return {
+        categories: categories || [],
         rows: [],
         alertMessage: '',
         init() {

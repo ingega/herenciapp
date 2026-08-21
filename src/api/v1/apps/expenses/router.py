@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
 from src.database import get_session
-from src.api.v1.apps.expenses.schemas import ExpenseCreate, ExpenseRead, ExpenseUpdate
+from src.api.v1.apps.expenses.schemas import ExpenseBatchCreate, ExpenseCreate, ExpenseRead, ExpenseUpdate
 from src.api.v1.apps.expenses.services import ExpenseService
 from src.api.v1.apps.expenses.models import ExpenseCategory
 from src.api.v1.auth.auth import get_current_user_from_cookie
@@ -54,6 +54,15 @@ def create_expense(payload: ExpenseCreate, service: ExpenseService = Depends(get
     created = service.add_expense(payload)
     if not created:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not create expense")
+    return created
+
+
+@router.post("/batch", response_model=List[ExpenseRead], status_code=status.HTTP_201_CREATED)
+def create_expenses_batch(payload: ExpenseBatchCreate, service: ExpenseService = Depends(get_expense_service)):
+    """Create several expenses in one atomic transaction."""
+    created = service.add_expenses_batch(payload.items)
+    if not created:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not create expenses batch")
     return created
 
 
