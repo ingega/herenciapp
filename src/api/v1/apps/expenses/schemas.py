@@ -34,7 +34,13 @@ class ExpenseUpdate(SQLModel):
     total: Optional[float] = None
 
 
+class ExpenseBatchCreate(SQLModel):
+    """Schema for atomic creation of multiple expenses in a single request."""
+    items: list[ExpenseCreate]
+
+
 # Ensure Pydantic/SQLModel internals are rebuilt (compat)
 ExpenseRead.model_rebuild()
 ExpenseCreate.model_rebuild()
 ExpenseUpdate.model_rebuild()
+ExpenseBatchCreate.model_rebuild()

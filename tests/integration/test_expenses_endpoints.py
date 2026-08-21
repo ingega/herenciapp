@@ -16,6 +16,19 @@ def test_expenses_endpoints_crud(client):
     assert "id" in data
     expense_id = data["id"]
 
+    # batch creation atomic call
+    batch_payload = {
+        "items": [
+            {"expense": "Batch item 1", "total": 12.00, "category": "food", "date": datetime.utcnow().isoformat()},
+            {"expense": "Batch item 2", "total": 7.50, "category": "operation", "date": datetime.utcnow().isoformat()}
+        ]
+    }
+    batch_resp = client.post("/expenses/batch", json=batch_payload)
+    assert batch_resp.status_code == 201
+    batch_data = batch_resp.json()
+    assert isinstance(batch_data, list)
+    assert len(batch_data) == 2
+
     # get by id
     get_resp = client.get(f"/expenses/{expense_id}")
     assert get_resp.status_code == 200

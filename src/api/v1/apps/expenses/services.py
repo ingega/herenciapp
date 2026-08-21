@@ -56,7 +56,7 @@ class ExpenseService:
     def add_expense(self, expense_in: ExpenseCreate) -> Optional[Expenses]:
         """Create and persist a new Expenses row. Returns the created Expenses or None on failure."""
         try:
-            payload = expense_in.dict()
+            payload = expense_in.model_dump()
             new_expense = Expenses(**payload)
             self.session.add(new_expense)
             self.session.commit()
@@ -67,6 +67,24 @@ class ExpenseService:
             logger.error(f"Failed to add expense: {e}")
             return None
 
+    def add_expenses_batch(self, expense_items: list[ExpenseCreate]) -> list[Expenses]:
+        """Create multiple expenses in a single transaction and return the created rows."""
+        try:
+            created: list[Expenses] = []
+            for item in expense_items:
+                payload = item.model_dump()
+                new_expense = Expenses(**payload)
+                self.session.add(new_expense)
+                created.append(new_expense)
+            self.session.commit()
+            for item in created:
+                self.session.refresh(item)
+            return created
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            logger.error(f"Failed to add expenses batch: {e}")
+            return []
+
     def update_expense(self, expense_id: int, data: ExpenseUpdate) -> Optional[Expenses]:
         """Update an existing expense with partial data. Returns updated Expenses or None."""
         try:
@@ -74,7 +92,7 @@ class ExpenseService:
             if not expense:
                 return None
 
-            update_data = data.dict(exclude_unset=True)
+            update_data = data.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(expense, key, value)
 
