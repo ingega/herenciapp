@@ -44,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configured correctly Alpine service in expenses template
 - Changing enum list for ExpensesCategory
 
+### Fixed
+
+- Fixed expense creation failing due to a mismatch between the `ExpenseCategory` enum values and the PostgreSQL `expensecategory` type.
+- Fixed expense category selection by loading active categories dynamically from the database.
+
 ## [2.3.0] 2026-08-18
 This version adds the expenses app and introduces expenses tracking with a new model and migration.
 
