@@ -16,6 +16,14 @@ def test_expenses_endpoints_crud(client):
     assert "id" in data
     expense_id = data["id"]
 
+    # the API accepts uppercase enum names and normalizes them to the database enum values
+    uppercase_payload = {
+        "expense": "Uppercase category", "total": 18.50, "category": "FOOD", "date": datetime.utcnow().isoformat()
+    }
+    uppercase_resp = client.post("/expenses/", json=uppercase_payload)
+    assert uppercase_resp.status_code == 201
+    assert uppercase_resp.json()["category"] == "food"
+
     # batch creation atomic call
     batch_payload = {
         "items": [

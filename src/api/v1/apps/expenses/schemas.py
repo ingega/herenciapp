@@ -1,9 +1,24 @@
 from datetime import datetime
 from typing import Optional
 
+from pydantic import field_validator
 from sqlmodel import SQLModel, Field
 
 from src.api.v1.apps.expenses.models import ExpenseCategory
+
+
+def normalize_expense_category(value):
+    if value is None:
+        return None
+    if isinstance(value, ExpenseCategory):
+        return value
+    text = str(value).strip()
+    if not text:
+        return None
+    lowered = text.lower()
+    if lowered in {item.value for item in ExpenseCategory}:
+        return ExpenseCategory(lowered)
+    return ExpenseCategory[text.upper()]
 
 
 class ExpenseBase(SQLModel):
@@ -13,6 +28,11 @@ class ExpenseBase(SQLModel):
     category: Optional[ExpenseCategory] = None
     quantity: Optional[float] = None
     total: Optional[float] = None
+
+    @field_validator("category", mode="before")
+    @classmethod
+    def normalize_category(cls, value):
+        return normalize_expense_category(value)
 
 
 class ExpenseCreate(ExpenseBase):
@@ -32,6 +52,11 @@ class ExpenseUpdate(SQLModel):
     category: Optional[ExpenseCategory] = None
     quantity: Optional[float] = None
     total: Optional[float] = None
+
+    @field_validator("category", mode="before")
+    @classmethod
+    def normalize_category(cls, value):
+        return normalize_expense_category(value)
 
 
 class ExpenseBatchCreate(SQLModel):

@@ -79,68 +79,68 @@
 <script>
 function expensesApp(categories) {
     return {
-    categories: Array.isArray(categories) ? categories : [],
+        categories: Array.isArray(categories) ? categories : [],
         rows: [],
         alertMessage: '',
         init() {
-        this.rows = [this.createEmptyRow()];
-    },
-    createEmptyRow() {
-        const d = new Date();
-        const iso = d.toISOString().slice(0, 10);
-        return {
-            uid: cryptoRandomId(),
-            date: iso,
-            expense: '',
-            category: this.categories[0] || '',
-            quantity: null,
-            total: null
-        };
-    },
-    addRow() {
-        if (!Array.isArray(this.rows)) {
-            this.rows = [];
-        }
-        this.rows.push(this.createEmptyRow());
-    },
-    duplicateRow(idx) {
-        if (!this.rows[idx]) return;
-        const copy = JSON.parse(JSON.stringify(this.rows[idx]));
-        copy.uid = cryptoRandomId();
-        this.rows.splice(idx + 1, 0, copy);
-    },
-    removeRow(idx) {
-        if (!this.rows[idx]) return;
-        this.rows.splice(idx, 1);
-        if (this.rows.length === 0) {
-            this.rows.push(this.createEmptyRow());
-        }
-    },
-    async submitAll() {
-        const payload = this.rows.map(r => ({ date: r.date, expense: r.expense, category: r.category, quantity: r.quantity, total: r.total }));
-        try {
-            const resp = await fetch('/expenses/batch', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items: payload })
-            });
-            if (resp.ok) {
-                this.alertMessage = 'Saved successfully.';
-                this.rows = this.rows.map((row) => ({ ...row, uid: cryptoRandomId() }));
-                setTimeout(() => this.alertMessage = '', 3000);
-            } else {
-                const err = await resp.text();
-                this.alertMessage = 'Save failed: ' + err;
+            this.rows = [this.createEmptyRow()];
+        },
+        createEmptyRow() {
+            const d = new Date();
+            const iso = d.toISOString().slice(0, 10);
+            return {
+                uid: cryptoRandomId(),
+                date: iso,
+                expense: '',
+                category: this.categories[0] || '',
+                quantity: null,
+                total: null
+            };
+        },
+        addRow() {
+            if (!Array.isArray(this.rows)) {
+                this.rows = [];
             }
-        } catch (e) {
-            this.alertMessage = 'Network error: ' + e.message;
+            this.rows.push(this.createEmptyRow());
+        },
+        duplicateRow(idx) {
+            if (!this.rows[idx]) return;
+            const copy = JSON.parse(JSON.stringify(this.rows[idx]));
+            copy.uid = cryptoRandomId();
+            this.rows.splice(idx + 1, 0, copy);
+        },
+        removeRow(idx) {
+            if (!this.rows[idx]) return;
+            this.rows.splice(idx, 1);
+            if (this.rows.length === 0) {
+                this.rows.push(this.createEmptyRow());
+            }
+        },
+        async submitAll() {
+            const payload = this.rows.map(r => ({ date: r.date, expense: r.expense, category: r.category, quantity: r.quantity, total: r.total }));
+            try {
+                const resp = await fetch('/expenses/batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: payload })
+                });
+                if (resp.ok) {
+                    this.alertMessage = 'Saved successfully.';
+                    this.rows = this.rows.map((row) => ({ ...row, uid: cryptoRandomId() }));
+                    setTimeout(() => this.alertMessage = '', 3000);
+                } else {
+                    const err = await resp.text();
+                    this.alertMessage = 'Save failed: ' + err;
+                }
+            } catch (e) {
+                this.alertMessage = 'Network error: ' + e.message;
+            }
         }
     }
 }
-}
 
 function cryptoRandomId() {
-return Math.random().toString(36).slice(2, 9);
+    return Math.random().toString(36).slice(2, 9);
 }
 </script>
 {% endblock %}
