@@ -97,6 +97,7 @@ class Product(SQLModel, table=True):
     main_dish: str = Field(max_length=50, index=True, unique=True)  # e.g., taco, burger, soda
     category: str = Field(max_length=30, index=True)  # package, taco, beverage
     price: condecimal(max_digits=6, decimal_places=2) = Field()
+    photo: str | None = Field(max_length=255, default=None)
 
     # Relationships
     flavors: List["FlavorCatalogue"] = Relationship(back_populates="product")
