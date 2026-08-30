@@ -37,6 +37,7 @@ class ProductBase(SQLModel):
     main_dish: str = Field(max_length=50)
     category: str = Field(max_length=30, description="e.g., food, dessert, beverage")
     price: condecimal(max_digits=6, decimal_places=2) = Field(default=0.00)
+    photo: str | None = Field(max_length=255, default=None)
 
 
 class ProductCreate(ProductBase):
@@ -51,6 +52,7 @@ class ProductUpdate(SQLModel):
     main_dish: Optional[str] = Field(default=None, max_length=50)
     category: Optional[str] = Field(default=None, max_length=30)
     price: Optional[condecimal(max_digits=6, decimal_places=2)] = Field(default=None)
+    photo: str | None = Field(default=None, max_length=255)
 
 
 class ProductWithFlavors(ProductRead):

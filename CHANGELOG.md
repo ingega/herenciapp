@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [3.0.2] 2026-08-30
+
+### Added
+- product.photo field to the schema `src/api/v1/apps/orders/schemas.py`
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [3.0.1] 2026-08-29
 Version 3.x added the new template for using photos in orders, instead
 raw text.
