@@ -16,6 +16,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [3.1.0] 2026-08-30
+This tag add all the serialization to save and retrieve photos of a product
+workflow to add these changes are:
+1. Add photo field to the UI ✓
+2. Change POST endpoint to acept multiform and UploadFile
+3. Validation and resizing
+4. Upload and get file (locally or S3 bucket)
+5. Pass a photo
+6. Add logic to the waiter template
+
+### Added
+- Photo field to `src/templates/products.html`
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [3.0.2] 2026-08-30
 
 ### Added
