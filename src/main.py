@@ -100,8 +100,10 @@ app.include_router(expenses_router) # expenses router
 # Static Files
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 STATIC_DIR = CURRENT_DIR / "static"
+MEDIA_DIR = CURRENT_DIR.parent / "media"
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 templates = Jinja2Templates(directory="src/templates")
 templates.env.globals.update(config=settings)
