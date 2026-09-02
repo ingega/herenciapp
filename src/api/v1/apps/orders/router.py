@@ -541,8 +541,6 @@ async def get_add_product_page(
     Renders the dedicated 'Add New Product' workspace form.
     Only allows access if valid auth tokens are found.
     """
-    # debug, delete  on production
-    print(f"current user value: {current_user}")
     return templates.TemplateResponse(
         request=request,
         name="products.html",
@@ -592,7 +590,6 @@ def create_new_product(
     category=category,
     price=price,
     )
-    photo_path: Path | None = None
 
     if photo:
         product_in.photo = save_product_photo(photo)
@@ -601,27 +598,35 @@ def create_new_product(
 
     return product_service.create_product(product_in)
 
-@router_products.patch("/{product_id}", 
-              response_model=ProductRead, status_code=status.HTTP_200_OK)
-async def update_product(product_update: ProductUpdate,
-                         product_id: int, 
-                         current_user: dict = Depends(get_current_user_from_cookie),
-                         session: Session = Depends(get_session)
-                         ):
-    
+@router_products.patch(
+    "/{product_id}",
+    response_model=ProductRead,
+    status_code=status.HTTP_200_OK,
+)
+async def update_product(
+    product_id: int,
+    main_dish: str = Form(...),
+    category: str = Form(...),
+    price: condecimal(max_digits=6, decimal_places=2) = Form(...),
+    photo: UploadFile | None = File(default=None),
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session),
+):
     product_service = ProductService(session)
-    
-    return product_service.update_product(product_id=product_id, product_in=product_update)
 
-@router_products.delete("/{product_id}")
-async def delete_product(product_id: int, 
-                         current_user: dict = Depends(get_current_user_from_cookie),
-                         session: Session = Depends(get_session)
-                         ):
-    
-    product_service = ProductService(session)
-    
-    return product_service.delete_product(product_id=product_id)
+    product_update = ProductUpdate(
+        main_dish=main_dish,
+        category=category,
+        price=price,
+    )
+
+    if photo:
+        product_update.photo = save_product_photo(photo)
+
+    return product_service.update_product(
+        product_id=product_id,
+        product_in=product_update,
+    )
 
 # endpoint to acces the update product template
 @router_products.get("/update", response_class=HTMLResponse)
@@ -709,6 +714,7 @@ async def get_flavors_management_page(request: Request,
             "current_user": current_user # for nav_bar
         }
     )
+
 
 # ui template endpoint for flavors additon
 @router_flavors.get("/add", response_class=HTMLResponse,

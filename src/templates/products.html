@@ -77,6 +77,15 @@
                 </p>
             </div>
 
+            <div id="photo-preview" class="hidden mt-3">
+                <img
+                    id="photo-preview-image"
+                    src=""
+                    alt="Vista previa del producto"
+                    class="w-full max-h-64 object-cover rounded-xl border border-gray-200"
+                >
+            </div>
+
             <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="reset" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition">
                     limpiar campos
@@ -111,62 +120,103 @@
         });
     }
 
-    // if the button clicked is submit type, validate and insert the new record
-    async function handleFormSubmit(event) {
-        event.preventDefault();
-        
-        const submitBtn = document.getElementById('submit-btn');
-        const editBtn = document.getElementById('edit-btn');
-        const form = document.getElementById('add-product-form');
-        const mainDish = document.getElementById('main_dish').value.trim();
-        const category = document.getElementById('category').value;
-        const price = parseFloat(document.getElementById('price').value);
+    // Product photo preview
+    const photoInput = document.getElementById('photo');
+    const photoPreview = document.getElementById('photo-preview');
+    const photoPreviewImage = document.getElementById('photo-preview-image');
 
-        // Security baseline checks
-        if (!mainDish || !category || isNaN(price)) {
-            showFeedback("Please fill out all operational context criteria correctly.");
+    photoInput.addEventListener('change', () => {
+        const file = photoInput.files[0];
+
+        if (!file) {
+            photoPreview.classList.add('hidden');
+            photoPreviewImage.src = '';
             return;
         }
-        
-        // Lock button interaction during server handshake
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing Request...`;
 
-        const payload = {
-            main_dish: mainDish,
-            category: category,
-            price: price
-        };
+        photoPreviewImage.src = URL.createObjectURL(file);
+        photoPreview.classList.remove('hidden');
+    });
 
-        try {
-            // Streaming context payload straight to our verified green-tested endpoint
-            const response = await fetch("/orders/products/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            });
+    // if the button clicked is submit type, validate and insert the new record
+    async function handleFormSubmit(event) {
+    event.preventDefault();
 
-            if (response.status === 201) {
-                const data = await response.json();
-                showFeedback(`el alimento "${data.main_dish}" ha sido agregado al inventario de la base de datos! con el id ${data.id}`, 'success');
-                form.reset();
-            } else if (response.status === 422) {
-                showFeedback("Error de validación (422): La estructura de envío no cumple con los límites backend de Pydantic.");
-            } else if (response.status === 403 || response.status === 401) {
-                showFeedback("Error de autenticación: Credenciales faltantes o expiradas del estado de sesión del navegador.");
-            } else {
-                showFeedback(`Server rejected database insertion with status code: ${response.status}`);
-            }
-        } catch (error) {
-            console.error("AJAX Pipeline Error Execution:", error);
-            showFeedback("Error de infraestructura de red. No se pudo establecer un canal de comunicación con el clúster API backend.");
-        } finally {
-            // Unlock control handlers mapping
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `<i class="fa-solid fa-save"></i> Commit Product`;
+    const submitBtn = document.getElementById('submit-btn');
+    const form = document.getElementById('add-product-form');
+
+    const mainDish = document.getElementById('main_dish').value.trim();
+    const category = document.getElementById('category').value;
+    const price = parseFloat(document.getElementById('price').value);
+
+    // Security baseline checks
+    if (!mainDish || !category || isNaN(price)) {
+        showFeedback("Please fill out all operational context criteria correctly.");
+        return;
+    }
+
+    // Lock button interaction during server handshake
+    submitBtn.disabled = true;
+    submitBtn.innerHTML =
+        `<i class="fa-solid fa-spinner animate-spin"></i> Processing Request...`;
+
+    // Build multipart/form-data payload
+    const formData = new FormData();
+
+    formData.append("main_dish", mainDish);
+    formData.append("category", category);
+    formData.append("price", price);
+
+    // Photo is optional
+    if (photoInput.files.length > 0) {
+        formData.append("photo", photoInput.files[0]);
+    }
+
+    try {
+        const response = await fetch("/orders/products/", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.status === 201) {
+            const data = await response.json();
+
+            showFeedback(
+                `el alimento "${data.main_dish}" ha sido agregado al inventario de la base de datos! con el id ${data.id}`,
+                'success'
+            );
+
+            form.reset();
+
+        } else if (response.status === 422) {
+            showFeedback(
+                "Error de validación (422): La estructura de envío no cumple con los límites backend de Pydantic."
+            );
+
+        } else if (response.status === 403 || response.status === 401) {
+            showFeedback(
+                "Error de autenticación: Credenciales faltantes o expiradas del estado de sesión del navegador."
+            );
+
+        } else {
+            showFeedback(
+                `Server rejected database insertion with status code: ${response.status}`
+            );
         }
+
+    } catch (error) {
+        console.error("AJAX Pipeline Error Execution:", error);
+
+        showFeedback(
+            "Error de infraestructura de red. No se pudo establecer un canal de comunicación con el clúster API backend."
+        );
+
+    } finally {
+        // Unlock control handlers mapping
+        submitBtn.disabled = false;
+        submitBtn.innerHTML =
+            `<i class="fa-solid fa-save"></i> Commit Product`;
+    }
     }
 </script>
 {% endblock %}

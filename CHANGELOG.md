@@ -22,8 +22,8 @@ workflow to add these changes are:
 1. Add photo field to the UI ✓
 2. Change POST endpoint to acept multiform and UploadFile ✓
 3. Validation and resizing ✓
-4. Upload and get file (locally or S3 bucket)
-5. Pass a photo
+4. CRUD template for photo
+5. Create a product with photo
 6. Add logic to the waiter template
 
 ### Added

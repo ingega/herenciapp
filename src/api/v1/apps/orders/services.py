@@ -2,6 +2,7 @@
 
 from datetime import datetime, time, date
 from decimal import Decimal
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
@@ -21,6 +22,8 @@ from src.api.v1.apps.orders.schemas import OrderDetailCreate, OrderDetailUpdateS
 from src.api.v1.apps.orders.schemas import OrderDiscount, OrderDetailUpdateItem, OrderItemBatchInput
 # local datetime funcs
 from src.api.v1.apps.orders.models import get_mexico_time
+# media paths
+from src.core.paths import MEDIA_DIR
 
 
 ### --- Orders service class init ---  ####
@@ -675,6 +678,8 @@ class ProductService:
         Pydantic's update rules, and persists changes.
         """
         db_product = self.get_product_by_id(product_id)
+        # addresses orphans photo files
+        old_photo = db_product.photo
         
         # Extract the fields sent in the request update data payload
         update_data = product_in.model_dump(exclude_unset=True)
@@ -684,6 +689,16 @@ class ProductService:
             
         self.session.add(db_product)
         self.session.commit()
+        if old_photo and old_photo != db_product.photo:
+            old_photo_path = old_photo_path = MEDIA_DIR / old_photo
+            if old_photo_path.exists():
+                try:
+                    old_photo_path.unlink()
+                except OSError:
+                    print(
+                        "Could not remove old product photo: ",
+                        old_photo_path,
+                    )
         self.session.refresh(db_product)
         return db_product
 

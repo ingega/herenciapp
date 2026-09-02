@@ -56,6 +56,31 @@
                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all">
         </div>
 
+        <div>
+            <label for="photo" class="block text-sm font-medium text-gray-300 mb-1">
+                Foto del producto
+            </label>
+
+            <input
+                type="file"
+                id="photo"
+                accept="image/jpeg,image/png,image/webp"
+                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5
+                    text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+            >
+            <div id="photoPreview" class="hidden mt-3">
+                <img
+                    id="photoPreviewImage"
+                    src=""
+                    alt="Vista previa del producto"
+                    class="w-full max-h-64 object-cover rounded-lg border border-gray-600"
+                >
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+                JPG, PNG o WebP. Máximo 2 MB.
+            </p>
+        </div>
+
         <div class="grid grid-cols-2 gap-4 pt-4">
             <button type="button" id="btnUpdate"
                     class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-3 px-4 rounded-lg shadow-md transition-colors duration-200 uppercase tracking-wider text-sm">
@@ -80,9 +105,58 @@
     const txtMainDish = document.getElementById('mainDish');
     const selCategory = document.getElementById('category');
     const txtPrice = document.getElementById('price');
+
+    const photoInput = document.getElementById('photo');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoPreviewImage = document.getElementById('photoPreviewImage');
     
     const btnUpdate = document.getElementById('btnUpdate');
     const btnDelete = document.getElementById('btnDelete');
+
+    photoInput.addEventListener('change', () => {
+    const file = photoInput.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    // Client-side validation
+    const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/webp'
+    ];
+
+    const maxSize = 2 * 1024 * 1024; // 2 MB
+
+    if (!allowedTypes.includes(file.type)) {
+        showFeedback(
+            'Formato de imagen no válido. Solo se permiten JPG, PNG o WebP.'
+        );
+
+        photoInput.value = '';
+        photoPreviewImage.src = '';
+        photoPreview.classList.add('hidden');
+
+        return;
+    }
+
+    if (file.size > maxSize) {
+        showFeedback(
+            'La imagen es demasiado grande. El tamaño máximo permitido es 2 MB.'
+        );
+
+        photoInput.value = '';
+        photoPreviewImage.src = '';
+        photoPreview.classList.add('hidden');
+
+        return;
+    }
+
+    // Valid file → show preview
+    photoPreviewImage.src = URL.createObjectURL(file);
+    photoPreview.classList.remove('hidden');
+});
 
     // 1. EVENT LISTENER: Fetch Product Data on Dropdown Change
     productSelect.addEventListener('change', async (e) => {
@@ -106,6 +180,14 @@
             txtMainDish.value = product.main_dish;
             selCategory.value = product.category;
             txtPrice.value = parseFloat(product.price).toFixed(2);
+            // Populate current product photo
+            if (product.photo) {
+                photoPreviewImage.src = `/media/${product.photo}`;
+                photoPreview.classList.remove('hidden');
+            } else {
+                photoPreviewImage.src = '';
+                photoPreview.classList.add('hidden');
+            }
 
         } catch (err) {
             alert(`Error loading entry details: ${err.message}`);
@@ -113,44 +195,100 @@
     });
 
     // 2. ACTION HANDLER: Trigger Background PATCH Mutation Call
-    btnUpdate.addEventListener('click', async () => {
-        const id = txtId.value;
-        const payload = {
-            main_dish: txtMainDish.value,
-            category: selCategory.value,
-            price: parseFloat(txtPrice.value)
-        };
+btnUpdate.addEventListener('click', async () => {
+    const id = txtId.value;
+    const photoInput = document.getElementById('photo');
 
-        if (!txtMainDish.value || isNaN(payload.price)) {
-            alert('Please populate all fields with valid information before updating.');
-            return;
-        }
+    const price = parseFloat(txtPrice.value);
 
-        try {
-            const response = await fetch(`/orders/products/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+    if (!txtMainDish.value || isNaN(price)) {
+        alert('Please populate all fields with valid information before updating.');
+        return;
+    }
 
-            if (response.status === 200) {
-                alert('Información actualizada con éxito!');
-                window.location.href = '/main';
-            } else {
-                const errData = await response.json();
-                alert(`Update failed: ${JSON.stringify(errData.detail || 'Invalid data schema provided.')}`);
+    // Build multipart/form-data payload
+    const formData = new FormData();
+
+    formData.append('main_dish', txtMainDish.value);
+    formData.append('category', selCategory.value);
+    formData.append('price', price);
+
+    // Photo is optional.
+    // If no new photo is selected, the backend keeps the existing one.
+    if (photoInput.files.length > 0) {
+        formData.append('photo', photoInput.files[0]);
+    }
+
+    try {
+        // Lock both actions while the request is running
+        btnUpdate.disabled = true;
+        btnDelete.disabled = true;
+
+        btnUpdate.innerHTML = `
+            <i class="fa-solid fa-spinner animate-spin"></i>
+            Actualizando...
+        `;
+
+        const response = await fetch(`/orders/products/${id}`, {
+            method: 'PATCH',
+            body: formData
+        });
+
+        if (response.status === 200) {
+            const data = await response.json();
+
+            console.log('Updated product:', data);
+
+            // Update form with the persisted values
+            txtId.value = data.id;
+            txtMainDish.value = data.main_dish;
+            selCategory.value = data.category;
+            txtPrice.value = parseFloat(data.price).toFixed(2);
+
+            // Update displayed photo if the product has one
+            if (data.photo) {
+                photoPreviewImage.src = `/media/${data.photo}?t=${Date.now()}`;
+                photoPreview.classList.remove('hidden');
             }
-        } catch (err) {
-            alert(`Network execution exception: ${err.message}`);
+
+            showFeedback('Información actualizada con éxito!', 'success');
+        } else {
+            const errData = await response.json();
+
+            showFeedback(
+                `Update failed: ${
+                    JSON.stringify(
+                        errData.detail || 'Invalid data schema provided.'
+                    )
+                }`
+            );
         }
-    });
+
+    } catch (err) {
+        console.error('PATCH execution exception:', err);
+
+        showFeedback(
+            `Network execution exception: ${err.message}`
+        );
+
+    } finally {
+        // Always restore the buttons,
+        // regardless of success, validation error, or network failure.
+        btnUpdate.disabled = false;
+        btnDelete.disabled = false;
+
+        btnUpdate.innerHTML = `
+            Actualizar producto
+        `;
+    }
+});
 
     // 3. ACTION HANDLER: Trigger Background DELETE Mutation Call
     btnDelete.addEventListener('click', async () => {
         const id = txtId.value;
         const dishName = txtMainDish.value;
 
-        if (!confirm(`Estás segur@ de eliminar el prodcuto "${dishName}" del menú?`)) {
+        if (!confirm(`Estás segur@ de eliminar el producto "${dishName}" del menú?`)) {
             return;
         }
 
@@ -161,7 +299,7 @@
 
             if (response.status === 200 || response.status === 204) {
                 alert('Product has been successfully removed from inventory tracking.');
-                window.location.href = '/main';
+                window.location.href = '/orders/products/update';
             } else {
                 const errData = await response.json();
                 alert(`Deletion denied: ${JSON.stringify(errData.detail || 'Cascade integrity check triggered.')}`);
