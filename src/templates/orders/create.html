@@ -94,7 +94,8 @@
             id: {{ p.id }}, 
             name: "{{ p.main_dish }}", 
             price: {{ p.price }}, 
-            category: "{{ p.category if p.category else '' }}" 
+            category: "{{ p.category if p.category else '' }}",
+            photo: "{{ p.photo if p.photo else '' }}" 
         },
         {% endfor %}
     ];
@@ -121,128 +122,152 @@
      * Rebuilds container card blocks reflecting guest counts designated by the waiter
      */
     function regenerateSeatSections() {
-        const workspaceRoot = document.getElementById('seats-workspace-root');
-        const totalPersons = parseInt(document.getElementById('number_of_persons').value) || 1;
-        
+    const workspaceRoot = document.getElementById('seats-workspace-root');
+    const totalPersons =
+        parseInt(document.getElementById('number_of_persons').value) || 1;
+
         workspaceRoot.innerHTML = '';
 
         for (let seatNum = 1; seatNum <= totalPersons; seatNum++) {
+
             const seatCard = document.createElement('div');
-            seatCard.className = "bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition duration-150";
+
+            seatCard.className =
+                "bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden";
+
             seatCard.id = `seat-card-block-${seatNum}`;
-            
+
             seatCard.innerHTML = `
-                <div class="bg-slate-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                <div class="bg-slate-50 border-b border-gray-200 px-4 py-3">
                     <div class="flex items-center space-x-2">
-                        <span class="flex items-center justify-center w-6 h-6 bg-amber-100 text-amber-800 rounded-md text-xs font-bold border border-amber-200">
+                        <span class="flex items-center justify-center
+                                    w-7 h-7 bg-amber-100 text-amber-800
+                                    rounded-md text-xs font-bold
+                                    border border-amber-200">
                             ${seatNum}
                         </span>
-                        <h3 class="font-bold text-gray-700 text-sm">Orden de Persona #${seatNum}</h3>
+
+                        <h3 class="font-bold text-gray-700 text-sm">
+                            Orden de Persona #${seatNum}
+                        </h3>
                     </div>
-                    <button type="button" onclick="appendItemRow(${seatNum})" 
-                            class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 shadow-sm">
-                        <i class="fa-solid fa-plus"></i> <span>Add Item</span>
-                    </button>
                 </div>
-                
+
                 <div class="p-4">
-                    <div class="hidden md:grid grid-cols-12 gap-3 text-[10px] font-bold tracking-wider text-gray-400 uppercase border-b border-gray-200 pb-2 mb-2 px-1">
-                        <div class="col-span-3">Platillo</div>
-                        <div class="col-span-3">Descripción / Variante</div>
-                        <div class="col-span-1 text-center">Cant</div>
-                        <div class="col-span-3">Notas Adicionales</div>
-                        <div class="col-span-1 text-center">Extra ($)</div>
-                        <div class="col-span-1 text-right"><i class="fa-solid fa-trash-can text-gray-300"></i></div>
+                    <div
+                        id="product-mosaic-${seatNum}"
+                        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4
+                            xl:grid-cols-5 gap-3">
                     </div>
-                    
-                    <div id="seat-lines-container-${seatNum}" class="space-y-4 md:space-y-2">
-                        </div>
                 </div>
             `;
+
             workspaceRoot.appendChild(seatCard);
-            appendItemRow(seatNum);
+
+            renderProductMosaic(seatNum);
         }
     }
 
-    /**
-     * Appends an input row item mapped to an individual person's container
-     */
-    function appendItemRow(seatNumber) {
-        const container = document.getElementById(`seat-lines-container-${seatNumber}`);
-        globalLineIndex++;
-        const lineId = globalLineIndex;
+    function renderProductMosaic(seatNumber) {
 
-        const rowBlock = document.createElement('div');
-        rowBlock.id = `order-line-row-${lineId}`;
-        // Architecture Win: Grid layouts flatten to single stack on mobile, expand smoothly on desktop
-        rowBlock.className = "group grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-3 items-center text-xs font-medium text-gray-700 bg-gray-50 md:bg-transparent p-3 md:p-1 rounded-xl border border-gray-200 md:border-none relative transition duration-150";
-        rowBlock.dataset.seatNumber = seatNumber;
+    const container =
+        document.getElementById(`product-mosaic-${seatNumber}`);
 
-        let productOptionsHtml = '<option value="">-- elige platillo --</option>';
-        PRODUCT_CATALOG.forEach(p => {
-            productOptionsHtml += `<option value="${p.id}">${p.name} ($${p.price})</option>`;
-        });
+    if (!container) {
+        return;
+    }
 
-        rowBlock.innerHTML = `
-            <div class="col-span-1 md:col-span-3">
-                <label class="block md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Platillo</label>
-                <select id="product-select-${lineId}" onchange="handleProductChange(${lineId})" required
-                    class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-gray-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition text-xs">
-                    ${productOptionsHtml}
-                </select>
-            </div>
-            
-            <div class="col-span-1 md:col-span-3">
-                <label class="block md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Descripción</label>
-                <select id="variant-select-${lineId}" required
-                        class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-gray-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition text-xs">
-                    <option value="">-- elige opcion --</option>
-                </select>
-            </div>
-            
-            <div class="col-span-1 md:col-span-2 grid grid-cols-2 md:grid-cols-2 gap-2 md:contents">
-                <div>
-                    <label class="block md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1 text-center">Cant</label>
-                    <div class="flex justify-center">
-                        <input type="number" id="quantity-input-${lineId}" min="1" value="1" required
-                               class="w-full md:w-14 bg-white border border-gray-300 rounded-md px-1.5 py-1.5 text-gray-900 text-center focus:outline-none focus:border-amber-500 transition text-xs">
-                    </div>
+    PRODUCT_CATALOG.forEach(product => {
+
+        const card = document.createElement('button');
+
+        card.type = 'button';
+
+        card.className = `
+            group
+            bg-white
+            border border-gray-200
+            rounded-xl
+            overflow-hidden
+            text-left
+            shadow-sm
+            hover:shadow-md
+            hover:border-amber-400
+            hover:-translate-y-0.5
+            active:scale-[0.98]
+            transition-all
+            duration-150
+            focus:outline-none
+            focus:ring-2
+            focus:ring-amber-500/30
+        `;
+
+        const imageHtml = product.photo
+            ? `
+                <img
+                    src="/media/${product.photo}"
+                    alt="${product.name}"
+                    class="w-full aspect-square object-cover
+                           group-hover:scale-105 transition-transform
+                           duration-200"
+                >
+              `
+            : `
+                <div
+                    class="w-full aspect-square bg-gray-100
+                           flex items-center justify-center
+                           text-gray-300">
+                    <i class="fa-solid fa-image text-3xl"></i>
                 </div>
-                <div>
-                    <label class="block md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1 text-center">Extra ($)</label>
-                    <div class="flex justify-center">
-                        <input type="number" id="extra-charge-input-${lineId}" min="0" value="0" required
-                               class="w-full md:w-14 bg-white border border-gray-300 rounded-md px-1.5 py-1.5 text-gray-900 text-center focus:outline-none focus:border-amber-500 transition text-xs">
-                    </div>
+              `;
+
+        card.innerHTML = `
+            ${imageHtml}
+
+            <div class="p-2.5">
+                <div class="font-semibold text-gray-800 text-xs
+                            leading-tight">
+                    ${product.name}
                 </div>
-            </div>
-            
-            <div class="col-span-1 md:col-span-3">
-                <label class="block md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Notas adicionales</label>
-                <input type="text" id="notes-input-${lineId}" placeholder="ejemplo: sin cebolla"
-                       class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-amber-500 transition text-xs">
-            </div>
-            
-            <div class="absolute top-2 right-2 md:static col-span-1 text-right flex items-center justify-end">
-                <button type="button" onclick="removeItemRow(${lineId})"
-                        class="text-gray-400 hover:text-rose-500 p-1.5 transition rounded-md hover:bg-rose-50 md:hover:bg-transparent">
-                    <i class="fa-solid fa-xmark text-sm md:text-xs"></i>
-                </button>
+
+                <div class="text-amber-600 font-bold text-xs mt-1">
+                    $${Number(product.price).toFixed(2)}
+                </div>
             </div>
         `;
 
-        container.appendChild(rowBlock);
-    }
+        card.addEventListener('click', () => {
+            handleProductSelected(seatNumber, product.id);
+        });
 
-    function removeItemRow(lineId) {
-        const row = document.getElementById(`order-line-row-${lineId}`);
-        if (row) row.remove();
-    }
+        container.appendChild(card);
+    });
+}
 
     /**
-     * Evaluates standard flavors matching the targeted item. If an option 
-     * description reads "carne", it injects the dynamic database Meat Catalogue instead!
+     * The new UI handled a selected product
      */
+
+    function handleProductSelected(seatNumber, productId) {
+
+    const product = PRODUCT_CATALOG.find(
+        p => p.id === productId
+    );
+
+    if (!product) {
+        return;
+    }
+
+    console.log(
+        `Person ${seatNumber} selected product:`,
+        product
+    );
+
+    alert(
+        `Persona #${seatNumber}: ${product.name}`
+    );
+}
+
     function handleProductChange(lineId) {
         const productSelect = document.getElementById(`product-select-${lineId}`);
         const variantSelect = document.getElementById(`variant-select-${lineId}`);
