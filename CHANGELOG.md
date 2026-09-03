@@ -22,9 +22,9 @@ workflow to add these changes are:
 1. Add photo field to the UI ✓
 2. Change POST endpoint to acept multiform and UploadFile ✓
 3. Validation and resizing ✓
-4. CRUD template for photo
-5. Create a product with photo
-6. Add logic to the waiter template
+4. CRUD template for photo ✓
+5. Create a product with photo ✓
+6. Add logic to the waiter template 
 
 ### Added
 - Photo field to `src/templates/products.html`
@@ -32,6 +32,9 @@ workflow to add these changes are:
 
 ### Changed
 - POST endpoint for products in `src/api/v1/apps/orders/router.py`
+- Changes in `src/templates/orders/waiter/create.html` template:
+  - Added the new product photo, instead a drop-down
+  - Saved all in the UI and a final ATOMIC commit with all selection is sent
 
 ### Fixed
 - N/A
