@@ -79,6 +79,7 @@
 
         <div class="lg:col-span-2 space-y-6">
             <div id="seats-workspace-root" class="space-y-6">
+                <p>seat section</p>
                 </div>
         </div>
     </div>
@@ -87,15 +88,17 @@
 
 {% block scripts %}
 <script>
+    console.log("🔥🔥🔥 ORDER TICKET SCRIPT LOADED 🔥🔥🔥");
+    
     // Maps live databases elements into browser execution arrays
     const PRODUCT_CATALOG = [
         {% for p in products %}
         { 
-            id: {{ p.id }}, 
-            name: "{{ p.main_dish }}", 
-            price: {{ p.price }}, 
-            category: "{{ p.category if p.category else '' }}",
-            photo: "{{ p.photo if p.photo else '' }}" 
+            id: {{ p.id | default(0) }}, 
+            name: {{ (p.main_dish if p.main_dish else p.name) | default('') | tojson }}, 
+            price: {{ p.price | default(0.0) }}, 
+            category: {{ (p.category if p.category else '') | tojson }},
+            photo: {{ (p.photo if p.photo else '') | tojson }} 
         },
         {% endfor %}
     ];
@@ -103,70 +106,404 @@
     const FLAVOR_CATALOG = [
         {% for f in flavors %}
         { 
-            id: {{ f.id }}, 
-            product_id: {{ f.product_id }}, 
-            description: "{{ f.description }}" 
+            id: {{ f.id | default(0) }}, 
+            product_id: {{ f.product_id | default(0) }}, 
+            description: {{ f.description | default('') | tojson }} 
         },
         {% endfor %}
     ];
 
     const MEAT_CATALOG = [
         {% for m in meat_catalogue %}
-        { id: {{ m.id }}, description: "{{ m.description }}" },
+        { 
+            id: {{ m.id | default(0) }}, 
+            description: {{ m.description | default('') | tojson }} 
+        },
         {% endfor %}
     ];
 
-    let globalLineIndex = 0;
+    // Debug print your constants safely
+    console.log("📦 PRODUCT_CATALOG loaded:", PRODUCT_CATALOG);
+    console.log("🎨 FLAVOR_CATALOG loaded:", FLAVOR_CATALOG);
+    console.log("🥩 MEAT_CATALOG loaded:", MEAT_CATALOG);
 
+    const ORDER_WORKSPACE = {};
+
+    let activeSeatNumber = 1;
+    
+    /**
+     * Generate a person's space
+     */
+    function initializePerson(seatNumber) {
+        console.log("🔥 initializePerson() CALLED");
+        if (!ORDER_WORKSPACE[seatNumber]) {
+            ORDER_WORKSPACE[seatNumber] = {
+                items: []
+            };
+        }
+    }
+    
     /**
      * Rebuilds container card blocks reflecting guest counts designated by the waiter
      */
+    
     function regenerateSeatSections() {
-    const workspaceRoot = document.getElementById('seats-workspace-root');
+    console.log("🔥 regenerateSeatSections() CALLED");
+    const workspaceRoot =
+        document.getElementById('seats-workspace-root');
+
     const totalPersons =
-        parseInt(document.getElementById('number_of_persons').value) || 1;
+        parseInt(
+            document.getElementById('number_of_persons').value
+        ) || 1;
 
-        workspaceRoot.innerHTML = '';
+    if (!workspaceRoot) {
+        return;
+    }
 
-        for (let seatNum = 1; seatNum <= totalPersons; seatNum++) {
+    // Make sure the active person still exists
+    if (activeSeatNumber > totalPersons) {
+        activeSeatNumber = totalPersons;
+    }
 
-            const seatCard = document.createElement('div');
+    // Initialize all persons
+    for (let seatNum = 1; seatNum <= totalPersons; seatNum++) {
+        initializePerson(seatNum);
+    }
 
-            seatCard.className =
-                "bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden";
+    workspaceRoot.innerHTML = `
+        <div id="person-navigation"></div>
 
-            seatCard.id = `seat-card-block-${seatNum}`;
+        <div id="active-person-workspace" class="mt-4"></div>
+    `;
 
-            seatCard.innerHTML = `
-                <div class="bg-slate-50 border-b border-gray-200 px-4 py-3">
-                    <div class="flex items-center space-x-2">
-                        <span class="flex items-center justify-center
-                                    w-7 h-7 bg-amber-100 text-amber-800
-                                    rounded-md text-xs font-bold
-                                    border border-amber-200">
-                            ${seatNum}
+    renderPersonNavigation(totalPersons);
+    renderActivePersonWorkspace();
+}
+
+    function renderPersonNavigation(totalPersons) {
+
+    const container =
+        document.getElementById('person-navigation');
+
+    if (!container) {
+        return;
+    }
+
+    let html = `
+        <div
+            class="
+                bg-white
+                border border-gray-200
+                rounded-xl
+                shadow-sm
+                p-2
+            "
+        >
+
+            <div class="flex items-center gap-2">
+
+                <button
+                    type="button"
+                    onclick="navigatePerson(-1)"
+                    class="
+                        flex-shrink-0
+                        w-10 h-10
+                        rounded-lg
+                        border border-gray-200
+                        bg-gray-50
+                        text-gray-500
+                        hover:bg-gray-100
+                        hover:text-gray-700
+                        transition
+                    "
+                >
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <div
+                    id="person-tabs"
+                    class="
+                        flex-1
+                        flex
+                        gap-2
+                        overflow-x-auto
+                        scrollbar-hide
+                        py-1
+                    "
+                >
+    `;
+
+    for (let seatNum = 1; seatNum <= totalPersons; seatNum++) {
+
+        initializePerson(seatNum);
+
+        const isActive =
+            seatNum === activeSeatNumber;
+
+        const itemCount =
+            ORDER_WORKSPACE[seatNum].items.reduce(
+                (total, item) => total + item.quantity,
+                0
+            );
+
+        html += `
+            <button
+                type="button"
+                onclick="switchPerson(${seatNum})"
+                class="
+                    flex-shrink-0
+                    min-w-[72px]
+                    px-3 py-2
+                    rounded-lg
+                    border
+                    transition-all
+                    duration-150
+                    ${
+                        isActive
+                        ? `
+                            bg-amber-500
+                            border-amber-500
+                            text-slate-950
+                            shadow-sm
+                          `
+                        : `
+                            bg-white
+                            border-gray-200
+                            text-gray-600
+                            hover:border-amber-300
+                            hover:bg-amber-50
+                          `
+                    }
+                "
+            >
+
+                <div class="text-sm font-bold">
+                    ${seatNum}
+                </div>
+
+                <div
+                    class="
+                        text-[10px]
+                        mt-0.5
+                        ${
+                            isActive
+                            ? 'text-slate-800'
+                            : 'text-gray-400'
+                        }
+                    "
+                >
+                    ${
+                        itemCount > 0
+                        ? `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`
+                        : 'Sin items'
+                    }
+                </div>
+
+            </button>
+        `;
+    }
+
+    html += `
+                </div>
+
+                <button
+                    type="button"
+                    onclick="navigatePerson(1)"
+                    class="
+                        flex-shrink-0
+                        w-10 h-10
+                        rounded-lg
+                        border border-gray-200
+                        bg-gray-50
+                        text-gray-500
+                        hover:bg-gray-100
+                        hover:text-gray-700
+                        transition
+                    "
+                >
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+
+    // Keep active person visible
+    const activeTab =
+        document.querySelector(
+            `#person-tabs button:nth-child(${activeSeatNumber})`
+        );
+
+    if (activeTab) {
+        activeTab.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+        });
+    }
+}
+
+    function navigatePerson(direction) {
+
+    const totalPersons =
+        parseInt(
+            document.getElementById('number_of_persons').value
+        ) || 1;
+
+    const newSeat =
+        activeSeatNumber + direction;
+
+    if (newSeat < 1 || newSeat > totalPersons) {
+        return;
+    }
+
+    switchPerson(newSeat);
+}
+
+    function switchPerson(seatNumber) {
+
+    const totalPersons =
+        parseInt(
+            document.getElementById('number_of_persons').value
+        ) || 1;
+
+    if (
+        seatNumber < 1 ||
+        seatNumber > totalPersons
+    ) {
+        return;
+    }
+
+    initializePerson(seatNumber);
+
+    activeSeatNumber = seatNumber;
+
+    renderPersonNavigation(totalPersons);
+    renderActivePersonWorkspace();
+}
+
+    function renderActivePersonWorkspace() {
+
+    const workspace =
+        document.getElementById('active-person-workspace');
+
+    if (!workspace) {
+        return;
+    }
+
+    const seatNumber = activeSeatNumber;
+
+    initializePerson(seatNumber);
+
+    const person =
+        ORDER_WORKSPACE[seatNumber];
+
+    workspace.innerHTML = `
+        <div
+            class="
+                bg-white
+                border border-gray-200
+                rounded-xl
+                shadow-sm
+                overflow-hidden
+            "
+        >
+
+            <div
+                class="
+                    bg-slate-50
+                    border-b border-gray-200
+                    px-4 py-3
+                "
+            >
+
+                <div class="flex items-center justify-between">
+
+                    <div class="flex items-center gap-3">
+
+                        <span
+                            class="
+                                flex items-center justify-center
+                                w-9 h-9
+                                bg-amber-100
+                                text-amber-800
+                                rounded-lg
+                                text-sm
+                                font-bold
+                                border border-amber-200
+                            "
+                        >
+                            ${seatNumber}
                         </span>
 
-                        <h3 class="font-bold text-gray-700 text-sm">
-                            Orden de Persona #${seatNum}
-                        </h3>
-                    </div>
-                </div>
+                        <div>
 
-                <div class="p-4">
+                            <div
+                                class="
+                                    text-xs
+                                    uppercase
+                                    tracking-wider
+                                    text-gray-400
+                                    font-bold
+                                "
+                            >
+                                Orden actual
+                            </div>
+
+                            <div
+                                class="
+                                    text-lg
+                                    font-bold
+                                    text-gray-800
+                                "
+                            >
+                                Persona #${seatNumber}
+                            </div>
+
+                        </div>
+
+                    </div>
+
                     <div
-                        id="product-mosaic-${seatNum}"
-                        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4
-                            xl:grid-cols-5 gap-3">
+                        class="
+                            text-xs
+                            text-gray-400
+                            font-semibold
+                        "
+                    >
+                        ${person.items.length}
+                        ${person.items.length === 1 ? 'platillo' : 'platillos'}
                     </div>
+
                 </div>
-            `;
 
-            workspaceRoot.appendChild(seatCard);
+            </div>
 
-            renderProductMosaic(seatNum);
-        }
-    }
+            <div class="p-4">
+
+                <div
+                    id="product-mosaic-${seatNumber}"
+                    class="
+                        grid
+                        grid-cols-2
+                        sm:grid-cols-3
+                        lg:grid-cols-4
+                        xl:grid-cols-5
+                        gap-3
+                    "
+                >
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    renderPersonItems(seatNumber);
+}
 
     function renderProductMosaic(seatNumber) {
 
@@ -258,194 +595,545 @@
         return;
     }
 
-    console.log(
-        `Person ${seatNumber} selected product:`,
-        product
-    );
-
-    alert(
-        `Persona #${seatNumber}: ${product.name}`
-    );
+    showItemConfigurator(seatNumber, product);
 }
 
-    function handleProductChange(lineId) {
-        const productSelect = document.getElementById(`product-select-${lineId}`);
-        const variantSelect = document.getElementById(`variant-select-${lineId}`);
-        
-        const selectedProductId = parseInt(productSelect.value);
-        const productMatch = PRODUCT_CATALOG.find(p => p.id === selectedProductId);
+    function showItemConfigurator(seatNumber, product) {
+        const container = document.getElementById(`product-mosaic-${seatNumber}`);
+        if (!container) return;
 
-        variantSelect.innerHTML = '<option value="">-- Elige opción --</option>';
+        // Fetch direct flavors tied to this product
+        const flavors = FLAVOR_CATALOG.filter(f => f.product_id === product.id);
 
-        if (!productMatch) {
-            variantSelect.innerHTML = '<option value="">-- Selecciona una opción primero --</option>';
-            return;
-        }
+        let flavorOptions = '';
 
-        const filteredFlavors = FLAVOR_CATALOG.filter(f => f.product_id === selectedProductId);
+        // Check if any flavor for this dish is designated as "carne"
+        const isMeatProduct = flavors.some(
+            f => f.description && f.description.toLowerCase() === 'carne'
+        );
 
-        if (filteredFlavors.length === 0) {
-            let option = document.createElement("option");
-            option.value = "0"; 
-            option.text = "Standard / No Options";
-            option.dataset.selectionText = "Standard"; 
-            variantSelect.appendChild(option);
-            return;
-        }
+        if (isMeatProduct) {
+            // Find the baseline "carne" flavor entity to retain its foreign key reference
+            const carneFlavor = flavors.find(
+                f => f.description && f.description.toLowerCase() === 'carne'
+            );
+            const baseFlavorId = carneFlavor ? carneFlavor.id : 0;
 
-        const carnePlaceholderFlavor = filteredFlavors.find(f => f.description.toLowerCase() === "carne");
+            flavorOptions = `<option value="">-- Selecciona el tipo de carne --</option>`;
 
-        if (carnePlaceholderFlavor) {
+            // Populate choices dynamically using MEAT_CATALOG
             MEAT_CATALOG.forEach(meat => {
-                let option = document.createElement("option");
-                option.value = carnePlaceholderFlavor.id; 
-                option.text = meat.description;
-                option.dataset.selectionText = meat.description; 
-                variantSelect.appendChild(option);
+                flavorOptions += `
+                    <option value="${baseFlavorId}" data-selection-text="${meat.description}">
+                        ${meat.description}
+                    </option>
+                `;
             });
+        } else if (flavors.length === 0) {
+            // Dishes with no specific option configured
+            flavorOptions = `
+                <option value="0" data-selection-text="Estándar">
+                    Standard / Sin opciones
+                </option>
+            `;
         } else {
-            filteredFlavors.forEach(flavor => {
-                let option = document.createElement("option");
-                option.value = flavor.id;              
-                option.text = flavor.description;
-                option.dataset.selectionText = flavor.description; 
-                variantSelect.appendChild(option);
+            // Standard specific flavors (e.g., Sodas: Coca, Fanta, Sprite)
+            flavorOptions = `<option value="">-- Selecciona una opción --</option>`;
+            
+            flavors.forEach(flavor => {
+                flavorOptions += `
+                    <option value="${flavor.id}" data-selection-text="${flavor.description}">
+                        ${flavor.description}
+                    </option>
+                `;
             });
+        }
+
+        container.innerHTML = `
+            <div class="col-span-full bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        ${
+                            product.photo
+                            ? `<img src="/media/${product.photo}" alt="${product.name}" class="w-16 h-16 rounded-xl object-cover border border-gray-200">`
+                            : ''
+                        }
+                        <div>
+                            <div class="text-xs uppercase tracking-wider text-gray-400 font-bold">
+                                Platillo seleccionado
+                            </div>
+                            <div class="text-lg font-bold text-gray-800">
+                                ${product.name}
+                            </div>
+                            <div class="text-sm font-semibold text-amber-600">
+                                $${Number(product.price).toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="showProductMosaic(${seatNumber})"
+                        class="text-gray-400 hover:text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-100 transition">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                            Sabor / Opción
+                        </label>
+                        <select id="config-flavor-${seatNumber}"
+                            class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20">
+                            ${flavorOptions}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                            Cantidad
+                        </label>
+                        <div class="flex items-center">
+                            <button type="button" onclick="changeConfiguredQuantity(${seatNumber}, -1)"
+                                class="w-11 h-11 bg-gray-100 hover:bg-gray-200 rounded-l-lg font-bold text-lg">
+                                −
+                            </button>
+                            <input id="config-quantity-${seatNumber}" type="number" min="1" value="1"
+                                class="w-16 h-11 text-center border-y border-gray-300 text-sm font-bold focus:outline-none">
+                            <button type="button" onclick="changeConfiguredQuantity(${seatNumber}, 1)"
+                                class="w-11 h-11 bg-gray-100 hover:bg-gray-200 rounded-r-lg font-bold text-lg">
+                                +
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                            Notas adicionales
+                        </label>
+                        <input id="config-notes-${seatNumber}" type="text" placeholder="Ejemplo: sin cebolla, bien dorado"
+                            class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20">
+                    </div>
+
+                    <button type="button" onclick="addConfiguredItem(${seatNumber}, ${product.id})"
+                        class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl transition shadow-sm">
+                        <i class="fa-solid fa-plus mr-1"></i>
+                        Agregar platillo
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function changeConfiguredQuantity(seatNumber, delta) {
+
+    const input =
+        document.getElementById(`config-quantity-${seatNumber}`);
+
+    if (!input) {
+        return;
+    }
+
+    const current =
+        parseInt(input.value) || 1;
+
+    input.value = Math.max(1, current + delta);
+}
+
+    function addConfiguredItem(seatNumber, productId) {
+
+    const product = PRODUCT_CATALOG.find(
+        p => p.id === productId
+    );
+
+    if (!product) {
+        return;
+    }
+
+    const flavorSelect =
+        document.getElementById(`config-flavor-${seatNumber}`);
+
+    const quantityInput =
+        document.getElementById(`config-quantity-${seatNumber}`);
+
+    const notesInput =
+        document.getElementById(`config-notes-${seatNumber}`);
+
+    const quantity =
+        parseInt(quantityInput.value) || 1;
+
+    const selectedOption =
+        flavorSelect.options[flavorSelect.selectedIndex];
+
+    const flavorId =
+        selectedOption ? parseInt(selectedOption.value) : null;
+
+    const selection =
+        selectedOption
+            ? selectedOption.text.trim()
+            : "Standard";
+
+    if (!flavorSelect.value) {
+        alert("Selecciona una opción para el platillo.");
+        flavorSelect.focus();
+        return;
+    }
+
+    ORDER_WORKSPACE[seatNumber].items.push({
+        product_id: product.id,
+        product_name: product.name,
+        price: Number(product.price),
+        flavor_id: flavorId || null,
+        selection: selection,
+        quantity: quantity,
+        notes: notesInput.value.trim(),
+        extra_charge: 0
+    });
+
+    console.log(
+        `Person ${seatNumber} workspace:`,
+        ORDER_WORKSPACE[seatNumber]
+    );
+
+    renderPersonItems(seatNumber);
+}
+
+    function renderPersonItems(seatNumber) {
+
+    const container =
+        document.getElementById(`product-mosaic-${seatNumber}`);
+
+    if (!container) {
+        return;
+    }
+
+    const person =
+        ORDER_WORKSPACE[seatNumber];
+
+    let html = '';
+
+    if (person.items.length > 0) {
+
+        html += `
+            <div class="col-span-full space-y-2 mb-4">
+
+                <div class="text-xs uppercase tracking-wider
+                            text-gray-400 font-bold mb-2">
+                    Platillos agregados
+                </div>
+        `;
+
+        person.items.forEach((item, index) => {
+
+            html += `
+                <div
+                    class="flex items-center justify-between
+                           bg-gray-50 border border-gray-200
+                           rounded-xl p-3">
+
+                    <div>
+                        <div class="font-bold text-gray-800 text-sm">
+                            ${item.product_name}
+                        </div>
+
+                        <div class="text-xs text-gray-500 mt-0.5">
+                            ${item.selection}
+                            · Cant. ${item.quantity}
+                        </div>
+
+                        ${
+                            item.notes
+                            ? `
+                                <div class="text-xs text-gray-400 mt-1">
+                                    ${item.notes}
+                                </div>
+                              `
+                            : ''
+                        }
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="removeWorkspaceItem(${seatNumber}, ${index})"
+                        class="text-gray-400 hover:text-rose-500
+                               p-2 rounded-lg hover:bg-rose-50">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+    }
+
+    html += `
+        <div class="col-span-full">
+
+            <button
+                type="button"
+                onclick="showProductMosaic(${seatNumber})"
+                class="w-full border-2 border-dashed
+                       border-gray-300 hover:border-amber-400
+                       text-gray-500 hover:text-amber-600
+                       rounded-xl py-5 transition font-semibold">
+
+                <i class="fa-solid fa-plus mr-1"></i>
+                Agregar otro platillo
+
+            </button>
+
+        </div>
+    `;
+
+    container.innerHTML = html;
+
+    const totalPersons =
+    parseInt(
+        document.getElementById('number_of_persons').value
+    ) || 1;
+
+renderPersonNavigation(totalPersons);
+}
+
+    function showProductMosaic(seatNumber) {
+
+    const container =
+        document.getElementById(`product-mosaic-${seatNumber}`);
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = '';
+
+    renderProductMosaic(seatNumber);
+}
+
+    /**
+     * Convert our data into a valid payload
+     */
+
+    function buildOrderItemsPayload() {
+
+    const items = [];
+
+    Object.entries(ORDER_WORKSPACE).forEach(
+        ([seatNumber, person]) => {
+
+            person.items.forEach(item => {
+
+                items.push({
+                    person_number: parseInt(seatNumber),
+                    product_id: item.product_id,
+                    flavor_id: item.flavor_id,
+                    selection: item.selection,
+                    quantity: item.quantity,
+                    notes: item.notes || "",
+                    extra_charge: item.extra_charge || 0
+                });
+
+            });
+
+        }
+    );
+
+    return items;
+}
+
+    /**
+     * validate the order before sending to backend
+     */
+
+     function validateOrderWorkspace() {
+
+    const items = buildOrderItemsPayload();
+
+    if (items.length === 0) {
+        alert(
+            "Selecciona al menos un platillo antes de enviar la orden."
+        );
+        return false;
+    }
+
+    for (const item of items) {
+
+        if (!item.product_id || item.product_id <= 0) {
+            alert("Hay un platillo inválido en la orden.");
+            return false;
+        }
+
+        if (!item.quantity || item.quantity < 1) {
+            alert(
+                `Cantidad inválida para el producto ${item.product_id}.`
+            );
+            return false;
+        }
+
+        /*
+         * If the backend requires a concrete selection,
+         * don't allow an empty selection.
+         */
+        if (
+            !item.selection ||
+            item.selection.trim() === ""
+        ) {
+            alert(
+                `Falta seleccionar una opción para el producto ${item.product_id}.`
+            );
+            return false;
         }
     }
+
+    return true;
+}
 
     /**
      * Loops over active rows and submits payload to backend REST endpoints
      */
     async function submitCompleteTicket(event) {
-        if (event) {
-            event.preventDefault();
-        }
 
-        const tableNoInput = document.getElementById('table_no');
-        const tableNo = parseInt(tableNoInput.value);
-        const totalPersons = parseInt(document.getElementById('number_of_persons').value) || 1;
+    if (event) {
+        event.preventDefault();
+    }
 
-        if (!tableNo) {
-            alert("Por favor asigna un número válido de mesa.");
-            tableNoInput.focus();
-            return;
-        }
+    const tableNoInput =
+        document.getElementById('table_no');
 
-        const allRows = document.querySelectorAll('[id^="order-line-row-"]');
-        const validRows = [];
+    const tableNo =
+        parseInt(tableNoInput.value);
 
-        for (let row of allRows) {
-            const lineId = row.id.split('-').pop();
-            const productSelect = document.getElementById(`product-select-${lineId}`);
-            const variantSelect = document.getElementById(`variant-select-${lineId}`);
-            const quantityInput = document.getElementById(`quantity-input-${lineId}`);
+    const totalPersons =
+        parseInt(
+            document.getElementById('number_of_persons').value
+        ) || 1;
 
-            const productId = productSelect ? parseInt(productSelect.value) : NaN;
-            const quantity = quantityInput ? parseInt(quantityInput.value) : 0;
+    if (!tableNo) {
+        alert(
+            "Por favor asigna un número válido de mesa."
+        );
 
-            if (isNaN(productId) || productId <= 0 || quantity < 1) {
-                continue;
-            }
+        tableNoInput.focus();
 
-            if (variantSelect) {
-                const chosenOption = variantSelect.options[variantSelect.selectedIndex];
-                const flavorIdVal = chosenOption ? chosenOption.value : "";
-                const selectionText = chosenOption ? (chosenOption.dataset.selectionText || chosenOption.text).trim() : "";
+        return;
+    }
 
-                if (!flavorIdVal || flavorIdVal === "0" || selectionText === "" || selectionText.toLowerCase() === "standard") {
-                    alert(`Línea #${lineId}: Selecciona una opción válida de platillo. Cocina no podrá saber cuál es la selección.`);
-                    variantSelect.focus();
-                    return; 
-                }
-            }
+    if (!validateOrderWorkspace()) {
+        return;
+    }
 
-            validRows.push(row);
-        }
+    const items =
+        buildOrderItemsPayload();
 
-        if (validRows.length === 0) {
-            alert("Selecciona al menos un ítem válido para enviar esta orden.");
-            return;
-        }
+    const orderPayload = {
+        table_no: tableNo,
+        number_of_persons: totalPersons,
+        items: []
+    };
 
-        const orderPayload = {
-            table_no: tableNo,
-            number_of_persons: totalPersons,
-            items: []
-        };
+    console.log(
+        "Submitting ORDER_WORKSPACE:",
+        ORDER_WORKSPACE
+    );
 
-        try {
-            const orderResponse = await fetch("/orders/create", {
+    console.log(
+        "Generated order items:",
+        items
+    );
+
+    try {
+
+        /*
+         * Step 1
+         * Create the base ticket
+         */
+        const orderResponse =
+            await fetch("/orders/create", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify(orderPayload)
             });
 
-            if (!orderResponse.ok) {
-                const errorData = await orderResponse.json();
-                throw new Error(errorData.detail || "Failed initializing base ticket state.");
-            }
+        if (!orderResponse.ok) {
 
-            const createdOrder = await orderResponse.json();
-            const orderId = createdOrder.id;
+            const errorData =
+                await orderResponse.json();
 
-            for (let row of validRows) {
-                const lineId = row.id.split('-').pop();
-                const productSelect = document.getElementById(`product-select-${lineId}`);
-                const variantSelect = document.getElementById(`variant-select-${lineId}`);
-                const quantityInput = document.getElementById(`quantity-input-${lineId}`);
-                const notesInput = document.getElementById(`notes-input-${lineId}`);
-                const extraChargeInput = document.getElementById(`extra-charge-input-${lineId}`);
-
-                const productId = parseInt(productSelect.value);
-                const quantity = parseInt(quantityInput.value) || 1;
-                const notes = notesInput ? notesInput.value.trim() : "";
-                const extra_charge = extraChargeInput ? parseFloat(extraChargeInput.value) : 0.00;
-                const seatNumber = parseInt(row.dataset.seatNumber) || 1;
-
-                const chosenOption = variantSelect ? variantSelect.options[variantSelect.selectedIndex] : null;
-                const flavorIdVal = chosenOption ? chosenOption.value : "";
-                const selectionText = chosenOption ? (chosenOption.dataset.selectionText || chosenOption.text).trim() : "Standard";
-
-                const itemPayload = {
-                    person_number: seatNumber,
-                    product_id: productId,
-                    flavor_id: (flavorIdVal !== "" && flavorIdVal !== "0") ? parseInt(flavorIdVal) : null,
-                    selection: selectionText,
-                    quantity: quantity,
-                    notes: notes,
-                    extra_charge: !isNaN(extra_charge) && extra_charge >= 0 ? extra_charge : 0.00
-                };
-
-                const itemResponse = await fetch(`/orders/${orderId}/items`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(itemPayload)
-                });
-
-                if (!itemResponse.ok) {
-                    console.error(`Error processing item line allocation block index ${lineId}`);
-                    alert(`Error 422 en la línea #${lineId}: Verifica la consola para más detalles.`);
-                }
-            }
-
-            alert(`¡Comanda enviada a la cocina con éxito para la Mesa ${tableNo}!`);
-            window.location.href = "/main";
-
-        } catch (err) {
-            console.error(err);
-            alert(`Ticket Processing Exception: ${err.message}`);
+            throw new Error(
+                errorData.detail ||
+                "Failed initializing base ticket state."
+            );
         }
-    }
 
-    function resetWorkspace() {
-        document.getElementById('table_no').value = '';
-        document.getElementById('number_of_persons').value = '1';
-        regenerateSeatSections();
-    }
+        const createdOrder =
+            await orderResponse.json();
 
-    window.onload = function() {
-        regenerateSeatSections();
-    };
+        const orderId =
+            createdOrder.id;
+
+        /*
+         * Step 2
+         * Allocate every workspace item
+         */
+        for (const item of items) {
+
+            const itemResponse =
+                await fetch(
+                    `/orders/${orderId}/items`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify(item)
+                    }
+                );
+
+            if (!itemResponse.ok) {
+
+                let errorMessage =
+                    "Error processing order item.";
+
+                try {
+                    const errorData =
+                        await itemResponse.json();
+
+                    errorMessage =
+                        errorData.detail ||
+                        errorMessage;
+
+                } catch (_) {
+                    // Keep generic message
+                }
+
+                throw new Error(errorMessage);
+            }
+        }
+
+        alert(
+            `¡Comanda enviada a la cocina con éxito para la Mesa ${tableNo}!`
+        );
+
+        window.location.href = "/main";
+
+    } catch (err) {
+
+        console.error(
+            "Ticket processing error:",
+            err
+        );
+
+        alert(
+            `Error procesando la comanda: ${err.message}`
+        );
+    }
+}
+document.addEventListener("DOMContentLoaded", () => {
+    regenerateSeatSections();
+});
 </script>
 {% endblock %}
