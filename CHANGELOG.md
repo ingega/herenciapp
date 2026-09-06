@@ -37,7 +37,7 @@ workflow to add these changes are:
   - Saved all in the UI and a final ATOMIC commit with all selection is sent
 
 ### Fixed
-- N/A
+- 1 ATOMIC commit solves the excesive time for looping all persons and selection of a table with too many persons.
 
 ## [3.0.2] 2026-08-30
 
