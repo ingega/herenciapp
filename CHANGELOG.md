@@ -38,6 +38,8 @@ workflow to add these changes are:
 
 ### Fixed
 - 1 ATOMIC commit solves the excesive time for looping all persons and selection of a table with too many persons.
+- Test for products
+- Removed test for delete products (product deletetion is not allowed)
 
 ## [3.0.2] 2026-08-30
 
