@@ -1,11 +1,22 @@
 # src/api/v1/apps/orders/router.py
-from fastapi import APIRouter, status, Request, Depends, HTTPException, Response
-from fastapi.responses import Response, HTMLResponse, RedirectResponse
-
-
-from fastapi.templating import Jinja2Templates
+from fastapi import (APIRouter, 
+                    Depends,
+                    File,
+                    Form,
+                    HTTPException,
+                    Request,
+                    Response,
+                    status, 
+                    UploadFile
+                    )
+from pathlib import Path
+from pydantic import condecimal
 from sqlmodel import Session
-from typing import List
+from typing import List, Annotated
+from uuid import uuid4
+
+from fastapi.responses import Response, HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 
 # schemas
 from src.api.v1.apps.orders.schemas import OrderDetailAddItem, OrderDetailReadNested, ProductCreate, ProductRead, ProductUpdate
@@ -21,10 +32,11 @@ from src.api.v1.apps.orders.models import Product, Order, mexico_time_filter
 from src.api.v1.apps.orders.services import FlavorService, MeatService, ProductService
 from src.api.v1.apps.orders.services import OrderService, MeatService, ItemService
 
-# functions, database, auth
-from src.api.v1.auth.auth import get_current_user_from_cookie
+# functions, database, auth, images
 from src.config import settings
 from src.database import get_session
+from src.api.v1.auth.auth import get_current_user_from_cookie
+from src.api.v1.apps.orders.image_service import save_product_photo
 
 # authz importation
 from src.api.v1.authz.authz import RoleChecker
@@ -513,8 +525,6 @@ async def update_order_items_batch(
     )
 
 
-
-
 ################################################################
 
 ########## --- products endpoints --- ###########################
@@ -531,8 +541,6 @@ async def get_add_product_page(
     Renders the dedicated 'Add New Product' workspace form.
     Only allows access if valid auth tokens are found.
     """
-    # debug, delete  on production
-    print(f"current user value: {current_user}")
     return templates.TemplateResponse(
         request=request,
         name="products.html",
@@ -542,35 +550,83 @@ async def get_add_product_page(
         }
     )
 
-@router_products.post("/", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
-def create_new_product(product_in: ProductCreate, 
-                       current_user: dict = Depends(get_current_user_from_cookie),
-                       session: Session = Depends(get_session)):
-    
+
+# ---------------------------------------------------------------------------
+# Post Product endpoint needs file preparation
+#---------------------------------------------------------------------------
+PRODUCT_PHOTO_DIR = Path("media/products")
+PRODUCT_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+
+ALLOWED_CONTENT_TYPES = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+}
+
+MAX_PHOTO_SIZE = 2 * 1024 * 1024  # 2 MB
+
+
+@router_products.post(
+    "/",
+    response_model=ProductRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_new_product(
+    main_dish: str = Form(...),
+    category: str = Form(...),
+    price: condecimal(max_digits=6, decimal_places=2) = Form(...),
+    photo: UploadFile | None = File(default=None),
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session),
+):
+    """
+    Creates a new product and optionally stores its photo locally.
+
+    Photo storage is intentionally local for now.
+    S3 will replace this storage layer in a later stage.
+    """
+    product_in = ProductCreate(
+    main_dish=main_dish,
+    category=category,
+    price=price,
+    )
+
+    if photo:
+        product_in.photo = save_product_photo(photo)
+
     product_service = ProductService(session)
+
     return product_service.create_product(product_in)
 
-@router_products.patch("/{product_id}", 
-              response_model=ProductRead, status_code=status.HTTP_200_OK)
-async def update_product(product_update: ProductUpdate,
-                         product_id: int, 
-                         current_user: dict = Depends(get_current_user_from_cookie),
-                         session: Session = Depends(get_session)
-                         ):
-    
+@router_products.patch(
+    "/{product_id}",
+    response_model=ProductRead,
+    status_code=status.HTTP_200_OK,
+)
+async def update_product(
+    product_id: int,
+    main_dish: str = Form(...),
+    category: str = Form(...),
+    price: condecimal(max_digits=6, decimal_places=2) = Form(...),
+    photo: UploadFile | None = File(default=None),
+    current_user: dict = Depends(get_current_user_from_cookie),
+    session: Session = Depends(get_session),
+):
     product_service = ProductService(session)
-    
-    return product_service.update_product(product_id=product_id, product_in=product_update)
 
-@router_products.delete("/{product_id}")
-async def delete_product(product_id: int, 
-                         current_user: dict = Depends(get_current_user_from_cookie),
-                         session: Session = Depends(get_session)
-                         ):
-    
-    product_service = ProductService(session)
-    
-    return product_service.delete_product(product_id=product_id)
+    product_update = ProductUpdate(
+        main_dish=main_dish,
+        category=category,
+        price=price,
+    )
+
+    if photo:
+        product_update.photo = save_product_photo(photo)
+
+    return product_service.update_product(
+        product_id=product_id,
+        product_in=product_update,
+    )
 
 # endpoint to acces the update product template
 @router_products.get("/update", response_class=HTMLResponse)
@@ -658,6 +714,7 @@ async def get_flavors_management_page(request: Request,
             "current_user": current_user # for nav_bar
         }
     )
+
 
 # ui template endpoint for flavors additon
 @router_flavors.get("/add", response_class=HTMLResponse,

@@ -16,6 +16,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [3.1.0] 2026-08-30
+This tag add all the serialization to save and retrieve photos of a product
+workflow to add these changes are:
+1. Add photo field to the UI ✓
+2. Change POST endpoint to acept multiform and UploadFile ✓
+3. Validation and resizing ✓
+4. CRUD template for photo ✓
+5. Create a product with photo ✓
+6. Add logic to the waiter template 
+
+### Added
+- Photo field to `src/templates/products.html`
+- `src/api/v1/apps/orders/image_service.py` file
+
+### Changed
+- POST endpoint for products in `src/api/v1/apps/orders/router.py`
+- Changes in `src/templates/orders/waiter/create.html` template:
+  - Added the new product photo, instead a drop-down
+  - Saved all in the UI and a final ATOMIC commit with all selection is sent
+
+### Fixed
+- 1 ATOMIC commit solves the excesive time for looping all persons and selection of a table with too many persons.
+
 ## [3.0.2] 2026-08-30
 
 ### Added

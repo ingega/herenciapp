@@ -15,6 +15,7 @@ from src.api.v1.auth.auth import get_current_user_from_cookie
 from src.config import settings
 from src.__init__ import __version__ as version
 from .database import init_db, get_session
+from src.core.paths import STATIC_DIR, MEDIA_DIR
 # routers
 from src.router import api_router
 from .api.v1.apps.users.router import router as users_router
@@ -97,11 +98,9 @@ app.include_router(router_products) # products router
 app.include_router(main_router) # statistics main router
 app.include_router(expenses_router) # expenses router
 
-# Static Files
-CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
-STATIC_DIR = CURRENT_DIR / "static"
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 templates = Jinja2Templates(directory="src/templates")
 templates.env.globals.update(config=settings)
