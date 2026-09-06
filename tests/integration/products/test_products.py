@@ -43,7 +43,7 @@ def test_create_product_unauthenticated(client: TestClient):
         "category": "taco",
         "price": 25.50
     }
-    response = client.post("orders/products/", json=payload)
+    response = client.post("orders/products/", data=payload)
     
     # It should fail authentication (401 Unauthorized)
     assert response.status_code == 401
@@ -105,7 +105,7 @@ def test_create_product_success(client: TestClient,
         "price": 85.00
     }
     
-    response = client.post("orders/products/", json=payload)
+    response = client.post("orders/products/", data=payload)
     
     # 4. Assert Response status code is explicitly 201 CREATED
     assert response.status_code == 201
@@ -139,7 +139,7 @@ def test_get_product_success(client: TestClient,
         "price": 85.00
     }
     
-    response = client.post("orders/products/", json=payload)
+    response = client.post("orders/products/", data=payload)
     
     # 4. Assert Response status code is explicitly 201 CREATED
     assert response.status_code == 201
@@ -172,7 +172,7 @@ def test_get_product_list_success(client: TestClient,
         "category": "taco",
         "price": 25.50
     }
-    response = client.post("orders/products/", json=payload)
+    response = client.post("orders/products/", data=payload)
     
     assert response.status_code == 201 # created
     
