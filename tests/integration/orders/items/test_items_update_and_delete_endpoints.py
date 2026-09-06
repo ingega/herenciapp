@@ -22,7 +22,7 @@ def setup_item(client, authorized_client_cookies):
         "category": "food",
         "price": 10.00
     }
-    product_response = client.post("/orders/products/", json=product_payload)
+    product_response = client.post("/orders/products/", data=product_payload)
     assert product_response.status_code == status.HTTP_201_CREATED
     product_id = product_response.json()["id"]
 
