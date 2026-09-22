@@ -49,6 +49,13 @@ class Expenses(SQLModel, table=True):
         )
     )
 
+    supplier: str = Field(
+            sa_column=Column(
+                String(length=255),
+                nullable=False,
+            )
+        )
+
     category: Optional[str] = Field(
         default=None,
         sa_column=Column(
