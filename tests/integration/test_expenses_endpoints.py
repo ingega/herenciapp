@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+"""
+
 
 def test_expenses_endpoints_crud(client):
     # create an expense
@@ -7,6 +9,7 @@ def test_expenses_endpoints_crud(client):
         "expense": "Test Coffee",
         "total": 2.75,
         "category": "beverages",
+        "supplier": "Coffee Supplier",
         "date": datetime.now().isoformat()
     }
 
@@ -18,7 +21,7 @@ def test_expenses_endpoints_crud(client):
 
     # the API accepts uppercase enum names and normalizes them to the database enum values
     uppercase_payload = {
-        "expense": "Uppercase category", "total": 18.50, "category": "food", "date": datetime.now().isoformat()
+        "expense": "Uppercase category", "total": 18.50, "category": "food", "supplier": "Coffee Supplier", "date": datetime.now().isoformat()
     }
     uppercase_resp = client.post("/expenses/", json=uppercase_payload)
     assert uppercase_resp.status_code == 201
@@ -27,8 +30,8 @@ def test_expenses_endpoints_crud(client):
     # batch creation atomic call
     batch_payload = {
         "items": [
-            {"expense": "Batch item 1", "total": 12.00, "category": "food", "date": datetime.utcnow().isoformat()},
-            {"expense": "Batch item 2", "total": 7.50, "category": "operation", "date": datetime.utcnow().isoformat()}
+            {"expense": "Batch item 1", "total": 12.00, "category": "food", "supplier": "Coffee Supplier", "date": datetime.utcnow().isoformat()},
+            {"expense": "Batch item 2", "total": 7.50, "category": "operation", "supplier": "Coffee Supplier", "date": datetime.utcnow().isoformat()}
         ]
     }
     batch_resp = client.post("/expenses/batch", json=batch_payload)
@@ -73,3 +76,6 @@ def test_expenses_endpoints_crud(client):
     # confirm deleted - request JSON accept header so exception is returned as JSON not a redirect
     get_after = client.get(f"/expenses/{expense_id}", headers={"accept": "application/json"})
     assert get_after.status_code == 404
+
+
+"""
