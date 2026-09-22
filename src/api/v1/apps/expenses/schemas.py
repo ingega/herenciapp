@@ -15,6 +15,10 @@ class ExpenseBase(SQLModel):
         default=None,
         max_length=100,
     )
+    supplier: Optional[str] = Field(
+            default=None,
+            max_length=100,
+        )
     quantity: Optional[float] = None
     total: Optional[float] = None
 
@@ -36,6 +40,10 @@ class ExpenseUpdate(SQLModel):
             default=None,
             max_length=100,
         )
+    supplier: Optional[str] = Field(
+                default=None,
+                max_length=100,
+            )
     quantity: Optional[float] = None
     total: Optional[float] = None
 

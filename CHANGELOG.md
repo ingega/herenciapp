@@ -19,7 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.1.1] 2026-09-21
 
 ### Added
-- Field `supplier` to the expenses model in `src/api/v1/apps/expenses/models.py`
+- Field `supplier` to:
+  - expenses model in `src/api/v1/apps/expenses/models.py`
+  - expnses schema in `src/api/v1/apps/expenses/schemas.py`
 
 ### Changed
 - N/A
