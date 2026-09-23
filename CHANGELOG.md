@@ -16,6 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [3.1.1] 2026-09-21
+
+### Added
+- Field `supplier` to:
+  - expenses model in `src/api/v1/apps/expenses/models.py`
+  - expnses schema in `src/api/v1/apps/expenses/schemas.py`
+
+### Changed
+- Added expenses field to the template in `src/templates/expenses/expenses.html`
+
+### Fixed
+- Added supplier field at all expenses test
+
 ## [3.1.0] 2026-08-30
 This tag add all the serialization to save and retrieve photos of a product
 workflow to add these changes are:
