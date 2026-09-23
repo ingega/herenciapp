@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
 
-"""
-
 
 def test_expenses_endpoints_crud(client):
     # create an expense
@@ -77,5 +75,3 @@ def test_expenses_endpoints_crud(client):
     get_after = client.get(f"/expenses/{expense_id}", headers={"accept": "application/json"})
     assert get_after.status_code == 404
 
-
-"""

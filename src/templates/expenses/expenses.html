@@ -45,6 +45,10 @@
                         <th class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase">
                             Gasto
                         </th>
+                        
+                        <th class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase">
+                            Proveedor
+                        </th>
 
                         <th class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase">
                             Descripción
@@ -80,7 +84,16 @@
                                 <input
                                     type="text"
                                     x-model="row.expense"
-                                    placeholder="Description"
+                                    placeholder="gasto"
+                                    class="w-full border rounded px-2 py-1 text-sm"
+                                >
+                            </td>
+                            <!-- supplier -->
+                            <td class="px-3 py-2 align-middle">
+                                <input
+                                    type="text"
+                                    x-model="row.supplier"
+                                    placeholder="proveedor"
                                     class="w-full border rounded px-2 py-1 text-sm"
                                 >
                             </td>
@@ -225,6 +238,8 @@ document.addEventListener('alpine:init', () => {
 
                 date: `${year}-${month}-${day}`,
 
+                supplier: '',
+
                 expense: '',
 
                 category: this.categories[0] || '',
@@ -322,6 +337,8 @@ document.addEventListener('alpine:init', () => {
                 date: row.date,
 
                 expense: row.expense,
+
+                supplier: row.supplier,
 
                 category: row.category,
 
